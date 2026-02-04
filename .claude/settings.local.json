@@ -4,8 +4,11 @@
       "Bash(gh repo view:*)",
       "Bash(git --version:*)",
       "Bash(git init:*)",
-      "Bash(git checkout:*)",
-      "Bash(GIT_EDITOR=true git rebase:*)"
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)"
     ]
   }
 }

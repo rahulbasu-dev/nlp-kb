@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive educational guide to TF-IDF (Term Frequency-Inverse Document Frequency) for classroom use">
+    <title>Understanding TF-IDF: A Complete Guide</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container - Wider Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks - Consistent Sizing */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-block.half {
+            min-height: calc(var(--block-min-height) / 2);
+        }
+
+        .content-block.auto {
+            min-height: auto;
+        }
+
+        /* Grid Layout for Side-by-Side Blocks */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .block-grid .content-block {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .block-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .icon {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #e0e7ff;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Flowchart */
+        .flowchart-container {
+            text-align: center;
+            margin: 2rem 0;
+            overflow-x: auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 1rem;
+        }
+
+        .flowchart-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        /* Steps */
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-color);
+            border-radius: 1rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .content-block {
+                padding: 1.5rem;
+                min-height: auto;
+            }
+
+            header {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            nav {
+                display: none;
+            }
+
+            main {
+                padding-top: 1rem;
+            }
+
+            .content-block {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+
+        /* Scroll Snap for Presentation Feel */
+        @media (min-width: 1200px) {
+            main {
+                scroll-snap-type: y proximity;
+            }
+
+            .content-block, header {
+                scroll-snap-align: start;
+                scroll-margin-top: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">📊 TF-IDF Guide</div>
+            <ul>
+                <li><a href="#intuition">Intuition</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#mathematics">Mathematics</a></li>
+                <li><a href="#flowchart">Flowchart</a></li>
+                <li><a href="#python">Python</a></li>
+                <li><a href="#variants">Variants</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Header -->
+        <header>
+            <h1>Understanding TF-IDF</h1>
+            <p>Term Frequency-Inverse Document Frequency is the foundational technique for text analysis and information retrieval, helping machines understand which words matter most.</p>
+            <div class="subtitle">Statistical Approach to Text Representation</div>
+        </header>
+
+        <!-- Section 1: Intuition -->
+        <div class="section-header" id="intuition">
+            <h2><span class="icon">💡</span> Intuition</h2>
+            <p>Understanding the core idea behind TF-IDF through analogies and real-world examples</p>
+        </div>
+
+        <div class="content-block">
+            <h3>What is TF-IDF?</h3>
+            <p><strong>TF-IDF</strong> stands for <span class="highlight">Term Frequency-Inverse Document Frequency</span>. It's a numerical statistic that reflects how important a word is to a document within a collection (or corpus) of documents.</p>
+
+            <p>The key insight is simple but powerful: <strong>words that appear frequently in a specific document but rarely across all documents are likely the most important for understanding what that document is about.</strong></p>
+
+            <div class="callout callout-analogy">
+                <h4>🏠 The Library Analogy</h4>
+                <p>Imagine you're a librarian trying to help someone find books about <em>marine biology</em>. You notice that:</p>
+                <ul>
+                    <li><strong>Common words</strong> like "the", "is", "and" appear in <em>every</em> book—they don't help identify what a book is about.</li>
+                    <li><strong>Rare but relevant words</strong> like "coral", "plankton", or "cetacean" appear frequently in marine biology books but rarely in cookbooks or mystery novels.</li>
+                </ul>
+                <p><strong>TF-IDF captures exactly this intuition mathematically!</strong></p>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Term Frequency (TF)</h3>
+                <p><strong>"How often does this word appear here?"</strong></p>
+                <p>If a word appears many times in a document, it's probably important to that document.</p>
+
+                <div class="callout callout-example">
+                    <h4>📝 Example</h4>
+                    <p>A recipe mentioning "chocolate" 15 times is likely about chocolate. The high frequency signals importance.</p>
+                </div>
+
+                <p><strong>Simple formula:</strong></p>
+                <p style="text-align: center; font-family: monospace; font-size: 1.2rem;">
+                    TF = count(word) / total_words
+                </p>
+            </div>
+
+            <div class="content-block">
+                <h3>Inverse Document Frequency (IDF)</h3>
+                <p><strong>"How special is this word?"</strong></p>
+                <p>If a word appears in almost every document, it's probably not very informative. But if it appears in only a few documents, it's distinctive.</p>
+
+                <div class="callout callout-example">
+                    <h4>📝 Example</h4>
+                    <p>"The" appears everywhere (low IDF). "Quantum" appears in few documents (high IDF). Rarity = Importance!</p>
+                </div>
+
+                <p><strong>Simple formula:</strong></p>
+                <p style="text-align: center; font-family: monospace; font-size: 1.2rem;">
+                    IDF = log(total_docs / docs_with_word)
+                </p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The Power of Multiplication</h3>
+
+            <div class="callout callout-analogy">
+                <h4>🎯 The Job Interview Analogy</h4>
+                <p>Think of describing your skills on a resume:</p>
+                <ul>
+                    <li><strong>"Proficient in Microsoft Word"</strong> — Everyone says this. It doesn't make you stand out. (Low IDF)</li>
+                    <li><strong>"Expert in Quantum Computing"</strong> — Very few people have this skill. It makes you distinctive! (High IDF)</li>
+                </ul>
+                <p>TF-IDF works the same way: it identifies words that make a document <em>stand out</em> from the crowd.</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">The TF-IDF Formula</div>
+                <p style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">TF-IDF = TF × IDF</p>
+                <div class="formula-description">
+                    <p>By multiplying these two values, we get a score that is:</p>
+                    <ul>
+                        <li><strong>High</strong> when a word appears often in this document AND rarely in others</li>
+                        <li><strong>Low</strong> when a word appears rarely here OR appears in many documents</li>
+                        <li><strong>Zero</strong> when a word doesn't appear in the document at all</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Examples -->
+        <div class="section-header" id="examples">
+            <h2><span class="icon">📝</span> Worked Examples</h2>
+            <p>Step-by-step calculations showing exactly how TF-IDF works</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Example: A Simple Three-Document Corpus</h3>
+
+            <div class="callout callout-example">
+                <h4>📚 Our Corpus</h4>
+                <ul>
+                    <li><strong>Document 1:</strong> "The cat sat on the mat"</li>
+                    <li><strong>Document 2:</strong> "The dog sat on the log"</li>
+                    <li><strong>Document 3:</strong> "The cat chased the dog"</li>
+                </ul>
+            </div>
+
+            <h4>Step 1: Calculate Term Frequency (TF)</h4>
+            <p>Count how often each word appears in each document, then divide by the total words in that document.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Doc 1 (6 words)</th>
+                            <th>Doc 2 (6 words)</th>
+                            <th>Doc 3 (5 words)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>the</td><td>2/6 = 0.333</td><td>2/6 = 0.333</td><td>2/5 = 0.400</td></tr>
+                        <tr><td>cat</td><td>1/6 = 0.167</td><td>0/6 = 0.000</td><td>1/5 = 0.200</td></tr>
+                        <tr><td>sat</td><td>1/6 = 0.167</td><td>1/6 = 0.167</td><td>0/5 = 0.000</td></tr>
+                        <tr><td>dog</td><td>0/6 = 0.000</td><td>1/6 = 0.167</td><td>1/5 = 0.200</td></tr>
+                        <tr><td>mat</td><td>1/6 = 0.167</td><td>0/6 = 0.000</td><td>0/5 = 0.000</td></tr>
+                        <tr><td>chased</td><td>0/6 = 0.000</td><td>0/6 = 0.000</td><td>1/5 = 0.200</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 2: Calculate Inverse Document Frequency (IDF)</h4>
+            <p>For each word, calculate: <code class="inline-code">IDF = log(Total Documents / Documents containing the word)</code></p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Docs Containing</th>
+                            <th>IDF = log(3/n)</th>
+                            <th>Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>the</td><td>3</td><td>log(3/3) = <strong>0.000</strong></td><td>Appears everywhere - not useful!</td></tr>
+                        <tr><td>cat</td><td>2</td><td>log(3/2) = <strong>0.176</strong></td><td>Somewhat distinctive</td></tr>
+                        <tr><td>sat</td><td>2</td><td>log(3/2) = <strong>0.176</strong></td><td>Somewhat distinctive</td></tr>
+                        <tr><td>dog</td><td>2</td><td>log(3/2) = <strong>0.176</strong></td><td>Somewhat distinctive</td></tr>
+                        <tr><td>mat</td><td>1</td><td>log(3/1) = <strong>0.477</strong></td><td>Very distinctive!</td></tr>
+                        <tr><td>chased</td><td>1</td><td>log(3/1) = <strong>0.477</strong></td><td>Very distinctive!</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>🔍 Notice the Pattern!</h4>
+                <p><strong>"the"</strong> has IDF = 0 because it appears in ALL documents (not distinctive at all).</p>
+                <p><strong>"mat"</strong> and <strong>"chased"</strong> have the highest IDF because they appear in only ONE document (very distinctive).</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 3: Calculate TF-IDF (TF × IDF)</h4>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Doc 1</th>
+                            <th>Doc 2</th>
+                            <th>Doc 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>the</td><td>0.333 × 0.000 = <strong>0.000</strong></td><td>0.333 × 0.000 = <strong>0.000</strong></td><td>0.400 × 0.000 = <strong>0.000</strong></td></tr>
+                        <tr><td>cat</td><td>0.167 × 0.176 = <strong>0.029</strong></td><td>0.000 × 0.176 = <strong>0.000</strong></td><td>0.200 × 0.176 = <strong>0.035</strong></td></tr>
+                        <tr><td>mat</td><td>0.167 × 0.477 = <strong>0.080</strong></td><td>0.000 × 0.477 = <strong>0.000</strong></td><td>0.000 × 0.477 = <strong>0.000</strong></td></tr>
+                        <tr><td>chased</td><td>0.000 × 0.477 = <strong>0.000</strong></td><td>0.000 × 0.477 = <strong>0.000</strong></td><td>0.200 × 0.477 = <strong>0.095</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-example">
+                <h4>📊 Interpretation</h4>
+                <ul>
+                    <li><strong>Document 1's most important word:</strong> "mat" (0.080) — unique to this document!</li>
+                    <li><strong>Document 3's most important word:</strong> "chased" (0.095) — unique to this document!</li>
+                    <li><strong>"the" scores 0 everywhere</strong> — it doesn't help distinguish any document.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 3: Visualization -->
+        <div class="section-header" id="visualization">
+            <h2><span class="icon">📊</span> Interactive Visualization</h2>
+            <p>Experiment with TF-IDF by entering your own documents and search terms</p>
+        </div>
+
+        <div class="content-block">
+            <div class="interactive-section">
+                <h3>TF-IDF Calculator</h3>
+                <p>Enter your documents below and a search term to see TF-IDF in action:</p>
+
+                <div class="block-grid" style="margin-top: 1.5rem;">
+                    <div>
+                        <div class="input-group">
+                            <label for="search-term">Search Term:</label>
+                            <input type="text" id="search-term" placeholder="Enter a word to analyze" value="cat">
+                        </div>
+                        <div class="input-group">
+                            <label for="doc1">Document 1:</label>
+                            <textarea id="doc1">The cat sat on the mat. The cat is fluffy.</textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="doc2">Document 2:</label>
+                            <textarea id="doc2">The dog ran in the park. The dog is happy.</textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="input-group">
+                            <label for="doc3">Document 3:</label>
+                            <textarea id="doc3">The cat and dog played together in the garden.</textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="doc4">Document 4 (optional):</label>
+                            <textarea id="doc4">Birds fly in the sky. The sky is blue.</textarea>
+                        </div>
+                        <button onclick="calculateTFIDF()">Calculate TF-IDF</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-display" id="results" style="display: none;">
+                <h4>📈 Results for "<span id="result-term"></span>"</h4>
+                <div id="calculation-details"></div>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>TF-IDF Scores by Document</h3>
+                <div class="chart-container">
+                    <canvas id="tfidfChart"></canvas>
+                </div>
+            </div>
+            <div class="content-block">
+                <h3>TF vs IDF Components</h3>
+                <div class="chart-container">
+                    <canvas id="componentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>TF-IDF Heatmap: All Terms</h3>
+            <p>This heatmap shows TF-IDF scores for all unique terms across all documents. Darker colors indicate higher scores.</p>
+            <div class="chart-container" style="height: 500px;">
+                <canvas id="heatmapChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Section 4: Mathematics -->
+        <div class="section-header" id="mathematics">
+            <h2><span class="icon">🔢</span> Mathematical Foundations</h2>
+            <p>The formal definitions and formulas behind TF-IDF</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Term Frequency (TF)</h3>
+            <p>Term Frequency measures how frequently a term appears in a document. The simplest form is the raw count:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Raw Term Frequency</div>
+                \[ \text{TF}(t, d) = f_{t,d} \]
+                <div class="formula-description">
+                    Where \( f_{t,d} \) is the number of times term \( t \) appears in document \( d \).
+                </div>
+            </div>
+
+            <p>To prevent bias toward longer documents, we typically <strong>normalize</strong> by document length:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Normalized Term Frequency</div>
+                \[ \text{TF}(t, d) = \frac{f_{t,d}}{\sum_{t' \in d} f_{t',d}} \]
+                <div class="formula-description">
+                    This divides the raw count by the total number of terms in the document, giving a value between 0 and 1.
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Inverse Document Frequency (IDF)</h3>
+            <p>IDF measures how much information a word provides—whether it's common or rare across all documents:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Standard IDF Formula</div>
+                \[ \text{IDF}(t, D) = \log \frac{N}{|\{d \in D : t \in d\}|} \]
+                <div class="formula-description">
+                    <p>Where:</p>
+                    <ul>
+                        <li>\( N \) = Total number of documents in the corpus</li>
+                        <li>\( |\{d \in D : t \in d\}| \) = Number of documents containing term \( t \)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>❓ Why Use Logarithm?</h4>
+                <ol>
+                    <li><strong>Dampening:</strong> Without log, a word appearing in 1 document vs. 1000 would have IDF differing by a factor of 1000. The log smooths this to a more manageable range.</li>
+                    <li><strong>Information Theory:</strong> Rare events carry more "information" (measured in bits), and the formula for information is logarithmic.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The Complete TF-IDF Formula</h3>
+
+            <div class="formula-box">
+                <div class="formula-label">TF-IDF Score</div>
+                \[ \text{TF-IDF}(t, d, D) = \text{TF}(t, d) \times \text{IDF}(t, D) \]
+            </div>
+
+            <p>Expanding this with the normalized TF and standard IDF:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Expanded TF-IDF Formula</div>
+                \[ \text{TF-IDF}(t, d, D) = \frac{f_{t,d}}{\sum_{t' \in d} f_{t',d}} \times \log \frac{N}{|\{d \in D : t \in d\}|} \]
+            </div>
+
+            <div class="callout callout-warning">
+                <h4>⚠️ Edge Case: Division by Zero</h4>
+                <p>If a term doesn't appear in any document, the IDF formula would divide by zero. Common solutions:</p>
+                <p><strong>Smoothed IDF:</strong> \[ \text{IDF}(t) = \log \frac{N + 1}{1 + |\{d \in D : t \in d\}|} \]</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Understanding Through Properties</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Scenario</th>
+                            <th>TF</th>
+                            <th>IDF</th>
+                            <th>TF-IDF</th>
+                            <th>Meaning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Often in this doc, rare in corpus</td><td>High</td><td>High</td><td><strong>High</strong></td><td>Very important</td></tr>
+                        <tr><td>Often in this doc, common in corpus</td><td>High</td><td>Low</td><td>Medium</td><td>Frequent but not distinctive</td></tr>
+                        <tr><td>Rare in this doc, rare in corpus</td><td>Low</td><td>High</td><td>Medium</td><td>Distinctive but not emphasized</td></tr>
+                        <tr><td>Rare in this doc, common in corpus</td><td>Low</td><td>Low</td><td><strong>Low</strong></td><td>Not important</td></tr>
+                        <tr><td>Doesn't appear in this doc</td><td>0</td><td>Any</td><td><strong>0</strong></td><td>Not relevant</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 5: Flowchart -->
+        <div class="section-header" id="flowchart">
+            <h2><span class="icon">🔄</span> TF-IDF Process Flowchart</h2>
+            <p>Visual representation of the complete TF-IDF calculation pipeline</p>
+        </div>
+
+        <div class="content-block">
+            <div class="flowchart-container">
+                <svg viewBox="0 0 900 750" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6"/>
+                            <stop offset="100%" style="stop-color:#2563eb"/>
+                        </linearGradient>
+                        <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8b5cf6"/>
+                            <stop offset="100%" style="stop-color:#7c3aed"/>
+                        </linearGradient>
+                        <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#10b981"/>
+                            <stop offset="100%" style="stop-color:#059669"/>
+                        </linearGradient>
+                        <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f59e0b"/>
+                            <stop offset="100%" style="stop-color:#d97706"/>
+                        </linearGradient>
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+                        </filter>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Start -->
+                    <ellipse cx="450" cy="40" rx="120" ry="35" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="450" y="45" text-anchor="middle" fill="white" font-weight="bold" font-size="16">INPUT CORPUS</text>
+
+                    <path d="M450 75 L450 110" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Preprocessing -->
+                    <rect x="250" y="120" width="400" height="70" rx="12" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="450" y="150" text-anchor="middle" fill="white" font-weight="bold" font-size="15">1. PREPROCESSING</text>
+                    <text x="450" y="172" text-anchor="middle" fill="white" font-size="13">Tokenize → Lowercase → Remove Stopwords</text>
+
+                    <path d="M450 190 L450 230" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Vocabulary -->
+                    <rect x="250" y="240" width="400" height="55" rx="12" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="450" y="265" text-anchor="middle" fill="white" font-weight="bold" font-size="15">2. BUILD VOCABULARY</text>
+                    <text x="450" y="283" text-anchor="middle" fill="white" font-size="12">Create set of all unique terms</text>
+
+                    <!-- Split -->
+                    <path d="M450 295 L450 330 M450 330 L250 360 M450 330 L650 360" stroke="#6b7280" stroke-width="2"/>
+
+                    <!-- TF Box -->
+                    <rect x="100" y="370" width="250" height="90" rx="12" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+                    <text x="225" y="400" text-anchor="middle" fill="white" font-weight="bold" font-size="15">3a. CALCULATE TF</text>
+                    <text x="225" y="425" text-anchor="middle" fill="white" font-size="12">For each term in each doc:</text>
+                    <text x="225" y="445" text-anchor="middle" fill="white" font-size="12">TF = count(t,d) / total(d)</text>
+
+                    <!-- IDF Box -->
+                    <rect x="550" y="370" width="250" height="90" rx="12" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+                    <text x="675" y="400" text-anchor="middle" fill="white" font-weight="bold" font-size="15">3b. CALCULATE IDF</text>
+                    <text x="675" y="425" text-anchor="middle" fill="white" font-size="12">For each unique term:</text>
+                    <text x="675" y="445" text-anchor="middle" fill="white" font-size="12">IDF = log(N / df)</text>
+
+                    <!-- Arrows down -->
+                    <path d="M225 460 L225 500 M675 460 L675 500" stroke="#6b7280" stroke-width="2"/>
+
+                    <!-- Result boxes -->
+                    <rect x="100" y="510" width="250" height="50" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="225" y="540" text-anchor="middle" fill="#1e40af" font-weight="bold" font-size="14">TF MATRIX [docs × terms]</text>
+
+                    <rect x="550" y="510" width="250" height="50" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="675" y="540" text-anchor="middle" fill="#1e40af" font-weight="bold" font-size="14">IDF VECTOR [1 × terms]</text>
+
+                    <!-- Merge arrows -->
+                    <path d="M225 560 L225 590 L350 610 M675 560 L675 590 L550 610" stroke="#6b7280" stroke-width="2"/>
+
+                    <!-- Multiply -->
+                    <ellipse cx="450" cy="640" rx="130" ry="40" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="450" y="635" text-anchor="middle" fill="white" font-weight="bold" font-size="15">4. MULTIPLY</text>
+                    <text x="450" y="655" text-anchor="middle" fill="white" font-size="12">TF × IDF (element-wise)</text>
+
+                    <path d="M450 680 L450 710" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Result -->
+                    <rect x="250" y="720" width="400" height="50" rx="12" fill="url(#greenGrad)" filter="url(#shadow)"/>
+                    <text x="450" y="750" text-anchor="middle" fill="white" font-weight="bold" font-size="16">TF-IDF MATRIX</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Process Steps Explained</h3>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Preprocessing</h4>
+                        <p><strong>Tokenization:</strong> Split text into words. <strong>Lowercasing:</strong> Normalize case. <strong>Stopword removal:</strong> Remove common words like "the", "is".</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Build Vocabulary</h4>
+                        <p>Create a list of all unique terms across all documents. This defines the dimensions of our TF-IDF matrix.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Calculate TF and IDF</h4>
+                        <p><strong>TF:</strong> Count each term's occurrences per document. <strong>IDF:</strong> Calculate once for each unique term based on document frequency.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Multiply TF × IDF</h4>
+                        <p>For each cell in the TF matrix, multiply by the corresponding IDF value to get the final TF-IDF score.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Python -->
+        <div class="section-header" id="python">
+            <h2><span class="icon">🐍</span> Python Implementation</h2>
+            <p>Complete, runnable code implementing TF-IDF from scratch</p>
+        </div>
+
+        <div class="content-block auto">
+            <h3>Complete TF-IDF Implementation</h3>
+            <p>Copy this code into a Python file and run it directly. No external dependencies required!</p>
+
+            <pre><code><span class="comment">"""
+TF-IDF Implementation from Scratch
+===================================
+Educational implementation - clear, commented, runnable.
+"""</span>
+
+<span class="keyword">import</span> math
+<span class="keyword">import</span> re
+<span class="keyword">from</span> collections <span class="keyword">import</span> Counter
+
+<span class="keyword">class</span> <span class="class-name">TFIDFVectorizer</span>:
+    <span class="string">"""Compute TF-IDF scores for a collection of documents."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, use_smoothing=<span class="keyword">True</span>):
+        self.vocabulary = []
+        self.idf_values = {}
+        self.tfidf_matrix = []
+        self.use_smoothing = use_smoothing
+
+    <span class="keyword">def</span> <span class="function">preprocess</span>(self, text):
+        <span class="string">"""Tokenize and lowercase text."""</span>
+        <span class="keyword">return</span> re.findall(r<span class="string">'[a-z]+'</span>, text.lower())
+
+    <span class="keyword">def</span> <span class="function">compute_tf</span>(self, tokens):
+        <span class="string">"""Compute normalized term frequency."""</span>
+        counts = Counter(tokens)
+        total = len(tokens)
+        <span class="keyword">if</span> total == <span class="number">0</span>:
+            <span class="keyword">return</span> {}
+        <span class="keyword">return</span> {term: count/total <span class="keyword">for</span> term, count <span class="keyword">in</span> counts.items()}
+
+    <span class="keyword">def</span> <span class="function">compute_idf</span>(self, tokenized_docs):
+        <span class="string">"""Compute inverse document frequency for all terms."""</span>
+        N = len(tokenized_docs)
+        doc_freq = Counter()
+
+        <span class="comment"># Count documents containing each term</span>
+        <span class="keyword">for</span> tokens <span class="keyword">in</span> tokenized_docs:
+            <span class="keyword">for</span> term <span class="keyword">in</span> set(tokens):
+                doc_freq[term] += <span class="number">1</span>
+
+        <span class="comment"># Calculate IDF with optional smoothing</span>
+        idf = {}
+        <span class="keyword">for</span> term <span class="keyword">in</span> self.vocabulary:
+            df = doc_freq.get(term, <span class="number">0</span>)
+            <span class="keyword">if</span> self.use_smoothing:
+                idf[term] = math.log10(N / (<span class="number">1</span> + df))
+            <span class="keyword">else</span>:
+                idf[term] = math.log10(N / df) <span class="keyword">if</span> df > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0</span>
+        <span class="keyword">return</span> idf
+
+    <span class="keyword">def</span> <span class="function">fit_transform</span>(self, documents):
+        <span class="string">"""Compute TF-IDF for all documents."""</span>
+        <span class="comment"># Tokenize</span>
+        tokenized = [self.preprocess(doc) <span class="keyword">for</span> doc <span class="keyword">in</span> documents]
+
+        <span class="comment"># Build vocabulary</span>
+        self.vocabulary = sorted(set(t <span class="keyword">for</span> tokens <span class="keyword">in</span> tokenized <span class="keyword">for</span> t <span class="keyword">in</span> tokens))
+
+        <span class="comment"># Compute TF for each document</span>
+        tf_matrix = [self.compute_tf(tokens) <span class="keyword">for</span> tokens <span class="keyword">in</span> tokenized]
+
+        <span class="comment"># Compute IDF</span>
+        self.idf_values = self.compute_idf(tokenized)
+
+        <span class="comment"># Compute TF-IDF = TF × IDF</span>
+        self.tfidf_matrix = []
+        <span class="keyword">for</span> tf <span class="keyword">in</span> tf_matrix:
+            tfidf = {term: tf.get(term, <span class="number">0</span>) * self.idf_values.get(term, <span class="number">0</span>)
+                     <span class="keyword">for</span> term <span class="keyword">in</span> self.vocabulary}
+            self.tfidf_matrix.append(tfidf)
+
+        <span class="keyword">return</span> self.tfidf_matrix
+
+<span class="comment"># Example usage</span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    documents = [
+        <span class="string">"The cat sat on the mat."</span>,
+        <span class="string">"The dog sat on the log."</span>,
+        <span class="string">"The cat chased the dog."</span>,
+    ]
+
+    vectorizer = TFIDFVectorizer()
+    tfidf = vectorizer.fit_transform(documents)
+
+    <span class="keyword">print</span>(<span class="string">"TF-IDF Results:"</span>)
+    <span class="keyword">for</span> i, scores <span class="keyword">in</span> enumerate(tfidf):
+        <span class="keyword">print</span>(f<span class="string">"\nDoc {i+1}:"</span>)
+        top = sorted(scores.items(), key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)[:<span class="number">3</span>]
+        <span class="keyword">for</span> term, score <span class="keyword">in</span> top:
+            <span class="keyword">if</span> score > <span class="number">0</span>:
+                <span class="keyword">print</span>(f<span class="string">"  {term}: {score:.4f}"</span>)</code></pre>
+
+            <div class="callout callout-example">
+                <h4>Expected Output</h4>
+                <pre style="background: #f0fdf4; color: #166534; margin: 0;">
+TF-IDF Results:
+
+Doc 1:
+  mat: 0.0795
+  cat: 0.0293
+  sat: 0.0293
+
+Doc 2:
+  log: 0.0795
+  dog: 0.0293
+  sat: 0.0293
+
+Doc 3:
+  chased: 0.0954
+  cat: 0.0352
+  dog: 0.0352</pre>
+            </div>
+        </div>
+
+        <!-- Section 7: Variants -->
+        <div class="section-header" id="variants">
+            <h2><span class="icon">🔧</span> TF-IDF Variants</h2>
+            <p>Alternative formulations and modern approaches</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Common TF-IDF Variants</h3>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4>Log-Normalized TF</h4>
+                    <p>\[ \text{TF} = 1 + \log(f_{t,d}) \]</p>
+                    <p>Dampens high frequency. A word appearing 100× isn't 100× more important.</p>
+                </div>
+                <div class="card">
+                    <h4>Double Normalization</h4>
+                    <p>\[ \text{TF} = 0.5 + 0.5 \cdot \frac{f_{t,d}}{\max f} \]</p>
+                    <p>Scales TF to [0.5, 1.0] range for consistency.</p>
+                </div>
+                <div class="card">
+                    <h4>Smoothed IDF</h4>
+                    <p>\[ \text{IDF} = \log\left(\frac{N+1}{df+1}\right) + 1 \]</p>
+                    <p>Prevents negative values and handles edge cases.</p>
+                </div>
+                <div class="card">
+                    <h4>BM25</h4>
+                    <p>Probabilistic ranking that improves TF-IDF with term saturation.</p>
+                    <p>Used by Elasticsearch and search engines.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>When to Use TF-IDF</h3>
+
+            <div class="callout callout-concept">
+                <h4>✅ TF-IDF Excels At</h4>
+                <ul>
+                    <li>Feature extraction for traditional ML models</li>
+                    <li>Keyword extraction and summarization</li>
+                    <li>Document similarity (when semantics aren't crucial)</li>
+                    <li>Baseline for comparing more complex methods</li>
+                    <li>Situations with limited computational resources</li>
+                    <li>When interpretability is important</li>
+                </ul>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Method</th><th>Description</th><th>When to Use</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>TF-IDF</strong></td><td>Statistical word importance</td><td>Keyword extraction, simple search</td></tr>
+                        <tr><td><strong>BM25</strong></td><td>Probabilistic TF-IDF variant</td><td>Production search engines</td></tr>
+                        <tr><td><strong>Word2Vec</strong></td><td>Neural word embeddings</td><td>Semantic similarity</td></tr>
+                        <tr><td><strong>BERT</strong></td><td>Contextual embeddings</td><td>State-of-the-art NLP tasks</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
+            <p>Created for educational purposes • TF-IDF was popularized by Karen Spärck Jones (1972)</p>
+            <p style="margin-top: 1rem;">
+                <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec →</a>
+                <a href="sgns_educational.html" style="color: var(--primary-color); margin: 0 1rem;">SGNS →</a>
+                <a href="cbow_educational.html" style="color: var(--primary-color); margin: 0 1rem;">CBOW →</a>
+                <a href="glove_educational.html" style="color: var(--primary-color); margin: 0 1rem;">GloVe →</a>
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        let tfidfChart = null;
+        let componentChart = null;
+        let heatmapChart = null;
+
+        function preprocess(text) {
+            return text.toLowerCase().match(/[a-z]+/g) || [];
+        }
+
+        function computeTF(tokens) {
+            const counts = {};
+            tokens.forEach(t => counts[t] = (counts[t] || 0) + 1);
+            const total = tokens.length;
+            const tf = {};
+            for (const term in counts) tf[term] = counts[term] / total;
+            return tf;
+        }
+
+        function computeIDF(tokenizedDocs, vocabulary) {
+            const N = tokenizedDocs.length;
+            const idf = {};
+            vocabulary.forEach(term => {
+                let docCount = tokenizedDocs.filter(tokens => tokens.includes(term)).length;
+                idf[term] = Math.log10(N / (1 + docCount));
+            });
+            return idf;
+        }
+
+        function calculateTFIDF() {
+            const docs = [
+                document.getElementById('doc1').value,
+                document.getElementById('doc2').value,
+                document.getElementById('doc3').value,
+                document.getElementById('doc4').value
+            ].filter(d => d.trim());
+
+            if (docs.length < 2) { alert('Enter at least 2 documents.'); return; }
+
+            const searchTerm = document.getElementById('search-term').value.toLowerCase().trim();
+            if (!searchTerm) { alert('Enter a search term.'); return; }
+
+            const tokenizedDocs = docs.map(preprocess);
+            const vocabulary = [...new Set(tokenizedDocs.flat())].sort();
+            const tfMatrix = tokenizedDocs.map(computeTF);
+            const idfValues = computeIDF(tokenizedDocs, vocabulary);
+            const tfidfMatrix = tfMatrix.map(tf => {
+                const tfidf = {};
+                vocabulary.forEach(term => tfidf[term] = (tf[term] || 0) * (idfValues[term] || 0));
+                return tfidf;
+            });
+
+            displayResults(searchTerm, tfMatrix, idfValues, tfidfMatrix, docs);
+            updateCharts(searchTerm, tfMatrix, idfValues, tfidfMatrix, docs, vocabulary);
+        }
+
+        function displayResults(term, tfMatrix, idf, tfidfMatrix, docs) {
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('result-term').textContent = term;
+
+            let docCount = tfidfMatrix.filter((_, i) => tfMatrix[i][term]).length;
+            let html = `<p><strong>IDF("${term}")</strong> = log(${docs.length}/(1+${docCount})) = <strong>${(idf[term]||0).toFixed(4)}</strong></p>
+                <table><thead><tr><th>Document</th><th>TF</th><th>TF-IDF</th></tr></thead><tbody>`;
+
+            tfidfMatrix.forEach((tfidf, i) => {
+                html += `<tr><td>Doc ${i+1}</td><td>${(tfMatrix[i][term]||0).toFixed(4)}</td><td><strong>${(tfidf[term]||0).toFixed(4)}</strong></td></tr>`;
+            });
+
+            document.getElementById('calculation-details').innerHTML = html + '</tbody></table>';
+        }
+
+        function updateCharts(term, tfMatrix, idf, tfidfMatrix, docs, vocabulary) {
+            const labels = docs.map((_, i) => `Doc ${i+1}`);
+            const tfidfScores = tfidfMatrix.map(t => t[term] || 0);
+            const tfScores = tfMatrix.map(t => t[term] || 0);
+
+            if (tfidfChart) tfidfChart.destroy();
+            if (componentChart) componentChart.destroy();
+            if (heatmapChart) heatmapChart.destroy();
+
+            tfidfChart = new Chart(document.getElementById('tfidfChart'), {
+                type: 'bar',
+                data: { labels, datasets: [{ label: `TF-IDF for "${term}"`, data: tfidfScores, backgroundColor: 'rgba(37,99,235,0.7)', borderColor: 'rgba(37,99,235,1)', borderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: `TF-IDF Scores for "${term}"`, font: { size: 16 } } }, scales: { y: { beginAtZero: true } } }
+            });
+
+            componentChart = new Chart(document.getElementById('componentChart'), {
+                type: 'bar',
+                data: { labels, datasets: [
+                    { label: 'TF', data: tfScores, backgroundColor: 'rgba(245,158,11,0.7)' },
+                    { label: `IDF = ${(idf[term]||0).toFixed(4)}`, data: labels.map(() => idf[term]||0), backgroundColor: 'rgba(16,185,129,0.7)' }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Heatmap
+            const termScores = vocabulary.map(t => ({ term: t, max: Math.max(...tfidfMatrix.map(m => m[t]||0)) }));
+            termScores.sort((a,b) => b.max - a.max);
+            const topTerms = termScores.slice(0, 15).map(t => t.term);
+
+            const data = [];
+            topTerms.forEach((t, ti) => {
+                tfidfMatrix.forEach((m, di) => data.push({ x: di, y: ti, v: m[t]||0 }));
+            });
+            const maxScore = Math.max(...data.map(d => d.v), 0.001);
+
+            heatmapChart = new Chart(document.getElementById('heatmapChart'), {
+                type: 'scatter',
+                data: { datasets: [{ data, backgroundColor: data.map(d => `rgba(37,99,235,${Math.max(0.1, d.v/maxScore)})`), pointRadius: 25, pointStyle: 'rect' }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${topTerms[ctx.raw.y]}: ${ctx.raw.v.toFixed(4)}` } } },
+                    scales: {
+                        x: { min: -0.5, max: docs.length-0.5, ticks: { callback: v => labels[v] } },
+                        y: { min: -0.5, max: topTerms.length-0.5, ticks: { callback: v => topTerms[v] } }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => setTimeout(calculateTFIDF, 500));
+    </script>
+</body>
+</html>

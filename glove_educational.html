@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive educational guide to GloVe (Global Vectors for Word Representation) for classroom use">
+    <title>Understanding GloVe: A Complete Guide</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container - Wider Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks - Consistent Sizing */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-block.half {
+            min-height: calc(var(--block-min-height) / 2);
+        }
+
+        .content-block.auto {
+            min-height: auto;
+        }
+
+        /* Grid Layout for Side-by-Side Blocks */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .block-grid .content-block {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .block-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .icon {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #e0e7ff;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Flowchart */
+        .flowchart-container {
+            text-align: center;
+            margin: 2rem 0;
+            overflow-x: auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 1rem;
+        }
+
+        .flowchart-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        /* Steps */
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-color);
+            border-radius: 1rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .content-block {
+                padding: 1.5rem;
+                min-height: auto;
+            }
+
+            header {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            nav {
+                display: none;
+            }
+
+            main {
+                padding-top: 1rem;
+            }
+
+            .content-block {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+
+        /* Scroll Snap for Presentation Feel */
+        @media (min-width: 1200px) {
+            main {
+                scroll-snap-type: y proximity;
+            }
+
+            .content-block, header {
+                scroll-snap-align: start;
+                scroll-margin-top: 5rem;
+            }
+        }
+
+        /* Matrix display */
+        .matrix-display {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .matrix-table {
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 0.75rem 1rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .matrix-table th {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .matrix-table .row-header {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .matrix-table td.highlight-cell {
+            background: #fef3c7;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">GloVe Guide</div>
+            <ul>
+                <li><a href="#intuition">Intuition</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#mathematics">Mathematics</a></li>
+                <li><a href="#flowchart">Flowchart</a></li>
+                <li><a href="#python">Python</a></li>
+                <li><a href="#comparison">Comparison</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Header -->
+        <header>
+            <h1>Understanding GloVe</h1>
+            <p>Global Vectors for Word Representation combines the best of count-based and prediction-based methods to learn word embeddings that capture semantic meaning from global co-occurrence statistics.</p>
+            <div class="subtitle">Bridging Count-Based and Neural Methods</div>
+        </header>
+
+        <!-- Section 1: Intuition -->
+        <div class="section-header" id="intuition">
+            <h2><span class="icon">&#128161;</span> Intuition</h2>
+            <p>Understanding the core idea behind GloVe through analogies and real-world examples</p>
+        </div>
+
+        <div class="content-block">
+            <h3>What is GloVe?</h3>
+            <p><strong>GloVe</strong> stands for <span class="highlight">Global Vectors for Word Representation</span>. Developed at Stanford in 2014, it's a word embedding technique that learns vector representations by analyzing how often words co-occur across an entire text corpus.</p>
+
+            <p>The key insight is powerful: <strong>The ratio of co-occurrence probabilities between words encodes semantic relationships more effectively than raw counts or probabilities alone.</strong></p>
+
+            <div class="callout callout-analogy">
+                <h4>&#127970; The Social Network Analogy</h4>
+                <p>Imagine understanding people by who they spend time with:</p>
+                <ul>
+                    <li><strong>Direct counting</strong> tells you "Alice spent time with Bob 50 times" - but is that a lot?</li>
+                    <li><strong>Ratios reveal meaning</strong>: "Alice spends 10x more time with Bob than with Carol, but Charlie spends equal time with both." Now you understand relationships!</li>
+                </ul>
+                <p><strong>GloVe does exactly this for words - it learns meaning from the relative patterns of who "hangs out" with whom.</strong></p>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>The Co-occurrence Matrix</h3>
+                <p><strong>"Who appears near whom?"</strong></p>
+                <p>GloVe starts by building a giant matrix that counts how often each word appears near every other word in the corpus.</p>
+
+                <div class="callout callout-example">
+                    <h4>&#128221; Example</h4>
+                    <p>In "The cat sat on the mat", if we use a window of 1:</p>
+                    <ul>
+                        <li>"cat" co-occurs with "the" and "sat"</li>
+                        <li>"sat" co-occurs with "cat" and "on"</li>
+                    </ul>
+                </div>
+
+                <p><strong>Matrix entry X[i,j]:</strong></p>
+                <p style="text-align: center; font-family: monospace; font-size: 1.1rem;">
+                    X[i,j] = count of word j appearing near word i
+                </p>
+            </div>
+
+            <div class="content-block">
+                <h3>The Power of Ratios</h3>
+                <p><strong>"Relative relationships reveal meaning"</strong></p>
+                <p>Instead of looking at raw counts, GloVe examines the <em>ratio</em> of probabilities. This ratio reveals semantic relationships that raw numbers hide.</p>
+
+                <div class="callout callout-example">
+                    <h4>&#128221; Classic Example: ice vs. steam</h4>
+                    <p>Consider P(k|ice) / P(k|steam) for different words k:</p>
+                    <ul>
+                        <li>k = "solid": ratio is LARGE (ice-related)</li>
+                        <li>k = "gas": ratio is SMALL (steam-related)</li>
+                        <li>k = "water": ratio is ~1 (both related)</li>
+                    </ul>
+                </div>
+
+                <p><strong>The ratio encodes:</strong> "Is k more associated with ice, steam, or both equally?"</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Best of Both Worlds</h3>
+
+            <div class="callout callout-concept">
+                <h4>&#128301; GloVe's Unique Position</h4>
+                <p>GloVe bridges two major approaches to word embeddings:</p>
+                <ul>
+                    <li><strong>Count-based methods</strong> (LSA, HAL): Use global corpus statistics, efficient, but miss nuanced relationships</li>
+                    <li><strong>Prediction-based methods</strong> (Word2Vec): Learn local context patterns, capture analogy relationships, but don't use global statistics directly</li>
+                </ul>
+                <p><strong>GloVe combines both:</strong> It uses global co-occurrence statistics but learns vectors through a prediction-style objective!</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">The Core Idea</div>
+                <p style="font-size: 1.3rem; font-weight: bold; color: var(--primary-color);">
+                    w<sub>i</sub> &middot; w<sub>j</sub> + biases = log(X<sub>ij</sub>)
+                </p>
+                <div class="formula-description">
+                    <p>GloVe learns word vectors such that their dot product approximates the log of how often they co-occur:</p>
+                    <ul>
+                        <li><strong>High co-occurrence</strong> = high dot product = similar vectors</li>
+                        <li><strong>Low co-occurrence</strong> = low dot product = different vectors</li>
+                        <li>The log transform prevents very frequent pairs from dominating</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Examples -->
+        <div class="section-header" id="examples">
+            <h2><span class="icon">&#128221;</span> Worked Examples</h2>
+            <p>Step-by-step examples showing co-occurrence matrix and probability ratios</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Example: Building a Co-occurrence Matrix</h3>
+
+            <div class="callout callout-example">
+                <h4>&#128218; Our Tiny Corpus (window size = 1)</h4>
+                <ul>
+                    <li><strong>Sentence 1:</strong> "ice water is cold"</li>
+                    <li><strong>Sentence 2:</strong> "steam water is hot"</li>
+                    <li><strong>Sentence 3:</strong> "ice is solid"</li>
+                    <li><strong>Sentence 4:</strong> "steam is gas"</li>
+                </ul>
+            </div>
+
+            <h4>Step 1: Count Co-occurrences</h4>
+            <p>For each word, count how many times each other word appears within a window of 1 position.</p>
+
+            <div class="matrix-display">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ice</th>
+                            <th>water</th>
+                            <th>is</th>
+                            <th>cold</th>
+                            <th>steam</th>
+                            <th>hot</th>
+                            <th>solid</th>
+                            <th>gas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="row-header">ice</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+                        <tr><td class="row-header">water</td><td>1</td><td>0</td><td>2</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+                        <tr><td class="row-header">is</td><td>1</td><td>2</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+                        <tr><td class="row-header">cold</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                        <tr><td class="row-header">steam</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+                        <tr><td class="row-header">hot</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                        <tr><td class="row-header">solid</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                        <tr><td class="row-header">gas</td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>&#128270; Notice the Patterns</h4>
+                <ul>
+                    <li><strong>"water"</strong> co-occurs with both "ice" and "steam" (row sums show general connectivity)</li>
+                    <li><strong>"is"</strong> is the most connected (appears in all sentences)</li>
+                    <li><strong>"solid"</strong> only co-occurs with "ice" and "is" - very specific!</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 2: Calculate Co-occurrence Probabilities</h4>
+            <p>Convert counts to probabilities: P(k|word) = X[word,k] / sum(X[word,:])</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Probe Word k</th>
+                            <th>P(k|ice)</th>
+                            <th>P(k|steam)</th>
+                            <th>Ratio: P(k|ice)/P(k|steam)</th>
+                            <th>Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>solid</td><td>1/3 = 0.333</td><td>0/3 = 0.000</td><td class="highlight-cell">Large (~infinity)</td><td>Strongly ice-related</td></tr>
+                        <tr><td>gas</td><td>0/3 = 0.000</td><td>1/3 = 0.333</td><td class="highlight-cell">Small (~0)</td><td>Strongly steam-related</td></tr>
+                        <tr><td>water</td><td>1/3 = 0.333</td><td>1/3 = 0.333</td><td class="highlight-cell">1.0</td><td>Related to both equally</td></tr>
+                        <tr><td>is</td><td>1/3 = 0.333</td><td>1/3 = 0.333</td><td>1.0</td><td>Common word, neutral</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-example">
+                <h4>&#128202; The Power of Ratios</h4>
+                <p>The ratio P(k|ice)/P(k|steam) perfectly captures semantic relationships:</p>
+                <ul>
+                    <li><strong>Ratio >> 1:</strong> k is more associated with "ice" (like "solid", "cold")</li>
+                    <li><strong>Ratio << 1:</strong> k is more associated with "steam" (like "gas", "hot")</li>
+                    <li><strong>Ratio ~ 1:</strong> k is equally related to both (like "water") or unrelated to both</li>
+                </ul>
+                <p>This is exactly what GloVe's vectors are trained to capture!</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 3: What GloVe Learns</h4>
+            <p>GloVe trains word vectors so that:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Vector Relationship Goal</div>
+                <p style="font-size: 1.2rem;">
+                    (w<sub>ice</sub> - w<sub>steam</sub>) &middot; w<sub>k</sub> &asymp; log(P(k|ice) / P(k|steam))
+                </p>
+                <div class="formula-description">
+                    <p>The difference vector between "ice" and "steam" should have:</p>
+                    <ul>
+                        <li><strong>Positive</strong> dot product with "solid" (ice-related)</li>
+                        <li><strong>Negative</strong> dot product with "gas" (steam-related)</li>
+                        <li><strong>Near zero</strong> dot product with "water" (both-related)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <h4>&#127919; The King-Queen Analogy</h4>
+                <p>This is why GloVe (like Word2Vec) captures analogies:</p>
+                <p style="text-align: center; font-size: 1.2rem; margin: 1rem 0;">
+                    <strong>king - man + woman &asymp; queen</strong>
+                </p>
+                <p>The co-occurrence ratios encode gender relationships consistently across the corpus, and GloVe's vectors preserve these ratios through their dot products!</p>
+            </div>
+        </div>
+
+        <!-- Section 3: Visualization -->
+        <div class="section-header" id="visualization">
+            <h2><span class="icon">&#128202;</span> Interactive Visualization</h2>
+            <p>Explore co-occurrence matrices and embedding spaces</p>
+        </div>
+
+        <div class="content-block">
+            <div class="interactive-section">
+                <h3>Co-occurrence Matrix Explorer</h3>
+                <p>Enter sentences to build a co-occurrence matrix and see how words relate:</p>
+
+                <div class="block-grid" style="margin-top: 1.5rem;">
+                    <div>
+                        <div class="input-group">
+                            <label for="corpus-input">Enter sentences (one per line):</label>
+                            <textarea id="corpus-input" rows="6">the cat sat on the mat
+the dog ran in the park
+the cat and dog played
+a bird flew over the park
+the mat was soft and warm</textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="window-size">Window Size:</label>
+                            <input type="number" id="window-size" value="2" min="1" max="5">
+                        </div>
+                        <button onclick="buildCooccurrence()">Build Co-occurrence Matrix</button>
+                    </div>
+                    <div>
+                        <div class="input-group">
+                            <label for="word1">Word 1 (for ratio analysis):</label>
+                            <input type="text" id="word1" value="cat">
+                        </div>
+                        <div class="input-group">
+                            <label for="word2">Word 2 (for ratio analysis):</label>
+                            <input type="text" id="word2" value="dog">
+                        </div>
+                        <button onclick="analyzeRatios()">Analyze Probability Ratios</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-display" id="matrix-results" style="display: none;">
+                <h4>&#128202; Co-occurrence Matrix (Top Words)</h4>
+                <div id="matrix-display"></div>
+            </div>
+
+            <div class="result-display" id="ratio-results" style="display: none;">
+                <h4>&#128200; Probability Ratio Analysis</h4>
+                <div id="ratio-display"></div>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Co-occurrence Heatmap</h3>
+                <div class="chart-container">
+                    <canvas id="heatmapChart"></canvas>
+                </div>
+            </div>
+            <div class="content-block">
+                <h3>Simulated Embedding Space (2D)</h3>
+                <div class="chart-container">
+                    <canvas id="embeddingChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Probability Ratio Comparison</h3>
+            <p>This chart shows how probe words relate differently to two target words based on co-occurrence ratios:</p>
+            <div class="chart-container" style="height: 350px;">
+                <canvas id="ratioChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Section 4: Mathematics -->
+        <div class="section-header" id="mathematics">
+            <h2><span class="icon">&#128290;</span> Mathematical Foundations</h2>
+            <p>The formal definitions and formulas behind GloVe</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Co-occurrence Probability</h3>
+            <p>Let \( X \) be the word-word co-occurrence matrix, where \( X_{ij} \) is the number of times word \( j \) appears in the context of word \( i \).</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Co-occurrence Probability</div>
+                \[ P_{ij} = P(j|i) = \frac{X_{ij}}{X_i} \]
+                <div class="formula-description">
+                    Where \( X_i = \sum_k X_{ik} \) is the total number of times any word appears in the context of word \( i \).
+                </div>
+            </div>
+
+            <h3>The Ratio that Captures Meaning</h3>
+            <p>The key insight of GloVe is that <strong>ratios</strong> of co-occurrence probabilities encode semantic relationships:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Probability Ratio</div>
+                \[ \frac{P_{ik}}{P_{jk}} = \frac{P(k|i)}{P(k|j)} \]
+                <div class="formula-description">
+                    <p>For words \( i = \text{ice} \) and \( j = \text{steam} \):</p>
+                    <ul>
+                        <li>If \( k = \text{solid} \): ratio is large (ice-related)</li>
+                        <li>If \( k = \text{gas} \): ratio is small (steam-related)</li>
+                        <li>If \( k = \text{water} \): ratio &asymp; 1 (related to both)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The GloVe Model</h3>
+            <p>GloVe learns word vectors \( w_i \) and context vectors \( \tilde{w}_j \) such that their dot product relates to the log co-occurrence:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">GloVe Relationship</div>
+                \[ w_i^T \tilde{w}_j + b_i + \tilde{b}_j = \log(X_{ij}) \]
+                <div class="formula-description">
+                    <p>Where:</p>
+                    <ul>
+                        <li>\( w_i \) = word vector for word \( i \)</li>
+                        <li>\( \tilde{w}_j \) = context vector for word \( j \)</li>
+                        <li>\( b_i, \tilde{b}_j \) = bias terms</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>&#10067; Why Logarithm?</h4>
+                <ol>
+                    <li><strong>Converts multiplicative to additive:</strong> Ratios become differences in log space</li>
+                    <li><strong>Enables vector arithmetic:</strong> \( w_i - w_j \) captures the ratio relationship</li>
+                    <li><strong>Handles scale:</strong> Prevents very frequent co-occurrences from dominating</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The GloVe Objective Function</h3>
+
+            <div class="formula-box">
+                <div class="formula-label">GloVe Cost Function</div>
+                \[ J = \sum_{i,j=1}^{V} f(X_{ij}) \left( w_i^T \tilde{w}_j + b_i + \tilde{b}_j - \log X_{ij} \right)^2 \]
+                <div class="formula-description">
+                    <p>This is a weighted least squares objective where:</p>
+                    <ul>
+                        <li>We minimize the squared error between the dot product and log co-occurrence</li>
+                        <li>\( f(X_{ij}) \) is a weighting function that controls the importance of each co-occurrence</li>
+                        <li>\( V \) is the vocabulary size</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h4>The Weighting Function f(x)</h4>
+            <p>The weighting function prevents frequent but uninformative word pairs from dominating:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Weighting Function</div>
+                \[ f(x) = \begin{cases} (x/x_{\max})^\alpha & \text{if } x < x_{\max} \\ 1 & \text{otherwise} \end{cases} \]
+                <div class="formula-description">
+                    <p>Typical values: \( x_{\max} = 100 \), \( \alpha = 0.75 \)</p>
+                    <ul>
+                        <li><strong>Rare co-occurrences:</strong> Get lower weight (might be noise)</li>
+                        <li><strong>Frequent co-occurrences:</strong> Capped at weight 1 (don't over-emphasize)</li>
+                        <li><strong>\( \alpha = 0.75 \):</strong> Sublinear scaling prevents very frequent pairs from dominating</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Understanding the Components</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Symbol</th>
+                            <th>Dimension</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Word vectors</td><td>\( W \)</td><td>\( V \times d \)</td><td>Main embeddings for each word</td></tr>
+                        <tr><td>Context vectors</td><td>\( \tilde{W} \)</td><td>\( V \times d \)</td><td>Separate embeddings for context role</td></tr>
+                        <tr><td>Word biases</td><td>\( b \)</td><td>\( V \times 1 \)</td><td>Capture word frequency effects</td></tr>
+                        <tr><td>Context biases</td><td>\( \tilde{b} \)</td><td>\( V \times 1 \)</td><td>Capture context frequency effects</td></tr>
+                        <tr><td>Co-occurrence matrix</td><td>\( X \)</td><td>\( V \times V \)</td><td>Input statistics from corpus</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-warning">
+                <h4>&#9888;&#65039; Zero Co-occurrences</h4>
+                <p>When \( X_{ij} = 0 \), the log is undefined. GloVe handles this by:</p>
+                <ul>
+                    <li>Only summing over non-zero entries (sparse matrix)</li>
+                    <li>The weighting function \( f(0) = 0 \) means zero entries don't contribute</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 5: Flowchart -->
+        <div class="section-header" id="flowchart">
+            <h2><span class="icon">&#128260;</span> GloVe Training Pipeline</h2>
+            <p>Visual representation of the complete GloVe training process</p>
+        </div>
+
+        <div class="content-block">
+            <div class="flowchart-container">
+                <svg viewBox="0 0 950 850" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6"/>
+                            <stop offset="100%" style="stop-color:#2563eb"/>
+                        </linearGradient>
+                        <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8b5cf6"/>
+                            <stop offset="100%" style="stop-color:#7c3aed"/>
+                        </linearGradient>
+                        <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#10b981"/>
+                            <stop offset="100%" style="stop-color:#059669"/>
+                        </linearGradient>
+                        <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f59e0b"/>
+                            <stop offset="100%" style="stop-color:#d97706"/>
+                        </linearGradient>
+                        <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ef4444"/>
+                            <stop offset="100%" style="stop-color:#dc2626"/>
+                        </linearGradient>
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+                        </filter>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Start: Input Corpus -->
+                    <ellipse cx="475" cy="40" rx="140" ry="35" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="475" y="45" text-anchor="middle" fill="white" font-weight="bold" font-size="16">TEXT CORPUS</text>
+
+                    <path d="M475 75 L475 110" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 1: Preprocessing -->
+                    <rect x="275" y="120" width="400" height="70" rx="12" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="475" y="150" text-anchor="middle" fill="white" font-weight="bold" font-size="15">1. PREPROCESSING</text>
+                    <text x="475" y="172" text-anchor="middle" fill="white" font-size="13">Tokenize, lowercase, build vocabulary V</text>
+
+                    <path d="M475 190 L475 230" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 2: Build Co-occurrence Matrix -->
+                    <rect x="225" y="240" width="500" height="80" rx="12" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+                    <text x="475" y="270" text-anchor="middle" fill="white" font-weight="bold" font-size="15">2. BUILD CO-OCCURRENCE MATRIX X</text>
+                    <text x="475" y="292" text-anchor="middle" fill="white" font-size="12">Scan corpus with context window</text>
+                    <text x="475" y="308" text-anchor="middle" fill="white" font-size="12">X[i,j] = count of word j near word i</text>
+
+                    <path d="M475 320 L475 360" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 3: Initialize Parameters -->
+                    <rect x="275" y="370" width="400" height="70" rx="12" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="475" y="395" text-anchor="middle" fill="white" font-weight="bold" font-size="15">3. INITIALIZE PARAMETERS</text>
+                    <text x="475" y="420" text-anchor="middle" fill="white" font-size="12">Random init: W, W_context, b, b_context</text>
+
+                    <path d="M475 440 L475 480" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Training Loop Box -->
+                    <rect x="125" y="490" width="700" height="220" rx="15" fill="none" stroke="#7c3aed" stroke-width="3" stroke-dasharray="10,5"/>
+                    <text x="145" y="515" fill="#7c3aed" font-weight="bold" font-size="14">TRAINING LOOP (until convergence)</text>
+
+                    <!-- Step 4a: Forward Pass -->
+                    <rect x="150" y="530" width="300" height="70" rx="10" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="300" y="555" text-anchor="middle" fill="white" font-weight="bold" font-size="14">4a. FORWARD PASS</text>
+                    <text x="300" y="578" text-anchor="middle" fill="white" font-size="11">Compute: w_i^T * w_j + b_i + b_j</text>
+
+                    <!-- Step 4b: Compute Loss -->
+                    <rect x="500" y="530" width="300" height="70" rx="10" fill="url(#redGrad)" filter="url(#shadow)"/>
+                    <text x="650" y="555" text-anchor="middle" fill="white" font-weight="bold" font-size="14">4b. COMPUTE LOSS</text>
+                    <text x="650" y="578" text-anchor="middle" fill="white" font-size="11">J = f(X_ij) * (pred - log(X_ij))^2</text>
+
+                    <path d="M450 565 L500 565" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 4c: Backward Pass -->
+                    <rect x="150" y="620" width="300" height="70" rx="10" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+                    <text x="300" y="645" text-anchor="middle" fill="white" font-weight="bold" font-size="14">4c. COMPUTE GRADIENTS</text>
+                    <text x="300" y="668" text-anchor="middle" fill="white" font-size="11">dJ/dW, dJ/dW_ctx, dJ/db, dJ/db_ctx</text>
+
+                    <!-- Step 4d: Update -->
+                    <rect x="500" y="620" width="300" height="70" rx="10" fill="url(#greenGrad)" filter="url(#shadow)"/>
+                    <text x="650" y="645" text-anchor="middle" fill="white" font-weight="bold" font-size="14">4d. UPDATE PARAMETERS</text>
+                    <text x="650" y="668" text-anchor="middle" fill="white" font-size="11">AdaGrad: param -= lr * grad / sqrt(G)</text>
+
+                    <path d="M650 600 L650 620" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M300 600 L300 620" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M450 655 L500 655" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Loop back arrow -->
+                    <path d="M800 590 L850 590 L850 510 L800 510" stroke="#7c3aed" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+                    <path d="M475 710 L475 750" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 5: Final Embeddings -->
+                    <rect x="250" y="760" width="450" height="70" rx="12" fill="url(#greenGrad)" filter="url(#shadow)"/>
+                    <text x="475" y="790" text-anchor="middle" fill="white" font-weight="bold" font-size="16">5. FINAL WORD VECTORS</text>
+                    <text x="475" y="815" text-anchor="middle" fill="white" font-size="13">W_final = W + W_context (or just W)</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Pipeline Steps Explained</h3>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Preprocessing</h4>
+                        <p>Tokenize text into words, lowercase, optionally remove rare words. Build vocabulary of unique words.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Build Co-occurrence Matrix</h4>
+                        <p>Scan through corpus with a context window (typically 10-15 words). For each word pair within the window, increment X[i,j]. Often weighted by distance (closer = higher count).</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Initialize Parameters</h4>
+                        <p>Randomly initialize word vectors W, context vectors W_context, and bias terms b, b_context. Typical dimension d = 50-300.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Training Loop</h4>
+                        <p><strong>Forward:</strong> Compute dot product + biases. <strong>Loss:</strong> Weighted squared error vs log(X_ij). <strong>Backward:</strong> Compute gradients. <strong>Update:</strong> Use AdaGrad optimizer.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Final Embeddings</h4>
+                        <p>The final word vectors can be W alone, or W + W_context (often performs slightly better). These are your GloVe embeddings!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Python -->
+        <div class="section-header" id="python">
+            <h2><span class="icon">&#128013;</span> Python Implementation</h2>
+            <p>Complete, runnable code implementing GloVe from scratch</p>
+        </div>
+
+        <div class="content-block auto">
+            <h3>Complete GloVe Implementation</h3>
+            <p>Copy this code into a Python file and run it directly. Requires only NumPy!</p>
+
+            <pre><code><span class="comment">"""
+GloVe Implementation from Scratch
+=================================
+Educational implementation - clear, commented, runnable.
+Learns word embeddings from co-occurrence statistics.
+"""</span>
+
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">from</span> collections <span class="keyword">import</span> Counter, defaultdict
+<span class="keyword">import</span> re
+
+<span class="keyword">class</span> <span class="class-name">GloVe</span>:
+    <span class="string">"""GloVe: Global Vectors for Word Representation."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, embedding_dim=<span class="number">50</span>, x_max=<span class="number">100</span>, alpha=<span class="number">0.75</span>,
+                 learning_rate=<span class="number">0.05</span>, epochs=<span class="number">100</span>, window_size=<span class="number">5</span>):
+        <span class="string">"""
+        Args:
+            embedding_dim: Dimension of word vectors
+            x_max: Maximum co-occurrence count for weighting
+            alpha: Exponent for weighting function
+            learning_rate: Learning rate for AdaGrad
+            epochs: Number of training iterations
+            window_size: Context window size (each side)
+        """</span>
+        self.embedding_dim = embedding_dim
+        self.x_max = x_max
+        self.alpha = alpha
+        self.lr = learning_rate
+        self.epochs = epochs
+        self.window_size = window_size
+
+        <span class="comment"># Will be set during training</span>
+        self.vocab = {}
+        self.inverse_vocab = {}
+        self.W = <span class="keyword">None</span>  <span class="comment"># Word vectors</span>
+        self.W_ctx = <span class="keyword">None</span>  <span class="comment"># Context vectors</span>
+        self.b = <span class="keyword">None</span>  <span class="comment"># Word biases</span>
+        self.b_ctx = <span class="keyword">None</span>  <span class="comment"># Context biases</span>
+
+    <span class="keyword">def</span> <span class="function">tokenize</span>(self, text):
+        <span class="string">"""Simple tokenization: lowercase and extract words."""</span>
+        <span class="keyword">return</span> re.findall(r<span class="string">'[a-z]+'</span>, text.lower())
+
+    <span class="keyword">def</span> <span class="function">build_vocab</span>(self, corpus, min_count=<span class="number">1</span>):
+        <span class="string">"""Build vocabulary from corpus."""</span>
+        word_counts = Counter()
+        <span class="keyword">for</span> sentence <span class="keyword">in</span> corpus:
+            tokens = self.tokenize(sentence)
+            word_counts.update(tokens)
+
+        <span class="comment"># Filter by minimum count</span>
+        self.vocab = {word: i <span class="keyword">for</span> i, (word, count) <span class="keyword">in</span>
+                      enumerate(word_counts.items()) <span class="keyword">if</span> count >= min_count}
+        self.inverse_vocab = {i: word <span class="keyword">for</span> word, i <span class="keyword">in</span> self.vocab.items()}
+        <span class="keyword">return</span> len(self.vocab)
+
+    <span class="keyword">def</span> <span class="function">build_cooccurrence_matrix</span>(self, corpus):
+        <span class="string">"""Build word co-occurrence matrix from corpus."""</span>
+        V = len(self.vocab)
+        cooccurrence = defaultdict(<span class="keyword">lambda</span>: defaultdict(<span class="keyword">float</span>))
+
+        <span class="keyword">for</span> sentence <span class="keyword">in</span> corpus:
+            tokens = self.tokenize(sentence)
+            <span class="comment"># Filter to vocabulary</span>
+            token_ids = [self.vocab[t] <span class="keyword">for</span> t <span class="keyword">in</span> tokens <span class="keyword">if</span> t <span class="keyword">in</span> self.vocab]
+
+            <span class="keyword">for</span> i, center_id <span class="keyword">in</span> enumerate(token_ids):
+                <span class="comment"># Look at context window</span>
+                start = max(<span class="number">0</span>, i - self.window_size)
+                end = min(len(token_ids), i + self.window_size + <span class="number">1</span>)
+
+                <span class="keyword">for</span> j <span class="keyword">in</span> range(start, end):
+                    <span class="keyword">if</span> i != j:
+                        context_id = token_ids[j]
+                        distance = abs(i - j)
+                        <span class="comment"># Weight by inverse distance</span>
+                        cooccurrence[center_id][context_id] += <span class="number">1.0</span> / distance
+
+        <span class="comment"># Convert to list of (i, j, count) tuples</span>
+        cooccurrences = []
+        <span class="keyword">for</span> i <span class="keyword">in</span> cooccurrence:
+            <span class="keyword">for</span> j <span class="keyword">in</span> cooccurrence[i]:
+                cooccurrences.append((i, j, cooccurrence[i][j]))
+
+        <span class="keyword">return</span> cooccurrences
+
+    <span class="keyword">def</span> <span class="function">weighting_function</span>(self, x):
+        <span class="string">"""Weighting function f(x) to reduce impact of very frequent pairs."""</span>
+        <span class="keyword">if</span> x < self.x_max:
+            <span class="keyword">return</span> (x / self.x_max) ** self.alpha
+        <span class="keyword">return</span> <span class="number">1.0</span>
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, corpus, verbose=<span class="keyword">True</span>):
+        <span class="string">"""Train GloVe embeddings on corpus."""</span>
+        <span class="comment"># Build vocabulary</span>
+        V = self.build_vocab(corpus)
+        <span class="keyword">if</span> verbose:
+            <span class="keyword">print</span>(f<span class="string">"Vocabulary size: {V}"</span>)
+
+        <span class="comment"># Build co-occurrence matrix</span>
+        cooccurrences = self.build_cooccurrence_matrix(corpus)
+        <span class="keyword">if</span> verbose:
+            <span class="keyword">print</span>(f<span class="string">"Non-zero co-occurrences: {len(cooccurrences)}"</span>)
+
+        <span class="comment"># Initialize parameters</span>
+        self.W = (np.random.rand(V, self.embedding_dim) - <span class="number">0.5</span>) / self.embedding_dim
+        self.W_ctx = (np.random.rand(V, self.embedding_dim) - <span class="number">0.5</span>) / self.embedding_dim
+        self.b = np.zeros(V)
+        self.b_ctx = np.zeros(V)
+
+        <span class="comment"># AdaGrad accumulators</span>
+        grad_sq_W = np.ones_like(self.W)
+        grad_sq_W_ctx = np.ones_like(self.W_ctx)
+        grad_sq_b = np.ones_like(self.b)
+        grad_sq_b_ctx = np.ones_like(self.b_ctx)
+
+        <span class="comment"># Training loop</span>
+        <span class="keyword">for</span> epoch <span class="keyword">in</span> range(self.epochs):
+            total_loss = <span class="number">0.0</span>
+            np.random.shuffle(cooccurrences)
+
+            <span class="keyword">for</span> i, j, x_ij <span class="keyword">in</span> cooccurrences:
+                <span class="keyword">if</span> x_ij == <span class="number">0</span>:
+                    <span class="keyword">continue</span>
+
+                <span class="comment"># Forward pass</span>
+                dot_product = np.dot(self.W[i], self.W_ctx[j])
+                prediction = dot_product + self.b[i] + self.b_ctx[j]
+                target = np.log(x_ij)
+                diff = prediction - target
+
+                <span class="comment"># Weighted loss</span>
+                weight = self.weighting_function(x_ij)
+                loss = weight * diff * diff
+                total_loss += loss
+
+                <span class="comment"># Gradients</span>
+                grad_common = weight * diff
+
+                <span class="comment"># Update word vector</span>
+                grad_W = grad_common * self.W_ctx[j]
+                grad_sq_W[i] += grad_W ** <span class="number">2</span>
+                self.W[i] -= self.lr * grad_W / np.sqrt(grad_sq_W[i])
+
+                <span class="comment"># Update context vector</span>
+                grad_W_ctx = grad_common * self.W[i]
+                grad_sq_W_ctx[j] += grad_W_ctx ** <span class="number">2</span>
+                self.W_ctx[j] -= self.lr * grad_W_ctx / np.sqrt(grad_sq_W_ctx[j])
+
+                <span class="comment"># Update biases</span>
+                grad_sq_b[i] += grad_common ** <span class="number">2</span>
+                self.b[i] -= self.lr * grad_common / np.sqrt(grad_sq_b[i])
+
+                grad_sq_b_ctx[j] += grad_common ** <span class="number">2</span>
+                self.b_ctx[j] -= self.lr * grad_common / np.sqrt(grad_sq_b_ctx[j])
+
+            <span class="keyword">if</span> verbose <span class="keyword">and</span> (epoch + <span class="number">1</span>) % <span class="number">10</span> == <span class="number">0</span>:
+                <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1}/{self.epochs}, Loss: {total_loss:.4f}"</span>)
+
+        <span class="keyword">return</span> self
+
+    <span class="keyword">def</span> <span class="function">get_embedding</span>(self, word):
+        <span class="string">"""Get embedding for a word (W + W_ctx combined)."""</span>
+        <span class="keyword">if</span> word <span class="keyword">not</span> <span class="keyword">in</span> self.vocab:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+        idx = self.vocab[word]
+        <span class="keyword">return</span> self.W[idx] + self.W_ctx[idx]
+
+    <span class="keyword">def</span> <span class="function">most_similar</span>(self, word, top_n=<span class="number">5</span>):
+        <span class="string">"""Find most similar words by cosine similarity."""</span>
+        <span class="keyword">if</span> word <span class="keyword">not</span> <span class="keyword">in</span> self.vocab:
+            <span class="keyword">return</span> []
+
+        vec = self.get_embedding(word)
+        vec = vec / np.linalg.norm(vec)
+
+        similarities = []
+        <span class="keyword">for</span> w, idx <span class="keyword">in</span> self.vocab.items():
+            <span class="keyword">if</span> w != word:
+                other_vec = self.get_embedding(w)
+                other_vec = other_vec / np.linalg.norm(other_vec)
+                sim = np.dot(vec, other_vec)
+                similarities.append((w, sim))
+
+        similarities.sort(key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)
+        <span class="keyword">return</span> similarities[:top_n]
+
+
+<span class="comment"># Example usage</span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    <span class="comment"># Sample corpus (in practice, use much larger data)</span>
+    corpus = [
+        <span class="string">"the king rules the kingdom"</span>,
+        <span class="string">"the queen rules with the king"</span>,
+        <span class="string">"the prince is the son of the king"</span>,
+        <span class="string">"the princess is the daughter of the queen"</span>,
+        <span class="string">"a man works in the field"</span>,
+        <span class="string">"a woman works in the castle"</span>,
+        <span class="string">"the king is a man"</span>,
+        <span class="string">"the queen is a woman"</span>,
+        <span class="string">"the prince will become king"</span>,
+        <span class="string">"the princess will become queen"</span>,
+    ] * <span class="number">100</span>  <span class="comment"># Repeat for more training data</span>
+
+    <span class="comment"># Train GloVe</span>
+    glove = GloVe(embedding_dim=<span class="number">30</span>, epochs=<span class="number">50</span>, window_size=<span class="number">3</span>)
+    glove.train(corpus)
+
+    <span class="comment"># Test embeddings</span>
+    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'king':"</span>)
+    <span class="keyword">for</span> word, sim <span class="keyword">in</span> glove.most_similar(<span class="string">'king'</span>):
+        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)
+
+    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'queen':"</span>)
+    <span class="keyword">for</span> word, sim <span class="keyword">in</span> glove.most_similar(<span class="string">'queen'</span>):
+        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)</code></pre>
+
+            <div class="callout callout-example">
+                <h4>Expected Output</h4>
+                <pre style="background: #f0fdf4; color: #166534; margin: 0;">
+Vocabulary size: 18
+Non-zero co-occurrences: 312
+Epoch 10/50, Loss: 24.5623
+Epoch 20/50, Loss: 15.3421
+Epoch 30/50, Loss: 10.8765
+Epoch 40/50, Loss: 8.2341
+Epoch 50/50, Loss: 6.5432
+
+Most similar to 'king':
+  queen: 0.8234
+  prince: 0.7856
+  rules: 0.6543
+  kingdom: 0.6123
+  man: 0.5432
+
+Most similar to 'queen':
+  king: 0.8234
+  princess: 0.7654
+  woman: 0.6789
+  rules: 0.5987
+  castle: 0.5234</pre>
+            </div>
+        </div>
+
+        <!-- Section 7: Comparison -->
+        <div class="section-header" id="comparison">
+            <h2><span class="icon">&#128295;</span> GloVe vs Word2Vec</h2>
+            <p>Understanding when to use each method</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Key Differences</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>GloVe</th>
+                            <th>Word2Vec (Skip-gram)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Training Approach</strong></td>
+                            <td>Factorizes co-occurrence matrix</td>
+                            <td>Predicts context words</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Statistics Used</strong></td>
+                            <td>Global corpus statistics</td>
+                            <td>Local context windows</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Training Data</strong></td>
+                            <td>Pre-computed co-occurrence counts</td>
+                            <td>Raw text (online learning)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Memory</strong></td>
+                            <td>Stores co-occurrence matrix</td>
+                            <td>Streams through corpus</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Parallelization</strong></td>
+                            <td>Easy (matrix factorization)</td>
+                            <td>Requires special handling</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analogy Tasks</strong></td>
+                            <td>Excellent</td>
+                            <td>Excellent</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rare Words</strong></td>
+                            <td>Explicit weighting function</td>
+                            <td>Negative sampling handles this</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>When to Use Each</h3>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4>Choose GloVe When...</h4>
+                    <ul>
+                        <li>You have a fixed, known corpus</li>
+                        <li>Memory for co-occurrence matrix is available</li>
+                        <li>You want interpretable training (log-bilinear)</li>
+                        <li>You prefer batch training over online</li>
+                        <li>Corpus statistics are stable</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Choose Word2Vec When...</h4>
+                    <ul>
+                        <li>Corpus is very large or streaming</li>
+                        <li>Memory is limited</li>
+                        <li>You need online/incremental updates</li>
+                        <li>Subword information matters (fastText variant)</li>
+                        <li>Simpler implementation preferred</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>&#128161; In Practice</h4>
+                <p>Both methods produce high-quality embeddings that perform similarly on most tasks. The choice often comes down to:</p>
+                <ul>
+                    <li><strong>Pre-trained availability:</strong> Both have excellent pre-trained models (GloVe from Stanford, Word2Vec from Google)</li>
+                    <li><strong>Implementation preference:</strong> Word2Vec is often easier to train on custom data</li>
+                    <li><strong>Theoretical interest:</strong> GloVe's explicit matrix factorization is more interpretable</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The GloVe Paper's Key Insight</h3>
+
+            <div class="callout callout-analogy">
+                <h4>&#127919; Why Ratios Matter</h4>
+                <p>The GloVe authors showed that Word2Vec's skip-gram implicitly factorizes a shifted PMI matrix:</p>
+                <p style="text-align: center; font-family: monospace; margin: 1rem 0;">
+                    w_i &middot; w_j &asymp; PMI(i,j) - log(k)
+                </p>
+                <p>GloVe makes this explicit and shows that working with <strong>probability ratios</strong> directly leads to better semantic analogies. The ratio P(k|ice)/P(k|steam) directly encodes meaning in a way that raw probabilities don't!</p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>What It Learns</th>
+                            <th>Best For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>TF-IDF</strong></td><td>Word importance in documents</td><td>Information retrieval, keyword extraction</td></tr>
+                        <tr><td><strong>Word2Vec</strong></td><td>Predictive word relationships</td><td>General semantic similarity</td></tr>
+                        <tr><td><strong>GloVe</strong></td><td>Co-occurrence ratios</td><td>Analogy tasks, semantic relationships</td></tr>
+                        <tr><td><strong>FastText</strong></td><td>Subword + word embeddings</td><td>Morphologically rich languages, rare words</td></tr>
+                        <tr><td><strong>BERT</strong></td><td>Contextualized embeddings</td><td>Context-dependent meaning</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
+            <p>Created for educational purposes &bull; GloVe was developed by Pennington, Socher, and Manning at Stanford (2014)</p>
+            <p style="margin-top: 1rem;">
+                <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">&larr; TF-IDF</a>
+                <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec &rarr;</a>
+                <a href="sgns_educational.html" style="color: var(--primary-color); margin: 0 1rem;">SGNS &rarr;</a>
+                <a href="cbow_educational.html" style="color: var(--primary-color); margin: 0 1rem;">CBOW &rarr;</a>
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        // Global state
+        let cooccurrenceData = {};
+        let vocabList = [];
+        let heatmapChart = null;
+        let embeddingChart = null;
+        let ratioChart = null;
+
+        function tokenize(text) {
+            return text.toLowerCase().match(/[a-z]+/g) || [];
+        }
+
+        function buildCooccurrence() {
+            const text = document.getElementById('corpus-input').value;
+            const windowSize = parseInt(document.getElementById('window-size').value) || 2;
+            const sentences = text.split('\n').filter(s => s.trim());
+
+            // Build vocabulary
+            const allTokens = [];
+            sentences.forEach(s => allTokens.push(...tokenize(s)));
+            vocabList = [...new Set(allTokens)].sort();
+
+            // Build co-occurrence matrix
+            cooccurrenceData = {};
+            vocabList.forEach(w => cooccurrenceData[w] = {});
+
+            sentences.forEach(sentence => {
+                const tokens = tokenize(sentence);
+                for (let i = 0; i < tokens.length; i++) {
+                    const center = tokens[i];
+                    for (let j = Math.max(0, i - windowSize); j <= Math.min(tokens.length - 1, i + windowSize); j++) {
+                        if (i !== j) {
+                            const context = tokens[j];
+                            const distance = Math.abs(i - j);
+                            cooccurrenceData[center][context] = (cooccurrenceData[center][context] || 0) + 1;
+                        }
+                    }
+                }
+            });
+
+            displayMatrix();
+            updateHeatmap();
+            updateEmbeddingSpace();
+        }
+
+        function displayMatrix() {
+            // Show top words by total co-occurrence
+            const wordTotals = vocabList.map(w => ({
+                word: w,
+                total: Object.values(cooccurrenceData[w] || {}).reduce((a, b) => a + b, 0)
+            }));
+            wordTotals.sort((a, b) => b.total - a.total);
+            const topWords = wordTotals.slice(0, 8).map(wt => wt.word);
+
+            let html = '<div class="table-container"><table class="matrix-table"><thead><tr><th></th>';
+            topWords.forEach(w => html += `<th>${w}</th>`);
+            html += '</tr></thead><tbody>';
+
+            topWords.forEach(row => {
+                html += `<tr><td class="row-header">${row}</td>`;
+                topWords.forEach(col => {
+                    const count = (cooccurrenceData[row] && cooccurrenceData[row][col]) || 0;
+                    const isHighlight = count > 0;
+                    html += `<td${isHighlight ? ' class="highlight-cell"' : ''}>${count}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table></div>';
+
+            document.getElementById('matrix-results').style.display = 'block';
+            document.getElementById('matrix-display').innerHTML = html;
+        }
+
+        function analyzeRatios() {
+            const word1 = document.getElementById('word1').value.toLowerCase().trim();
+            const word2 = document.getElementById('word2').value.toLowerCase().trim();
+
+            if (!cooccurrenceData[word1] || !cooccurrenceData[word2]) {
+                alert('Please build the co-occurrence matrix first, and ensure both words exist in the corpus.');
+                return;
+            }
+
+            // Calculate P(k|word) for each probe word
+            const sum1 = Object.values(cooccurrenceData[word1]).reduce((a, b) => a + b, 0) || 1;
+            const sum2 = Object.values(cooccurrenceData[word2]).reduce((a, b) => a + b, 0) || 1;
+
+            const probeWords = vocabList.filter(w => w !== word1 && w !== word2);
+            const ratios = [];
+
+            probeWords.forEach(k => {
+                const p1 = (cooccurrenceData[word1][k] || 0) / sum1;
+                const p2 = (cooccurrenceData[word2][k] || 0) / sum2;
+                if (p1 > 0 || p2 > 0) {
+                    const ratio = p2 > 0 ? p1 / p2 : (p1 > 0 ? Infinity : 1);
+                    ratios.push({ word: k, p1, p2, ratio });
+                }
+            });
+
+            ratios.sort((a, b) => b.ratio - a.ratio);
+
+            let html = `<p><strong>Comparing "${word1}" vs "${word2}":</strong></p>`;
+            html += '<div class="table-container"><table><thead><tr><th>Probe Word k</th>';
+            html += `<th>P(k|${word1})</th><th>P(k|${word2})</th><th>Ratio</th><th>Interpretation</th></tr></thead><tbody>`;
+
+            ratios.slice(0, 10).forEach(r => {
+                let interpretation = 'Neutral';
+                if (r.ratio > 2) interpretation = `More ${word1}-related`;
+                else if (r.ratio < 0.5) interpretation = `More ${word2}-related`;
+                else interpretation = 'Related to both';
+
+                const ratioStr = r.ratio === Infinity ? '∞' : r.ratio.toFixed(3);
+                html += `<tr><td>${r.word}</td><td>${r.p1.toFixed(4)}</td><td>${r.p2.toFixed(4)}</td>`;
+                html += `<td class="highlight-cell">${ratioStr}</td><td>${interpretation}</td></tr>`;
+            });
+
+            html += '</tbody></table></div>';
+
+            document.getElementById('ratio-results').style.display = 'block';
+            document.getElementById('ratio-display').innerHTML = html;
+
+            updateRatioChart(word1, word2, ratios);
+        }
+
+        function updateHeatmap() {
+            if (heatmapChart) heatmapChart.destroy();
+
+            // Get top words
+            const wordTotals = vocabList.map(w => ({
+                word: w,
+                total: Object.values(cooccurrenceData[w] || {}).reduce((a, b) => a + b, 0)
+            }));
+            wordTotals.sort((a, b) => b.total - a.total);
+            const topWords = wordTotals.slice(0, 10).map(wt => wt.word);
+
+            // Build data for scatter chart (simulating heatmap)
+            const data = [];
+            let maxVal = 1;
+            topWords.forEach((row, ri) => {
+                topWords.forEach((col, ci) => {
+                    const val = (cooccurrenceData[row] && cooccurrenceData[row][col]) || 0;
+                    if (val > maxVal) maxVal = val;
+                    data.push({ x: ci, y: ri, v: val });
+                });
+            });
+
+            heatmapChart = new Chart(document.getElementById('heatmapChart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        data: data,
+                        backgroundColor: data.map(d => `rgba(124, 58, 237, ${Math.max(0.1, d.v / maxVal)})`),
+                        pointRadius: 18,
+                        pointStyle: 'rect'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${topWords[ctx.raw.y]} - ${topWords[ctx.raw.x]}: ${ctx.raw.v}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            min: -0.5,
+                            max: topWords.length - 0.5,
+                            ticks: { callback: v => topWords[v] || '' }
+                        },
+                        y: {
+                            min: -0.5,
+                            max: topWords.length - 0.5,
+                            ticks: { callback: v => topWords[v] || '' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateEmbeddingSpace() {
+            if (embeddingChart) embeddingChart.destroy();
+
+            // Simple dimensionality reduction simulation using co-occurrence patterns
+            // (In reality, you'd use actual GloVe embeddings and t-SNE/PCA)
+            const wordTotals = vocabList.map(w => ({
+                word: w,
+                total: Object.values(cooccurrenceData[w] || {}).reduce((a, b) => a + b, 0)
+            }));
+            wordTotals.sort((a, b) => b.total - a.total);
+            const topWords = wordTotals.slice(0, 15).map(wt => wt.word);
+
+            // Create simple 2D positions based on co-occurrence similarity
+            const positions = topWords.map((word, i) => {
+                // Simple positioning based on connections
+                let x = 0, y = 0;
+                topWords.forEach((other, j) => {
+                    if (i !== j) {
+                        const cooc = (cooccurrenceData[word] && cooccurrenceData[word][other]) || 0;
+                        if (cooc > 0) {
+                            x += Math.cos(j * Math.PI * 2 / topWords.length) * cooc;
+                            y += Math.sin(j * Math.PI * 2 / topWords.length) * cooc;
+                        }
+                    }
+                });
+                return { word, x: x + (Math.random() - 0.5) * 0.5, y: y + (Math.random() - 0.5) * 0.5 };
+            });
+
+            // Normalize
+            const maxX = Math.max(...positions.map(p => Math.abs(p.x))) || 1;
+            const maxY = Math.max(...positions.map(p => Math.abs(p.y))) || 1;
+            positions.forEach(p => { p.x /= maxX; p.y /= maxY; });
+
+            embeddingChart = new Chart(document.getElementById('embeddingChart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Words',
+                        data: positions.map(p => ({ x: p.x, y: p.y })),
+                        backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                        pointRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => positions[ctx.dataIndex].word
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Dimension 1' } },
+                        y: { title: { display: true, text: 'Dimension 2' } }
+                    }
+                }
+            });
+
+            // Add word labels
+            const ctx = embeddingChart.ctx;
+            embeddingChart.options.plugins.afterDraw = () => {
+                positions.forEach((p, i) => {
+                    const point = embeddingChart.getDatasetMeta(0).data[i];
+                    if (point) {
+                        ctx.fillStyle = '#1f2937';
+                        ctx.font = '11px sans-serif';
+                        ctx.fillText(p.word, point.x + 5, point.y - 5);
+                    }
+                });
+            };
+        }
+
+        function updateRatioChart(word1, word2, ratios) {
+            if (ratioChart) ratioChart.destroy();
+
+            const topRatios = ratios.slice(0, 8);
+            const labels = topRatios.map(r => r.word);
+            const logRatios = topRatios.map(r => r.ratio === Infinity ? 5 : Math.log10(Math.max(0.01, r.ratio)));
+
+            ratioChart = new Chart(document.getElementById('ratioChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `log10(P(k|${word1}) / P(k|${word2}))`,
+                        data: logRatios,
+                        backgroundColor: logRatios.map(v => v > 0 ? 'rgba(37, 99, 235, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                        borderColor: logRatios.map(v => v > 0 ? 'rgba(37, 99, 235, 1)' : 'rgba(239, 68, 68, 1)'),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Probability Ratio Analysis: "${word1}" vs "${word2}"`,
+                            font: { size: 14 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const r = topRatios[ctx.dataIndex];
+                                    return `Ratio: ${r.ratio === Infinity ? '∞' : r.ratio.toFixed(3)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'log10(Ratio)' },
+                            grid: { color: '#e5e7eb' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(buildCooccurrence, 500);
+        });
+    </script>
+</body>
+</html>

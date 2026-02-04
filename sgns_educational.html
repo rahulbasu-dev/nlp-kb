@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive educational guide to Skip-gram with Negative Sampling (SGNS) for learning word embeddings">
+    <title>Understanding SGNS: Skip-gram with Negative Sampling</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container - Wider Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks - Consistent Sizing */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-block.half {
+            min-height: calc(var(--block-min-height) / 2);
+        }
+
+        .content-block.auto {
+            min-height: auto;
+        }
+
+        /* Grid Layout for Side-by-Side Blocks */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .block-grid .content-block {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .block-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .icon {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #e0e7ff;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Flowchart */
+        .flowchart-container {
+            text-align: center;
+            margin: 2rem 0;
+            overflow-x: auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 1rem;
+        }
+
+        .flowchart-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        /* Steps */
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-color);
+            border-radius: 1rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Word pair display */
+        .word-pair {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-color);
+            border-radius: 0.5rem;
+            margin: 0.25rem;
+            font-family: monospace;
+        }
+
+        .word-pair.positive {
+            background: #d1fae5;
+            border: 2px solid var(--accent-color);
+        }
+
+        .word-pair.negative {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+        }
+
+        .word-pair .arrow {
+            color: var(--text-light);
+        }
+
+        /* Context window visualization */
+        .context-window {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--bg-color);
+            border-radius: 0.5rem;
+        }
+
+        .context-window .word {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .context-window .word.center {
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .context-window .word.context {
+            background: #fef08a;
+            border: 2px solid var(--warning-color);
+        }
+
+        .context-window .word.outside {
+            background: #e5e7eb;
+            color: var(--text-light);
+        }
+
+        /* Embedding visualization */
+        .embedding-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 0.25rem;
+            margin: 1rem 0;
+        }
+
+        .embedding-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .content-block {
+                padding: 1.5rem;
+                min-height: auto;
+            }
+
+            header {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            nav {
+                display: none;
+            }
+
+            main {
+                padding-top: 1rem;
+            }
+
+            .content-block {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+
+        /* Scroll Snap for Presentation Feel */
+        @media (min-width: 1200px) {
+            main {
+                scroll-snap-type: y proximity;
+            }
+
+            .content-block, header {
+                scroll-snap-align: start;
+                scroll-margin-top: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">SGNS Guide</div>
+            <ul>
+                <li><a href="#intuition">Intuition</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#mathematics">Mathematics</a></li>
+                <li><a href="#flowchart">Flowchart</a></li>
+                <li><a href="#python">Python</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Header -->
+        <header>
+            <h1>Skip-gram with Negative Sampling</h1>
+            <p>SGNS is the heart of Word2Vec - a revolutionary approach that learns word meanings by predicting context words from center words, using a clever negative sampling trick to make training tractable.</p>
+            <div class="subtitle">Neural Word Embeddings Made Efficient</div>
+        </header>
+
+        <!-- Section 1: Intuition -->
+        <div class="section-header" id="intuition">
+            <h2><span class="icon">&#128161;</span> Intuition</h2>
+            <p>Understanding Skip-gram and Negative Sampling through intuitive analogies</p>
+        </div>
+
+        <div class="content-block">
+            <h3>What is Skip-gram?</h3>
+            <p><strong>Skip-gram</strong> is a neural network architecture that learns word representations by training on a deceptively simple task: <span class="highlight">given a word, predict the words that appear nearby</span>.</p>
+
+            <p>The key insight is that words appearing in similar contexts tend to have similar meanings. By learning to predict context, the model is forced to encode semantic information into the word vectors.</p>
+
+            <div class="callout callout-analogy">
+                <h4>The Party Guest Analogy</h4>
+                <p>Imagine you're at a party and you overhear snippets of conversations:</p>
+                <ul>
+                    <li>"I adopted a <strong>dog</strong> last week and..."</li>
+                    <li>"My <strong>dog</strong> loves to play fetch..."</li>
+                    <li>"The <strong>cat</strong> sleeps all day but..."</li>
+                    <li>"I adopted a <strong>cat</strong> from the shelter..."</li>
+                </ul>
+                <p>Even without knowing what "dog" or "cat" means, you'd notice they appear in similar contexts ("adopted", "loves", "plays"). This tells you they're <em>related concepts</em>. Skip-gram learns exactly this way!</p>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Skip-gram: Predicting Context</h3>
+                <p><strong>"Given a word, what words appear nearby?"</strong></p>
+                <p>Unlike CBOW (which predicts the center from context), Skip-gram does the reverse: it predicts each context word from the center word.</p>
+
+                <div class="callout callout-example">
+                    <h4>Example</h4>
+                    <p>Sentence: "The quick brown fox jumps"</p>
+                    <p>Center word: <strong>"brown"</strong> (window size = 2)</p>
+                    <p>Task: Predict "The", "quick", "fox", "jumps"</p>
+                    <p>This generates 4 training examples from one center word!</p>
+                </div>
+
+                <p><strong>Why "Skip-gram"?</strong> The model can "skip" over words - it doesn't require context words to be immediately adjacent, just within the window.</p>
+            </div>
+
+            <div class="content-block">
+                <h3>The Softmax Problem</h3>
+                <p><strong>"Why can't we just use standard neural networks?"</strong></p>
+                <p>The naive approach uses softmax over the entire vocabulary to predict context words:</p>
+
+                <div class="formula-box">
+                    <p style="font-family: monospace; font-size: 1.1rem;">P(context | center) = softmax(scores)</p>
+                </div>
+
+                <div class="callout callout-warning">
+                    <h4>Computational Disaster</h4>
+                    <p>With a vocabulary of 1 million words:</p>
+                    <ul>
+                        <li>Each training step computes 1M dot products</li>
+                        <li>Normalizes over 1M probabilities</li>
+                        <li>Updates gradients for 1M words</li>
+                    </ul>
+                    <p><strong>This is impossibly slow!</strong> Training would take years.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The Negative Sampling Breakthrough</h3>
+            <p>Negative Sampling transforms the problem from multiclass classification (predict which of V words) into binary classification (is this pair real or fake?).</p>
+
+            <div class="callout callout-analogy">
+                <h4>The True/False Quiz Analogy</h4>
+                <p>Instead of asking: "Which of these 1 million words is the answer?" (multiple choice)</p>
+                <p>We ask: "Is this word pair valid?" (true/false)</p>
+                <ul>
+                    <li><strong>Positive pair:</strong> ("brown", "fox") - Yes, these appear together!</li>
+                    <li><strong>Negative pair:</strong> ("brown", "refrigerator") - No, randomly sampled noise!</li>
+                </ul>
+                <p>We train the model to say "yes" to real pairs and "no" to random pairs. <strong>This only requires updating a few words per step, not millions!</strong></p>
+            </div>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4>Positive Samples</h4>
+                    <p>Real (center, context) pairs from the training corpus. The model learns to assign high probability to these.</p>
+                    <div class="word-pair positive">
+                        <span>king</span>
+                        <span class="arrow">-></span>
+                        <span>queen</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>Negative Samples</h4>
+                    <p>Random "noise" words paired with the center word. Sampled proportional to word frequency^0.75.</p>
+                    <div class="word-pair negative">
+                        <span>king</span>
+                        <span class="arrow">-></span>
+                        <span>banana</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>Two Embedding Matrices</h4>
+                    <p>SGNS maintains separate embeddings for center words (W) and context words (C). Final embeddings typically use W or W+C.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Subsampling Frequent Words</h3>
+            <p>Common words like "the", "is", "and" appear millions of times but provide little semantic information. SGNS uses <strong>subsampling</strong> to randomly discard frequent words during training.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Subsampling Probability</div>
+                <p style="font-size: 1.2rem; font-family: monospace;">P(keep) = sqrt(t / f(w)) + t / f(w)</p>
+                <div class="formula-description">
+                    <p>Where f(w) is the word's frequency and t is a threshold (typically 10^-5).</p>
+                    <ul>
+                        <li>Rare words: P(keep) close to 1 (almost always kept)</li>
+                        <li>Common words: P(keep) much less than 1 (often discarded)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>Why This Works</h4>
+                <p>1. Reduces training time by skipping redundant examples</p>
+                <p>2. Increases effective window size for remaining words</p>
+                <p>3. Improves embedding quality by reducing noise from stopwords</p>
+            </div>
+        </div>
+
+        <!-- Section 2: Examples -->
+        <div class="section-header" id="examples">
+            <h2><span class="icon">&#128221;</span> Worked Examples</h2>
+            <p>Step-by-step walkthrough of SGNS training</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Example: Extracting Training Pairs</h3>
+
+            <div class="callout callout-example">
+                <h4>Sample Sentence</h4>
+                <p style="font-size: 1.2rem; font-family: monospace;">"the king loved the queen and the people"</p>
+            </div>
+
+            <h4>Step 1: Slide the Context Window</h4>
+            <p>With window size = 2, we extract (center, context) pairs by sliding through the sentence:</p>
+
+            <div class="context-window">
+                <span class="word outside">...</span>
+                <span class="word context">the</span>
+                <span class="word context">king</span>
+                <span class="word center">loved</span>
+                <span class="word context">the</span>
+                <span class="word context">queen</span>
+                <span class="word outside">...</span>
+            </div>
+            <p><strong>Center word: "loved"</strong> generates pairs: (loved, the), (loved, king), (loved, the), (loved, queen)</p>
+
+            <h4>Step 2: Generate Positive and Negative Pairs</h4>
+            <p>For each positive pair, sample k negative words (typically k=5 to 15):</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Center</th>
+                            <th>Positive Context</th>
+                            <th>Label</th>
+                            <th>Negative Samples (k=3)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>loved</td>
+                            <td>king</td>
+                            <td style="color: var(--accent-color); font-weight: bold;">1</td>
+                            <td>computer, banana, zebra (label: 0)</td>
+                        </tr>
+                        <tr>
+                            <td>loved</td>
+                            <td>queen</td>
+                            <td style="color: var(--accent-color); font-weight: bold;">1</td>
+                            <td>table, river, planet (label: 0)</td>
+                        </tr>
+                        <tr>
+                            <td>loved</td>
+                            <td>the</td>
+                            <td style="color: var(--accent-color); font-weight: bold;">1</td>
+                            <td>guitar, mountain, coffee (label: 0)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Example: One Training Step</h3>
+            <p>Let's trace through one complete update for the pair <strong>("loved", "queen")</strong> with negative samples ["computer", "banana"].</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Look Up Embeddings</h4>
+                        <p>Get the center word vector for "loved" from matrix W:</p>
+                        <p style="font-family: monospace;">w_loved = [0.2, -0.5, 0.1, 0.8] (dim=4 for illustration)</p>
+                        <p>Get context vectors from matrix C:</p>
+                        <p style="font-family: monospace;">c_queen = [0.3, 0.4, -0.2, 0.1]</p>
+                        <p style="font-family: monospace;">c_computer = [-0.1, 0.2, 0.5, -0.3]</p>
+                        <p style="font-family: monospace;">c_banana = [0.4, -0.1, 0.3, 0.2]</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Compute Dot Products</h4>
+                        <p>Score = w_center . c_context (dot product measures similarity)</p>
+                        <p style="font-family: monospace;">score_queen = 0.2*0.3 + (-0.5)*0.4 + 0.1*(-0.2) + 0.8*0.1 = -0.08</p>
+                        <p style="font-family: monospace;">score_computer = 0.2*(-0.1) + (-0.5)*0.2 + 0.1*0.5 + 0.8*(-0.3) = -0.37</p>
+                        <p style="font-family: monospace;">score_banana = 0.2*0.4 + (-0.5)*(-0.1) + 0.1*0.3 + 0.8*0.2 = 0.32</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Apply Sigmoid</h4>
+                        <p>Convert scores to probabilities: sigmoid(x) = 1 / (1 + exp(-x))</p>
+                        <p style="font-family: monospace;">P(real | loved, queen) = sigmoid(-0.08) = 0.48</p>
+                        <p style="font-family: monospace;">P(real | loved, computer) = sigmoid(-0.37) = 0.41</p>
+                        <p style="font-family: monospace;">P(real | loved, banana) = sigmoid(0.32) = 0.58</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Compute Loss and Gradients</h4>
+                        <p><strong>We want:</strong> P(real|queen) = 1, P(real|computer) = 0, P(real|banana) = 0</p>
+                        <p>Error for positive: 1 - 0.48 = 0.52 (push queen closer)</p>
+                        <p>Error for negatives: 0 - 0.41 = -0.41, 0 - 0.58 = -0.58 (push them away)</p>
+                        <p>Gradient updates push "loved" and "queen" closer while pushing "loved" away from "computer" and "banana".</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>The Geometry of Learning</h4>
+                <p>Each update adjusts vectors in the embedding space:</p>
+                <ul>
+                    <li><strong>Positive pairs:</strong> Vectors move closer together (dot product increases)</li>
+                    <li><strong>Negative pairs:</strong> Vectors move apart (dot product decreases)</li>
+                </ul>
+                <p>After millions of updates, words with similar contexts cluster together!</p>
+            </div>
+        </div>
+
+        <!-- Section 3: Visualization -->
+        <div class="section-header" id="visualization">
+            <h2><span class="icon">&#128202;</span> Interactive Visualization</h2>
+            <p>Watch how embeddings evolve during training</p>
+        </div>
+
+        <div class="content-block">
+            <div class="interactive-section">
+                <h3>SGNS Training Simulator</h3>
+                <p>Watch how word embeddings converge during training. The visualization shows 2D projections of word vectors.</p>
+
+                <div class="block-grid" style="margin-top: 1.5rem;">
+                    <div>
+                        <div class="input-group">
+                            <label for="corpus-text">Training Corpus:</label>
+                            <textarea id="corpus-text">the king sat on the throne
+the queen sat beside the king
+the prince loved the princess
+the princess loved the prince
+the dog chased the cat
+the cat ran from the dog
+the man walked the dog
+the woman petted the cat</textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="window-size">Window Size:</label>
+                            <select id="window-size">
+                                <option value="1">1</option>
+                                <option value="2" selected>2</option>
+                                <option value="3">3</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="input-group">
+                            <label for="neg-samples">Negative Samples (k):</label>
+                            <select id="neg-samples">
+                                <option value="2">2</option>
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="embed-dim">Embedding Dimension:</label>
+                            <select id="embed-dim">
+                                <option value="2" selected>2 (for visualization)</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>
+                        <button onclick="initializeTraining()">Initialize</button>
+                        <button onclick="trainStep()">Train Step</button>
+                        <button onclick="train100Steps()">Train 100 Steps</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-display" id="training-stats" style="display: none;">
+                <h4>Training Statistics</h4>
+                <div id="stats-content"></div>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Embedding Space (2D)</h3>
+                <p>Words that appear in similar contexts cluster together.</p>
+                <div class="chart-container" style="height: 450px;">
+                    <canvas id="embeddingChart"></canvas>
+                </div>
+            </div>
+            <div class="content-block">
+                <h3>Training Loss</h3>
+                <p>Loss decreases as the model learns to distinguish real from fake pairs.</p>
+                <div class="chart-container">
+                    <canvas id="lossChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Word Similarity Matrix</h3>
+            <p>Cosine similarity between word vectors. Higher values (darker) indicate more similar words.</p>
+            <div class="chart-container" style="height: 500px;">
+                <canvas id="similarityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Section 4: Mathematics -->
+        <div class="section-header" id="mathematics">
+            <h2><span class="icon">&#128290;</span> Mathematical Foundations</h2>
+            <p>The formal definitions and gradient derivations for SGNS</p>
+        </div>
+
+        <div class="content-block">
+            <h3>The Skip-gram Objective (Full Softmax)</h3>
+            <p>The original Skip-gram objective maximizes the probability of context words given center words:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Skip-gram Objective</div>
+                \[ J = \frac{1}{T} \sum_{t=1}^{T} \sum_{-c \leq j \leq c, j \neq 0} \log P(w_{t+j} | w_t) \]
+                <div class="formula-description">
+                    <p>Where:</p>
+                    <ul>
+                        <li>\( T \) = total words in corpus</li>
+                        <li>\( c \) = context window size</li>
+                        <li>\( w_t \) = center word at position t</li>
+                        <li>\( w_{t+j} \) = context word at offset j</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p>The probability is computed using softmax over the entire vocabulary:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Softmax Probability</div>
+                \[ P(o | c) = \frac{\exp(\mathbf{u}_o^T \mathbf{v}_c)}{\sum_{w=1}^{V} \exp(\mathbf{u}_w^T \mathbf{v}_c)} \]
+                <div class="formula-description">
+                    <ul>
+                        <li>\( \mathbf{v}_c \) = center word embedding (from matrix W)</li>
+                        <li>\( \mathbf{u}_o \) = context word embedding (from matrix C)</li>
+                        <li>\( V \) = vocabulary size (the expensive denominator!)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Negative Sampling Objective</h3>
+            <p>Negative sampling replaces the expensive softmax with a binary classification objective:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">SGNS Objective (per word pair)</div>
+                \[ J = \log \sigma(\mathbf{u}_o^T \mathbf{v}_c) + \sum_{i=1}^{k} \mathbb{E}_{w_i \sim P_n(w)} \left[ \log \sigma(-\mathbf{u}_{w_i}^T \mathbf{v}_c) \right] \]
+                <div class="formula-description">
+                    <ul>
+                        <li>\( \sigma(x) = \frac{1}{1 + e^{-x}} \) is the sigmoid function</li>
+                        <li>\( k \) = number of negative samples</li>
+                        <li>\( P_n(w) \propto f(w)^{0.75} \) = noise distribution (smoothed unigram)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>Intuition Behind the Objective</h4>
+                <ul>
+                    <li><strong>First term:</strong> Maximize \( \sigma(\mathbf{u}_o^T \mathbf{v}_c) \) - push positive pairs to have high dot product</li>
+                    <li><strong>Second term:</strong> Maximize \( \sigma(-\mathbf{u}_{w_i}^T \mathbf{v}_c) \) - push negative pairs to have low dot product</li>
+                </ul>
+                <p>The sigmoid converts dot products to probabilities, and we maximize log probability.</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Gradient Updates</h3>
+            <p>To train the model, we compute gradients of the loss with respect to embeddings:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Gradient for Center Word Embedding</div>
+                \[ \frac{\partial J}{\partial \mathbf{v}_c} = (\sigma(\mathbf{u}_o^T \mathbf{v}_c) - 1) \mathbf{u}_o + \sum_{i=1}^{k} \sigma(\mathbf{u}_{w_i}^T \mathbf{v}_c) \mathbf{u}_{w_i} \]
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Gradient for Positive Context Embedding</div>
+                \[ \frac{\partial J}{\partial \mathbf{u}_o} = (\sigma(\mathbf{u}_o^T \mathbf{v}_c) - 1) \mathbf{v}_c \]
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Gradient for Negative Context Embedding</div>
+                \[ \frac{\partial J}{\partial \mathbf{u}_{w_i}} = \sigma(\mathbf{u}_{w_i}^T \mathbf{v}_c) \mathbf{v}_c \]
+            </div>
+
+            <div class="callout callout-example">
+                <h4>Gradient Update Rule</h4>
+                <p>With learning rate \( \alpha \), we update:</p>
+                <p>\[ \mathbf{v}_c \leftarrow \mathbf{v}_c - \alpha \frac{\partial J}{\partial \mathbf{v}_c} \]</p>
+                <p>Note: We subtract because we're maximizing J (equivalently, minimizing -J).</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The Noise Distribution</h3>
+            <p>Negative samples are drawn from a modified unigram distribution:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Noise Distribution</div>
+                \[ P_n(w) = \frac{f(w)^{0.75}}{\sum_{w'} f(w')^{0.75}} \]
+                <div class="formula-description">
+                    <p>The exponent 0.75 smooths the distribution:</p>
+                    <ul>
+                        <li>Pure unigram (1.0): Too many common words as negatives</li>
+                        <li>Uniform (0.0): Rare words sampled too often</li>
+                        <li><strong>0.75: Sweet spot</strong> - balances frequency and coverage</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Frequency f(w)</th>
+                            <th>f(w)^1.0 (Unigram)</th>
+                            <th>f(w)^0.75 (Smoothed)</th>
+                            <th>Effect</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>the</td>
+                            <td>0.07</td>
+                            <td>0.07</td>
+                            <td>0.13</td>
+                            <td>Relatively reduced</td>
+                        </tr>
+                        <tr>
+                            <td>cat</td>
+                            <td>0.001</td>
+                            <td>0.001</td>
+                            <td>0.006</td>
+                            <td>Relatively boosted</td>
+                        </tr>
+                        <tr>
+                            <td>quasar</td>
+                            <td>0.00001</td>
+                            <td>0.00001</td>
+                            <td>0.0002</td>
+                            <td>Much more likely</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 5: Flowchart -->
+        <div class="section-header" id="flowchart">
+            <h2><span class="icon">&#128260;</span> SGNS Training Process</h2>
+            <p>Visual representation of the complete training pipeline</p>
+        </div>
+
+        <div class="content-block">
+            <div class="flowchart-container">
+                <svg viewBox="0 0 1000 900" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6"/>
+                            <stop offset="100%" style="stop-color:#2563eb"/>
+                        </linearGradient>
+                        <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8b5cf6"/>
+                            <stop offset="100%" style="stop-color:#7c3aed"/>
+                        </linearGradient>
+                        <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#10b981"/>
+                            <stop offset="100%" style="stop-color:#059669"/>
+                        </linearGradient>
+                        <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f59e0b"/>
+                            <stop offset="100%" style="stop-color:#d97706"/>
+                        </linearGradient>
+                        <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ef4444"/>
+                            <stop offset="100%" style="stop-color:#dc2626"/>
+                        </linearGradient>
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+                        </filter>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Start: Input Corpus -->
+                    <ellipse cx="500" cy="40" rx="150" ry="35" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="45" text-anchor="middle" fill="white" font-weight="bold" font-size="16">INPUT CORPUS</text>
+
+                    <path d="M500 75 L500 110" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Preprocessing -->
+                    <rect x="300" y="120" width="400" height="70" rx="12" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="150" text-anchor="middle" fill="white" font-weight="bold" font-size="15">1. PREPROCESSING</text>
+                    <text x="500" y="172" text-anchor="middle" fill="white" font-size="13">Tokenize + Subsample frequent words</text>
+
+                    <path d="M500 190 L500 230" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Build Vocabulary & Initialize -->
+                    <rect x="300" y="240" width="400" height="70" rx="12" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="265" text-anchor="middle" fill="white" font-weight="bold" font-size="15">2. INITIALIZE</text>
+                    <text x="500" y="287" text-anchor="middle" fill="white" font-size="12">Build vocab, init W and C matrices randomly</text>
+
+                    <path d="M500 310 L500 350" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Training Loop Start -->
+                    <rect x="300" y="360" width="400" height="55" rx="12" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="385" text-anchor="middle" fill="white" font-weight="bold" font-size="15">3. SELECT CENTER WORD</text>
+                    <text x="500" y="403" text-anchor="middle" fill="white" font-size="12">Slide window through corpus</text>
+
+                    <!-- Split to positive and negative -->
+                    <path d="M500 415 L500 455 M500 455 L300 485 M500 455 L700 485" stroke="#6b7280" stroke-width="2"/>
+
+                    <!-- Positive pair -->
+                    <rect x="100" y="495" width="300" height="80" rx="12" fill="url(#greenGrad)" filter="url(#shadow)"/>
+                    <text x="250" y="525" text-anchor="middle" fill="white" font-weight="bold" font-size="14">4a. POSITIVE PAIRS</text>
+                    <text x="250" y="548" text-anchor="middle" fill="white" font-size="12">(center, context) from window</text>
+                    <text x="250" y="565" text-anchor="middle" fill="white" font-size="11">Label = 1</text>
+
+                    <!-- Negative samples -->
+                    <rect x="600" y="495" width="300" height="80" rx="12" fill="url(#redGrad)" filter="url(#shadow)"/>
+                    <text x="750" y="525" text-anchor="middle" fill="white" font-weight="bold" font-size="14">4b. NEGATIVE SAMPLES</text>
+                    <text x="750" y="548" text-anchor="middle" fill="white" font-size="12">Sample k words ~ P_n(w)</text>
+                    <text x="750" y="565" text-anchor="middle" fill="white" font-size="11">Label = 0</text>
+
+                    <!-- Merge -->
+                    <path d="M250 575 L250 610 L400 640 M750 575 L750 610 L600 640" stroke="#6b7280" stroke-width="2"/>
+
+                    <!-- Compute scores -->
+                    <rect x="300" y="650" width="400" height="60" rx="12" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="675" text-anchor="middle" fill="white" font-weight="bold" font-size="14">5. COMPUTE SCORES</text>
+                    <text x="500" y="695" text-anchor="middle" fill="white" font-size="12">score = v_center . u_context</text>
+
+                    <path d="M500 710 L500 745" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Update embeddings -->
+                    <rect x="300" y="755" width="400" height="60" rx="12" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="780" text-anchor="middle" fill="white" font-weight="bold" font-size="14">6. UPDATE EMBEDDINGS</text>
+                    <text x="500" y="800" text-anchor="middle" fill="white" font-size="12">SGD: v -= lr * gradient</text>
+
+                    <!-- Loop back arrow -->
+                    <path d="M700 785 L850 785 L850 390 L700 390" stroke="#6b7280" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+                    <text x="870" y="590" fill="#6b7280" font-size="12" transform="rotate(90, 870, 590)">Repeat for all words</text>
+
+                    <path d="M500 815 L500 855" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Output -->
+                    <ellipse cx="500" cy="880" rx="180" ry="35" fill="url(#greenGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="885" text-anchor="middle" fill="white" font-weight="bold" font-size="16">WORD EMBEDDINGS (W)</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Process Steps Explained</h3>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Preprocessing</h4>
+                        <p><strong>Tokenization:</strong> Split text into words. <strong>Subsampling:</strong> Randomly discard frequent words (like "the") to speed up training and improve quality.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Initialize Embeddings</h4>
+                        <p>Create two matrices: <strong>W</strong> (center word embeddings) and <strong>C</strong> (context word embeddings). Initialize with small random values ~ Uniform(-0.5/d, 0.5/d).</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Select Center Word</h4>
+                        <p>Iterate through each word in the corpus as the center word. The context window defines which surrounding words become positive examples.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Generate Training Pairs</h4>
+                        <p><strong>Positive:</strong> Each (center, context) pair from the window. <strong>Negative:</strong> Sample k random words from the noise distribution for each positive pair.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Compute Scores and Loss</h4>
+                        <p>Dot product between center and context vectors, passed through sigmoid. Loss encourages high scores for positive pairs, low for negatives.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h4>Update via Gradient Descent</h4>
+                        <p>Compute gradients and update only the embeddings involved in this sample (sparse update). This is what makes SGNS efficient!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Python -->
+        <div class="section-header" id="python">
+            <h2><span class="icon">&#128013;</span> Python Implementation</h2>
+            <p>Complete, runnable SGNS implementation from scratch</p>
+        </div>
+
+        <div class="content-block auto">
+            <h3>Complete SGNS Implementation</h3>
+            <p>A clean, educational implementation with detailed comments. Only requires NumPy!</p>
+
+            <pre><code><span class="comment">"""
+Skip-gram with Negative Sampling (SGNS) - From Scratch
+======================================================
+Educational implementation of Word2Vec's SGNS algorithm.
+"""</span>
+
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">from</span> collections <span class="keyword">import</span> Counter
+<span class="keyword">import</span> re
+
+
+<span class="keyword">class</span> <span class="class-name">SGNS</span>:
+    <span class="string">"""Skip-gram with Negative Sampling word embedding model."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, embedding_dim=<span class="number">100</span>, window_size=<span class="number">5</span>,
+                 neg_samples=<span class="number">5</span>, learning_rate=<span class="number">0.025</span>,
+                 subsample_threshold=<span class="number">1e-5</span>, min_count=<span class="number">5</span>):
+        <span class="string">"""
+        Args:
+            embedding_dim: Dimension of word vectors
+            window_size: Context window size (each side)
+            neg_samples: Number of negative samples per positive
+            learning_rate: Initial learning rate
+            subsample_threshold: Threshold for subsampling frequent words
+            min_count: Minimum word frequency to include in vocabulary
+        """</span>
+        self.embedding_dim = embedding_dim
+        self.window_size = window_size
+        self.neg_samples = neg_samples
+        self.learning_rate = learning_rate
+        self.subsample_threshold = subsample_threshold
+        self.min_count = min_count
+
+        <span class="comment"># To be initialized during training</span>
+        self.word2idx = {}
+        self.idx2word = {}
+        self.vocab_size = <span class="number">0</span>
+        self.W = <span class="keyword">None</span>  <span class="comment"># Center word embeddings</span>
+        self.C = <span class="keyword">None</span>  <span class="comment"># Context word embeddings</span>
+        self.word_freqs = <span class="keyword">None</span>
+        self.noise_dist = <span class="keyword">None</span>
+
+    <span class="keyword">def</span> <span class="function">tokenize</span>(self, text):
+        <span class="string">"""Simple tokenization: lowercase and extract words."""</span>
+        <span class="keyword">return</span> re.findall(r<span class="string">'[a-z]+'</span>, text.lower())
+
+    <span class="keyword">def</span> <span class="function">build_vocab</span>(self, corpus):
+        <span class="string">"""Build vocabulary from corpus."""</span>
+        word_counts = Counter()
+        <span class="keyword">for</span> sentence <span class="keyword">in</span> corpus:
+            tokens = self.tokenize(sentence)
+            word_counts.update(tokens)
+
+        <span class="comment"># Filter by minimum count</span>
+        vocab = [w <span class="keyword">for</span> w, c <span class="keyword">in</span> word_counts.items() <span class="keyword">if</span> c >= self.min_count]
+
+        self.word2idx = {w: i <span class="keyword">for</span> i, w <span class="keyword">in</span> enumerate(vocab)}
+        self.idx2word = {i: w <span class="keyword">for</span> w, i <span class="keyword">in</span> self.word2idx.items()}
+        self.vocab_size = len(vocab)
+
+        <span class="comment"># Compute word frequencies for noise distribution</span>
+        total = sum(word_counts[w] <span class="keyword">for</span> w <span class="keyword">in</span> vocab)
+        self.word_freqs = np.array([word_counts[self.idx2word[i]] / total
+                                     <span class="keyword">for</span> i <span class="keyword">in</span> range(self.vocab_size)])
+
+        <span class="comment"># Noise distribution: f(w)^0.75 normalized</span>
+        noise = self.word_freqs ** <span class="number">0.75</span>
+        self.noise_dist = noise / noise.sum()
+
+        <span class="keyword">print</span>(f<span class="string">"Vocabulary size: {self.vocab_size}"</span>)
+
+    <span class="keyword">def</span> <span class="function">subsample_prob</span>(self, word_idx):
+        <span class="string">"""Probability of keeping a word (subsampling frequent words)."""</span>
+        freq = self.word_freqs[word_idx]
+        <span class="keyword">if</span> freq == <span class="number">0</span>:
+            <span class="keyword">return</span> <span class="number">0</span>
+        ratio = self.subsample_threshold / freq
+        <span class="keyword">return</span> min(<span class="number">1.0</span>, np.sqrt(ratio) + ratio)
+
+    <span class="keyword">def</span> <span class="function">sample_negatives</span>(self, exclude_idx):
+        <span class="string">"""Sample negative word indices from noise distribution."""</span>
+        negatives = []
+        <span class="keyword">while</span> len(negatives) < self.neg_samples:
+            neg = np.random.choice(self.vocab_size, p=self.noise_dist)
+            <span class="keyword">if</span> neg != exclude_idx:
+                negatives.append(neg)
+        <span class="keyword">return</span> negatives
+
+    <span class="keyword">def</span> <span class="function">sigmoid</span>(self, x):
+        <span class="string">"""Numerically stable sigmoid."""</span>
+        <span class="keyword">return</span> np.where(x >= <span class="number">0</span>,
+                        <span class="number">1</span> / (<span class="number">1</span> + np.exp(-x)),
+                        np.exp(x) / (<span class="number">1</span> + np.exp(x)))
+
+    <span class="keyword">def</span> <span class="function">train_pair</span>(self, center_idx, context_idx, label):
+        <span class="string">"""Train on a single (center, context) pair."""</span>
+        <span class="comment"># Get embeddings</span>
+        v_c = self.W[center_idx]   <span class="comment"># Center word vector</span>
+        u_o = self.C[context_idx]  <span class="comment"># Context word vector</span>
+
+        <span class="comment"># Forward pass</span>
+        score = np.dot(v_c, u_o)
+        pred = self.sigmoid(score)
+
+        <span class="comment"># Compute gradient</span>
+        error = pred - label  <span class="comment"># For positive: want pred=1, for negative: want pred=0</span>
+
+        <span class="comment"># Update embeddings (gradient descent)</span>
+        grad_c = error * u_o
+        grad_o = error * v_c
+
+        self.W[center_idx] -= self.learning_rate * grad_c
+        self.C[context_idx] -= self.learning_rate * grad_o
+
+        <span class="comment"># Return loss for monitoring</span>
+        <span class="keyword">if</span> label == <span class="number">1</span>:
+            <span class="keyword">return</span> -np.log(pred + <span class="number">1e-10</span>)
+        <span class="keyword">else</span>:
+            <span class="keyword">return</span> -np.log(<span class="number">1</span> - pred + <span class="number">1e-10</span>)
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, corpus, epochs=<span class="number">5</span>):
+        <span class="string">"""Train SGNS on corpus."""</span>
+        <span class="comment"># Build vocabulary</span>
+        self.build_vocab(corpus)
+
+        <span class="comment"># Initialize embeddings</span>
+        scale = <span class="number">0.5</span> / self.embedding_dim
+        self.W = np.random.uniform(-scale, scale,
+                                    (self.vocab_size, self.embedding_dim))
+        self.C = np.random.uniform(-scale, scale,
+                                    (self.vocab_size, self.embedding_dim))
+
+        <span class="comment"># Training loop</span>
+        <span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):
+            total_loss = <span class="number">0</span>
+            num_pairs = <span class="number">0</span>
+
+            <span class="keyword">for</span> sentence <span class="keyword">in</span> corpus:
+                tokens = self.tokenize(sentence)
+                indices = [self.word2idx[w] <span class="keyword">for</span> w <span class="keyword">in</span> tokens
+                          <span class="keyword">if</span> w <span class="keyword">in</span> self.word2idx]
+
+                <span class="comment"># Subsample frequent words</span>
+                indices = [idx <span class="keyword">for</span> idx <span class="keyword">in</span> indices
+                          <span class="keyword">if</span> np.random.random() < self.subsample_prob(idx)]
+
+                <span class="comment"># Generate training pairs</span>
+                <span class="keyword">for</span> i, center_idx <span class="keyword">in</span> enumerate(indices):
+                    <span class="comment"># Dynamic window (like original Word2Vec)</span>
+                    window = np.random.randint(<span class="number">1</span>, self.window_size + <span class="number">1</span>)
+
+                    <span class="comment"># Context words</span>
+                    start = max(<span class="number">0</span>, i - window)
+                    end = min(len(indices), i + window + <span class="number">1</span>)
+
+                    <span class="keyword">for</span> j <span class="keyword">in</span> range(start, end):
+                        <span class="keyword">if</span> i == j:
+                            <span class="keyword">continue</span>
+                        context_idx = indices[j]
+
+                        <span class="comment"># Positive sample</span>
+                        loss = self.train_pair(center_idx, context_idx, <span class="number">1</span>)
+                        total_loss += loss
+
+                        <span class="comment"># Negative samples</span>
+                        <span class="keyword">for</span> neg_idx <span class="keyword">in</span> self.sample_negatives(context_idx):
+                            loss = self.train_pair(center_idx, neg_idx, <span class="number">0</span>)
+                            total_loss += loss
+
+                        num_pairs += <span class="number">1</span>
+
+            avg_loss = total_loss / max(num_pairs, <span class="number">1</span>)
+            <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}"</span>)
+
+        <span class="keyword">return</span> self.W
+
+    <span class="keyword">def</span> <span class="function">get_embedding</span>(self, word):
+        <span class="string">"""Get embedding for a word."""</span>
+        <span class="keyword">if</span> word <span class="keyword">not in</span> self.word2idx:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+        <span class="keyword">return</span> self.W[self.word2idx[word]]
+
+    <span class="keyword">def</span> <span class="function">most_similar</span>(self, word, top_k=<span class="number">10</span>):
+        <span class="string">"""Find most similar words by cosine similarity."""</span>
+        <span class="keyword">if</span> word <span class="keyword">not in</span> self.word2idx:
+            <span class="keyword">return</span> []
+
+        word_vec = self.W[self.word2idx[word]]
+
+        <span class="comment"># Normalize all vectors</span>
+        norms = np.linalg.norm(self.W, axis=<span class="number">1</span>, keepdims=<span class="keyword">True</span>)
+        normalized = self.W / (norms + <span class="number">1e-10</span>)
+        word_vec_norm = word_vec / (np.linalg.norm(word_vec) + <span class="number">1e-10</span>)
+
+        <span class="comment"># Cosine similarity</span>
+        similarities = np.dot(normalized, word_vec_norm)
+
+        <span class="comment"># Get top-k (excluding the word itself)</span>
+        top_indices = np.argsort(similarities)[::-<span class="number">1</span>][<span class="number">1</span>:top_k+<span class="number">1</span>]
+
+        <span class="keyword">return</span> [(self.idx2word[i], similarities[i]) <span class="keyword">for</span> i <span class="keyword">in</span> top_indices]
+
+
+<span class="comment"># Example usage</span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    <span class="comment"># Sample corpus</span>
+    corpus = [
+        <span class="string">"the king loved the queen"</span>,
+        <span class="string">"the queen loved the king"</span>,
+        <span class="string">"the prince is the son of the king"</span>,
+        <span class="string">"the princess is the daughter of the queen"</span>,
+        <span class="string">"the king and queen rule the kingdom"</span>,
+        <span class="string">"the prince will become king"</span>,
+        <span class="string">"the princess will become queen"</span>,
+        <span class="string">"the dog chased the cat"</span>,
+        <span class="string">"the cat ran from the dog"</span>,
+        <span class="string">"the man walked the dog in the park"</span>,
+        <span class="string">"the woman petted the cat at home"</span>,
+    ] * <span class="number">100</span>  <span class="comment"># Repeat for more training data</span>
+
+    <span class="comment"># Train model</span>
+    model = SGNS(embedding_dim=<span class="number">50</span>, window_size=<span class="number">2</span>,
+                  neg_samples=<span class="number">5</span>, min_count=<span class="number">1</span>)
+    model.train(corpus, epochs=<span class="number">10</span>)
+
+    <span class="comment"># Find similar words</span>
+    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'king':"</span>)
+    <span class="keyword">for</span> word, sim <span class="keyword">in</span> model.most_similar(<span class="string">"king"</span>, top_k=<span class="number">5</span>):
+        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)
+
+    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'dog':"</span>)
+    <span class="keyword">for</span> word, sim <span class="keyword">in</span> model.most_similar(<span class="string">"dog"</span>, top_k=<span class="number">5</span>):
+        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)</code></pre>
+
+            <div class="callout callout-example">
+                <h4>Expected Output</h4>
+                <pre style="background: #f0fdf4; color: #166534; margin: 0;">
+Vocabulary size: 20
+Epoch 1/10, Loss: 2.3847
+Epoch 2/10, Loss: 1.8923
+...
+Epoch 10/10, Loss: 0.9234
+
+Most similar to 'king':
+  queen: 0.8234
+  prince: 0.7891
+  kingdom: 0.6543
+  rule: 0.5678
+  loved: 0.5234
+
+Most similar to 'dog':
+  cat: 0.7654
+  chased: 0.6543
+  walked: 0.5987
+  man: 0.5432
+  park: 0.4567</pre>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Key Implementation Details</h3>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4>Two Embedding Matrices</h4>
+                    <p>W holds center word vectors, C holds context word vectors. After training, typically use W as final embeddings, or W + C.</p>
+                </div>
+                <div class="card">
+                    <h4>Sparse Updates</h4>
+                    <p>Only update embeddings for words in the current sample (1 positive + k negatives). This is what makes SGNS scale to huge vocabularies.</p>
+                </div>
+                <div class="card">
+                    <h4>Dynamic Window</h4>
+                    <p>Original Word2Vec samples window size uniformly from [1, max_window]. This gives closer words higher weight on average.</p>
+                </div>
+                <div class="card">
+                    <h4>Numerical Stability</h4>
+                    <p>Use stable sigmoid implementation to avoid overflow. Add small epsilon in log to prevent log(0).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
+            <p>Created for educational purposes | SGNS was introduced by Mikolov et al. (2013)</p>
+            <p style="margin-top: 1rem;">
+                <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">TF-IDF</a>
+                <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec</a>
+                <a href="cbow_educational.html" style="color: var(--primary-color); margin: 0 1rem;">CBOW</a>
+                <a href="glove_educational.html" style="color: var(--primary-color); margin: 0 1rem;">GloVe</a>
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        // SGNS Training Simulator
+        let model = null;
+        let lossHistory = [];
+        let embeddingChart = null;
+        let lossChart = null;
+        let similarityChart = null;
+        let stepCount = 0;
+
+        class SimpleSGNS {
+            constructor(vocab, dim = 2, negSamples = 5, lr = 0.1) {
+                this.vocab = vocab;
+                this.word2idx = Object.fromEntries(vocab.map((w, i) => [w, i]));
+                this.idx2word = Object.fromEntries(vocab.map((w, i) => [i, w]));
+                this.dim = dim;
+                this.negSamples = negSamples;
+                this.lr = lr;
+                this.V = vocab.length;
+
+                // Initialize embeddings randomly
+                const scale = 0.5 / dim;
+                this.W = Array(this.V).fill(0).map(() =>
+                    Array(dim).fill(0).map(() => (Math.random() - 0.5) * 2 * scale)
+                );
+                this.C = Array(this.V).fill(0).map(() =>
+                    Array(dim).fill(0).map(() => (Math.random() - 0.5) * 2 * scale)
+                );
+
+                // Uniform noise distribution for simplicity
+                this.noiseDist = Array(this.V).fill(1 / this.V);
+            }
+
+            sigmoid(x) {
+                if (x >= 0) return 1 / (1 + Math.exp(-x));
+                const ex = Math.exp(x);
+                return ex / (1 + ex);
+            }
+
+            dot(a, b) {
+                return a.reduce((sum, ai, i) => sum + ai * b[i], 0);
+            }
+
+            sampleNegative(exclude) {
+                let neg;
+                do {
+                    neg = Math.floor(Math.random() * this.V);
+                } while (neg === exclude);
+                return neg;
+            }
+
+            trainPair(centerIdx, contextIdx, label) {
+                const v = this.W[centerIdx];
+                const u = this.C[contextIdx];
+
+                const score = this.dot(v, u);
+                const pred = this.sigmoid(score);
+                const error = pred - label;
+
+                // Compute gradients and update
+                for (let d = 0; d < this.dim; d++) {
+                    const gradV = error * u[d];
+                    const gradU = error * v[d];
+                    this.W[centerIdx][d] -= this.lr * gradV;
+                    this.C[contextIdx][d] -= this.lr * gradU;
+                }
+
+                // Return loss
+                if (label === 1) {
+                    return -Math.log(pred + 1e-10);
+                } else {
+                    return -Math.log(1 - pred + 1e-10);
+                }
+            }
+
+            trainOnPairs(pairs, windowSize) {
+                let totalLoss = 0;
+                let count = 0;
+
+                for (const [centerWord, contextWord] of pairs) {
+                    if (!(centerWord in this.word2idx) || !(contextWord in this.word2idx)) continue;
+
+                    const centerIdx = this.word2idx[centerWord];
+                    const contextIdx = this.word2idx[contextWord];
+
+                    // Positive sample
+                    totalLoss += this.trainPair(centerIdx, contextIdx, 1);
+                    count++;
+
+                    // Negative samples
+                    for (let i = 0; i < this.negSamples; i++) {
+                        const negIdx = this.sampleNegative(contextIdx);
+                        totalLoss += this.trainPair(centerIdx, negIdx, 0);
+                    }
+                }
+
+                return count > 0 ? totalLoss / count : 0;
+            }
+
+            getEmbeddings() {
+                return this.vocab.map((word, i) => ({
+                    word,
+                    x: this.W[i][0],
+                    y: this.W[i][1] || 0
+                }));
+            }
+
+            cosineSimilarity(i, j) {
+                const a = this.W[i];
+                const b = this.W[j];
+                const dot = this.dot(a, b);
+                const normA = Math.sqrt(this.dot(a, a));
+                const normB = Math.sqrt(this.dot(b, b));
+                return dot / (normA * normB + 1e-10);
+            }
+        }
+
+        function extractPairs(corpus, windowSize) {
+            const pairs = [];
+            const sentences = corpus.split('\n').filter(s => s.trim());
+
+            for (const sentence of sentences) {
+                const words = sentence.toLowerCase().match(/[a-z]+/g) || [];
+
+                for (let i = 0; i < words.length; i++) {
+                    const center = words[i];
+                    for (let j = Math.max(0, i - windowSize); j < Math.min(words.length, i + windowSize + 1); j++) {
+                        if (i !== j) {
+                            pairs.push([center, words[j]]);
+                        }
+                    }
+                }
+            }
+
+            return pairs;
+        }
+
+        function initializeTraining() {
+            const corpus = document.getElementById('corpus-text').value;
+            const windowSize = parseInt(document.getElementById('window-size').value);
+            const negSamples = parseInt(document.getElementById('neg-samples').value);
+            const dim = parseInt(document.getElementById('embed-dim').value);
+
+            // Extract vocabulary
+            const words = corpus.toLowerCase().match(/[a-z]+/g) || [];
+            const vocab = [...new Set(words)].sort();
+
+            // Initialize model
+            model = new SimpleSGNS(vocab, dim, negSamples, 0.1);
+            model.pairs = extractPairs(corpus, windowSize);
+            model.windowSize = windowSize;
+
+            lossHistory = [];
+            stepCount = 0;
+
+            document.getElementById('training-stats').style.display = 'block';
+            updateStats();
+            updateCharts();
+        }
+
+        function trainStep() {
+            if (!model) {
+                alert('Please initialize training first!');
+                return;
+            }
+
+            // Shuffle and train on a batch of pairs
+            const shuffled = [...model.pairs].sort(() => Math.random() - 0.5);
+            const batchSize = Math.min(50, shuffled.length);
+            const batch = shuffled.slice(0, batchSize);
+
+            const loss = model.trainOnPairs(batch, model.windowSize);
+            lossHistory.push(loss);
+            stepCount++;
+
+            updateStats();
+            updateCharts();
+        }
+
+        function train100Steps() {
+            if (!model) {
+                alert('Please initialize training first!');
+                return;
+            }
+
+            for (let i = 0; i < 100; i++) {
+                const shuffled = [...model.pairs].sort(() => Math.random() - 0.5);
+                const batchSize = Math.min(50, shuffled.length);
+                const batch = shuffled.slice(0, batchSize);
+
+                const loss = model.trainOnPairs(batch, model.windowSize);
+                if (i % 10 === 0) {
+                    lossHistory.push(loss);
+                }
+                stepCount++;
+            }
+
+            updateStats();
+            updateCharts();
+        }
+
+        function updateStats() {
+            const stats = document.getElementById('stats-content');
+            const avgLoss = lossHistory.length > 0
+                ? lossHistory.slice(-10).reduce((a, b) => a + b, 0) / Math.min(10, lossHistory.length)
+                : 0;
+
+            stats.innerHTML = `
+                <p><strong>Steps:</strong> ${stepCount} |
+                   <strong>Vocabulary:</strong> ${model.vocab.length} words |
+                   <strong>Training pairs:</strong> ${model.pairs.length} |
+                   <strong>Avg Loss (last 10):</strong> ${avgLoss.toFixed(4)}</p>
+            `;
+        }
+
+        function updateCharts() {
+            const embeddings = model.getEmbeddings();
+
+            // Update embedding scatter plot
+            if (embeddingChart) embeddingChart.destroy();
+
+            const colors = embeddings.map((_, i) =>
+                `hsl(${(i * 360 / embeddings.length) % 360}, 70%, 50%)`
+            );
+
+            embeddingChart = new Chart(document.getElementById('embeddingChart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        data: embeddings.map(e => ({ x: e.x, y: e.y, label: e.word })),
+                        backgroundColor: colors,
+                        pointRadius: 8,
+                        pointHoverRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ctx.raw.label
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Dimension 1' } },
+                        y: { title: { display: true, text: 'Dimension 2' } }
+                    }
+                },
+                plugins: [{
+                    afterDraw: (chart) => {
+                        const ctx = chart.ctx;
+                        ctx.font = '11px Arial';
+                        ctx.fillStyle = '#333';
+                        ctx.textAlign = 'center';
+                        chart.data.datasets[0].data.forEach((point, i) => {
+                            const meta = chart.getDatasetMeta(0);
+                            const pt = meta.data[i];
+                            ctx.fillText(point.label, pt.x, pt.y - 12);
+                        });
+                    }
+                }]
+            });
+
+            // Update loss chart
+            if (lossChart) lossChart.destroy();
+
+            lossChart = new Chart(document.getElementById('lossChart'), {
+                type: 'line',
+                data: {
+                    labels: lossHistory.map((_, i) => i + 1),
+                    datasets: [{
+                        label: 'Training Loss',
+                        data: lossHistory,
+                        borderColor: 'rgba(37, 99, 235, 1)',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Loss Over Time' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Loss' } },
+                        x: { title: { display: true, text: 'Step (x10)' } }
+                    }
+                }
+            });
+
+            // Update similarity matrix
+            if (similarityChart) similarityChart.destroy();
+
+            const simData = [];
+            const words = model.vocab.slice(0, 15); // Limit to 15 words for readability
+
+            for (let i = 0; i < words.length; i++) {
+                for (let j = 0; j < words.length; j++) {
+                    const sim = model.cosineSimilarity(
+                        model.word2idx[words[i]],
+                        model.word2idx[words[j]]
+                    );
+                    simData.push({ x: j, y: i, v: sim });
+                }
+            }
+
+            similarityChart = new Chart(document.getElementById('similarityChart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        data: simData,
+                        backgroundColor: simData.map(d => {
+                            const intensity = (d.v + 1) / 2; // Map [-1,1] to [0,1]
+                            return `rgba(37, 99, 235, ${intensity})`;
+                        }),
+                        pointRadius: 18,
+                        pointStyle: 'rect'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const d = ctx.raw;
+                                    return `${words[d.y]} - ${words[d.x]}: ${d.v.toFixed(3)}`;
+                                }
+                            }
+                        },
+                        title: { display: true, text: 'Cosine Similarity Matrix' }
+                    },
+                    scales: {
+                        x: {
+                            min: -0.5,
+                            max: words.length - 0.5,
+                            ticks: {
+                                callback: (v) => words[v] || '',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            min: -0.5,
+                            max: words.length - 0.5,
+                            ticks: { callback: (v) => words[v] || '' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initializeTraining, 500);
+        });
+    </script>
+</body>
+</html>

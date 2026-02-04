@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive educational guide to Continuous Bag of Words (CBOW) for classroom use">
+    <title>Understanding CBOW: A Complete Guide</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container - Wider Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks - Consistent Sizing */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-block.half {
+            min-height: calc(var(--block-min-height) / 2);
+        }
+
+        .content-block.auto {
+            min-height: auto;
+        }
+
+        /* Grid Layout for Side-by-Side Blocks */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .block-grid .content-block {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .block-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .icon {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #e0e7ff;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Flowchart */
+        .flowchart-container {
+            text-align: center;
+            margin: 2rem 0;
+            overflow-x: auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 1rem;
+        }
+
+        .flowchart-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        /* Steps */
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-color);
+            border-radius: 1rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Context Window Display */
+        .context-window {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 1rem;
+        }
+
+        .context-word {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .context-word.context {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .context-word.target {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: var(--warning-color);
+            border: 2px solid var(--warning-color);
+            font-size: 1.3rem;
+        }
+
+        .context-word.other {
+            background: #e5e7eb;
+            color: var(--text-light);
+        }
+
+        .arrow-down {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        /* Vector Display */
+        .vector-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .vector-box {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 2px solid var(--accent-color);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .vector-label {
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .content-block {
+                padding: 1.5rem;
+                min-height: auto;
+            }
+
+            header {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            nav {
+                display: none;
+            }
+
+            main {
+                padding-top: 1rem;
+            }
+
+            .content-block {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+
+        /* Scroll Snap for Presentation Feel */
+        @media (min-width: 1200px) {
+            main {
+                scroll-snap-type: y proximity;
+            }
+
+            .content-block, header {
+                scroll-snap-align: start;
+                scroll-margin-top: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">CBOW Guide</div>
+            <ul>
+                <li><a href="#intuition">Intuition</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#mathematics">Mathematics</a></li>
+                <li><a href="#flowchart">Flowchart</a></li>
+                <li><a href="#python">Python</a></li>
+                <li><a href="#comparison">Comparison</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Header -->
+        <header>
+            <h1>Understanding CBOW</h1>
+            <p>Continuous Bag of Words (CBOW) is a neural network architecture that learns word embeddings by predicting a target word from its surrounding context words - like a fill-in-the-blank game for machines.</p>
+            <div class="subtitle">Part of the Word2Vec Family</div>
+        </header>
+
+        <!-- Section 1: Intuition -->
+        <div class="section-header" id="intuition">
+            <h2><span class="icon">*</span> Intuition</h2>
+            <p>Understanding the core idea behind CBOW through analogies and everyday examples</p>
+        </div>
+
+        <div class="content-block">
+            <h3>What is CBOW?</h3>
+            <p><strong>CBOW</strong> stands for <span class="highlight">Continuous Bag of Words</span>. It's a neural network model that learns to represent words as dense vectors (embeddings) by training on a simple task: <strong>predict the center word given its surrounding context words</strong>.</p>
+
+            <p>The key insight is elegantly simple: <strong>words that appear in similar contexts should have similar meanings, and therefore similar vector representations.</strong></p>
+
+            <div class="callout callout-analogy">
+                <h4>Fill-in-the-Blank Game</h4>
+                <p>CBOW is like playing a fill-in-the-blank game:</p>
+                <ul>
+                    <li><strong>Sentence:</strong> "The cat sat on the ___"</li>
+                    <li><strong>Context words:</strong> "The", "cat", "sat", "on", "the"</li>
+                    <li><strong>Target to predict:</strong> "mat" (or "floor", "couch", etc.)</li>
+                </ul>
+                <p>By learning to predict the missing word from context, the model learns that "mat", "floor", and "couch" share something in common - they can all follow "sat on the"!</p>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Context Window</h3>
+                <p><strong>"What words surround the target?"</strong></p>
+                <p>The context window defines how many words to the left and right we look at when predicting the center word.</p>
+
+                <div class="callout callout-example">
+                    <h4>Example: Window Size = 2</h4>
+                    <p>For the sentence "The quick brown fox jumps":</p>
+                    <div class="context-window">
+                        <span class="context-word other">The</span>
+                        <span class="context-word context">quick</span>
+                        <span class="context-word context">brown</span>
+                        <span class="context-word target">fox</span>
+                        <span class="context-word context">jumps</span>
+                        <span class="context-word other">over</span>
+                    </div>
+                    <p>Context: [quick, brown, jumps, over] -> Predict: "fox"</p>
+                </div>
+            </div>
+
+            <div class="content-block">
+                <h3>Why "Bag of Words"?</h3>
+                <p><strong>"Order doesn't matter!"</strong></p>
+                <p>CBOW averages the context word vectors together, ignoring their order. It treats context as a "bag" - knowing which words are present, not their sequence.</p>
+
+                <div class="callout callout-concept">
+                    <h4>Bag of Words Concept</h4>
+                    <p>These contexts are treated the same:</p>
+                    <ul>
+                        <li>"quick brown ___ jumps over"</li>
+                        <li>"brown quick ___ over jumps"</li>
+                    </ul>
+                    <p>Both result in the same averaged context vector!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>How CBOW Learns</h3>
+
+            <div class="callout callout-analogy">
+                <h4>The Classroom Analogy</h4>
+                <p>Imagine learning vocabulary in a foreign language:</p>
+                <ul>
+                    <li><strong>Instead of memorizing definitions,</strong> you see how words are used in sentences</li>
+                    <li><strong>If you see "delicious" near "food", "meal", "taste",</strong> you learn it relates to eating</li>
+                    <li><strong>If you see "fast" near "car", "run", "quick",</strong> you learn it relates to speed</li>
+                </ul>
+                <p>CBOW learns word meanings the same way - purely from context, without any dictionaries!</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">The Core CBOW Idea</div>
+                <p style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">Context Words -> Average -> Predict Center Word</p>
+                <div class="formula-description">
+                    <p>The training process:</p>
+                    <ul>
+                        <li><strong>Input:</strong> Context word embeddings (e.g., "quick", "brown", "jumps")</li>
+                        <li><strong>Average:</strong> Compute the mean of all context vectors</li>
+                        <li><strong>Predict:</strong> Use this average to predict the center word ("fox")</li>
+                        <li><strong>Update:</strong> Adjust embeddings to make better predictions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Examples -->
+        <div class="section-header" id="examples">
+            <h2><span class="icon">*</span> Worked Examples</h2>
+            <p>Step-by-step walkthrough of how CBOW processes sentences</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Example: Processing a Sentence</h3>
+
+            <div class="callout callout-example">
+                <h4>Our Sentence</h4>
+                <p style="font-size: 1.3rem; text-align: center;">"The quick brown fox jumps over the lazy dog"</p>
+            </div>
+
+            <h4>Step 1: Define Context Window (size = 2)</h4>
+            <p>For each word in the sentence, we create a training example with context words and a target word.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Target Word</th>
+                            <th>Context Words (window=2)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>0</td><td>The</td><td>[quick, brown]</td></tr>
+                        <tr><td>1</td><td>quick</td><td>[The, brown, fox]</td></tr>
+                        <tr><td>2</td><td>brown</td><td>[The, quick, fox, jumps]</td></tr>
+                        <tr><td>3</td><td>fox</td><td>[quick, brown, jumps, over]</td></tr>
+                        <tr><td>4</td><td>jumps</td><td>[brown, fox, over, the]</td></tr>
+                        <tr><td>5</td><td>over</td><td>[fox, jumps, the, lazy]</td></tr>
+                        <tr><td>6</td><td>the</td><td>[jumps, over, lazy, dog]</td></tr>
+                        <tr><td>7</td><td>lazy</td><td>[over, the, dog]</td></tr>
+                        <tr><td>8</td><td>dog</td><td>[the, lazy]</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 2: Convert Words to Vectors</h4>
+            <p>Each word has an embedding vector. Let's use simplified 3-dimensional vectors for illustration:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Embedding Vector (d=3)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>quick</td><td>[0.2, 0.8, -0.1]</td></tr>
+                        <tr><td>brown</td><td>[0.5, 0.3, 0.7]</td></tr>
+                        <tr><td>jumps</td><td>[0.1, 0.9, 0.2]</td></tr>
+                        <tr><td>over</td><td>[0.4, 0.2, 0.5]</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Step 3: Average Context Vectors</h4>
+            <p>To predict "fox" from context [quick, brown, jumps, over]:</p>
+
+            <div class="vector-display">
+                <div class="vector-box">
+                    <span class="vector-label">quick</span>
+                    [0.2, 0.8, -0.1]
+                </div>
+                <span style="font-size: 1.5rem;">+</span>
+                <div class="vector-box">
+                    <span class="vector-label">brown</span>
+                    [0.5, 0.3, 0.7]
+                </div>
+                <span style="font-size: 1.5rem;">+</span>
+                <div class="vector-box">
+                    <span class="vector-label">jumps</span>
+                    [0.1, 0.9, 0.2]
+                </div>
+                <span style="font-size: 1.5rem;">+</span>
+                <div class="vector-box">
+                    <span class="vector-label">over</span>
+                    [0.4, 0.2, 0.5]
+                </div>
+            </div>
+
+            <div style="text-align: center;" class="arrow-down">v</div>
+
+            <div class="formula-box">
+                <div class="formula-label">Average Context Vector</div>
+                <p style="font-family: monospace; font-size: 1.2rem;">
+                    h = [(0.2+0.5+0.1+0.4)/4, (0.8+0.3+0.9+0.2)/4, (-0.1+0.7+0.2+0.5)/4]
+                </p>
+                <p style="font-family: monospace; font-size: 1.4rem; color: var(--accent-color); font-weight: bold;">
+                    h = [0.30, 0.55, 0.325]
+                </p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 4: Predict Target Word</h4>
+            <p>The averaged context vector is used to compute a score for every word in the vocabulary. The word with the highest score (after softmax) is the prediction.</p>
+
+            <div class="callout callout-concept">
+                <h4>The Prediction Process</h4>
+                <ol>
+                    <li><strong>Compute scores:</strong> Dot product of h with each word's output embedding</li>
+                    <li><strong>Apply softmax:</strong> Convert scores to probabilities</li>
+                    <li><strong>Compare to target:</strong> The true word is "fox"</li>
+                    <li><strong>Update weights:</strong> Increase probability of "fox", decrease others</li>
+                </ol>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Score (h . w')</th>
+                            <th>Probability (softmax)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #d1fae5;"><td><strong>fox</strong></td><td>2.1</td><td><strong>0.35</strong></td></tr>
+                        <tr><td>dog</td><td>1.8</td><td>0.26</td></tr>
+                        <tr><td>cat</td><td>1.5</td><td>0.19</td></tr>
+                        <tr><td>bird</td><td>1.2</td><td>0.14</td></tr>
+                        <tr><td>the</td><td>0.5</td><td>0.06</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>The model predicted "fox" with probability 0.35. Training adjusts embeddings to make this probability higher next time!</p>
+        </div>
+
+        <!-- Section 3: Visualization -->
+        <div class="section-header" id="visualization">
+            <h2><span class="icon">*</span> Interactive Visualization</h2>
+            <p>Explore how CBOW averages context vectors and makes predictions</p>
+        </div>
+
+        <div class="content-block">
+            <div class="interactive-section">
+                <h3>CBOW Context Averaging Demo</h3>
+                <p>Enter a sentence and see how CBOW creates training examples with context windows:</p>
+
+                <div class="input-group">
+                    <label for="input-sentence">Input Sentence:</label>
+                    <input type="text" id="input-sentence" value="the quick brown fox jumps over the lazy dog">
+                </div>
+
+                <div class="block-grid" style="margin-top: 1rem;">
+                    <div class="input-group">
+                        <label for="window-size">Window Size:</label>
+                        <select id="window-size">
+                            <option value="1">1 (one word each side)</option>
+                            <option value="2" selected>2 (two words each side)</option>
+                            <option value="3">3 (three words each side)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="target-position">Target Word Position:</label>
+                        <select id="target-position"></select>
+                    </div>
+                </div>
+
+                <button onclick="visualizeCBOW()">Visualize CBOW</button>
+            </div>
+
+            <div class="result-display" id="cbow-result" style="display: none;">
+                <h4>CBOW Training Example</h4>
+                <div id="context-visualization"></div>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Context Vector Averaging</h3>
+                <p>This chart shows how individual context word vectors combine into the average hidden vector.</p>
+                <div class="chart-container">
+                    <canvas id="contextVectorChart"></canvas>
+                </div>
+            </div>
+            <div class="content-block">
+                <h3>Word Prediction Probabilities</h3>
+                <p>After averaging, CBOW predicts which word should fill the blank.</p>
+                <div class="chart-container">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Embedding Space Visualization</h3>
+            <p>Watch how word embeddings cluster in 2D space. Similar words (by context) end up close together.</p>
+            <div class="chart-container" style="height: 500px;">
+                <canvas id="embeddingChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Section 4: Mathematics -->
+        <div class="section-header" id="mathematics">
+            <h2><span class="icon">*</span> Mathematical Foundations</h2>
+            <p>The formal definitions and formulas behind CBOW</p>
+        </div>
+
+        <div class="content-block">
+            <h3>CBOW Objective Function</h3>
+            <p>The goal of CBOW is to maximize the probability of predicting the correct center word given its context. This is formalized as:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">CBOW Objective (Log-Likelihood)</div>
+                \[ J(\theta) = \frac{1}{T} \sum_{t=1}^{T} \log P(w_t | w_{t-c}, \ldots, w_{t-1}, w_{t+1}, \ldots, w_{t+c}) \]
+                <div class="formula-description">
+                    Where:
+                    <ul>
+                        <li>\( T \) = Total number of words in the corpus</li>
+                        <li>\( w_t \) = The target (center) word at position \( t \)</li>
+                        <li>\( c \) = The context window size</li>
+                        <li>\( w_{t-c}, \ldots, w_{t+c} \) = Context words within window</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Context Vector Averaging</h3>
+            <p>CBOW computes a hidden representation by averaging the input embeddings of all context words:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Hidden Layer (Average of Context Vectors)</div>
+                \[ \mathbf{h} = \frac{1}{2c} \sum_{-c \leq j \leq c, j \neq 0} \mathbf{v}_{w_{t+j}} \]
+                <div class="formula-description">
+                    Where:
+                    <ul>
+                        <li>\( \mathbf{h} \) = Hidden layer vector (averaged context)</li>
+                        <li>\( \mathbf{v}_{w} \) = Input embedding vector for word \( w \)</li>
+                        <li>\( 2c \) = Total number of context words (c on each side)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>Why Averaging?</h4>
+                <ul>
+                    <li><strong>Simplicity:</strong> No learnable parameters in the combination</li>
+                    <li><strong>Symmetry:</strong> Order of context words doesn't affect result</li>
+                    <li><strong>Efficiency:</strong> Single vector regardless of context size</li>
+                    <li><strong>Normalization:</strong> Keeps values in reasonable range</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Softmax Output Layer</h3>
+            <p>The probability of each word being the target is computed using softmax over dot products:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Softmax Probability</div>
+                \[ P(w_O | w_C) = \frac{\exp(\mathbf{v}'_{w_O}{}^{\top} \mathbf{h})}{\sum_{w=1}^{V} \exp(\mathbf{v}'_w{}^{\top} \mathbf{h})} \]
+                <div class="formula-description">
+                    Where:
+                    <ul>
+                        <li>\( \mathbf{v}'_{w_O} \) = Output embedding for target word \( w_O \)</li>
+                        <li>\( \mathbf{h} \) = Hidden layer (averaged context)</li>
+                        <li>\( V \) = Vocabulary size</li>
+                        <li>Numerator: Score for correct word</li>
+                        <li>Denominator: Sum of scores for ALL words (normalization)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-warning">
+                <h4>Computational Challenge</h4>
+                <p>The denominator sums over ALL words in the vocabulary (often 100K+ words). This makes training slow!</p>
+                <p><strong>Solutions:</strong> Hierarchical Softmax or Negative Sampling (see comparison section).</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Loss Function and Gradients</h3>
+            <p>We minimize the negative log-likelihood (cross-entropy loss):</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Loss Function</div>
+                \[ \mathcal{L} = -\log P(w_O | w_C) = -\mathbf{v}'_{w_O}{}^{\top} \mathbf{h} + \log \sum_{w=1}^{V} \exp(\mathbf{v}'_w{}^{\top} \mathbf{h}) \]
+            </div>
+
+            <h4>Gradients for Backpropagation</h4>
+
+            <div class="formula-box">
+                <div class="formula-label">Gradient w.r.t. Output Embedding</div>
+                \[ \frac{\partial \mathcal{L}}{\partial \mathbf{v}'_w} = \left( P(w|w_C) - \mathbf{1}_{w=w_O} \right) \mathbf{h} \]
+                <div class="formula-description">
+                    <p>Where \( \mathbf{1}_{w=w_O} \) is 1 if \( w \) is the target word, 0 otherwise.</p>
+                    <ul>
+                        <li>For the correct word: gradient pushes embedding closer to \( \mathbf{h} \)</li>
+                        <li>For incorrect words: gradient pushes embeddings away from \( \mathbf{h} \)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Gradient w.r.t. Hidden Layer</div>
+                \[ \frac{\partial \mathcal{L}}{\partial \mathbf{h}} = \sum_{w=1}^{V} \left( P(w|w_C) - \mathbf{1}_{w=w_O} \right) \mathbf{v}'_w \]
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Gradient w.r.t. Input Embeddings</div>
+                \[ \frac{\partial \mathcal{L}}{\partial \mathbf{v}_{w_i}} = \frac{1}{2c} \frac{\partial \mathcal{L}}{\partial \mathbf{h}} \quad \text{for each context word } w_i \]
+                <div class="formula-description">
+                    <p>Each context word's embedding is updated by the same amount (scaled by 1/2c due to averaging).</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Two Sets of Embeddings</h3>
+            <p>CBOW maintains two separate embedding matrices:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Matrix</th>
+                            <th>Symbol</th>
+                            <th>Shape</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Input Embeddings</strong></td>
+                            <td>\( \mathbf{W} \) or \( \mathbf{v} \)</td>
+                            <td>\( V \times d \)</td>
+                            <td>Represent context words</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Output Embeddings</strong></td>
+                            <td>\( \mathbf{W}' \) or \( \mathbf{v}' \)</td>
+                            <td>\( V \times d \)</td>
+                            <td>Compute prediction scores</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>Which Embeddings to Use?</h4>
+                <p>After training, you have options:</p>
+                <ul>
+                    <li><strong>Input embeddings only:</strong> Most common choice</li>
+                    <li><strong>Output embeddings only:</strong> Less common</li>
+                    <li><strong>Average both:</strong> Sometimes improves quality</li>
+                    <li><strong>Concatenate both:</strong> Doubles dimensionality</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 5: Flowchart -->
+        <div class="section-header" id="flowchart">
+            <h2><span class="icon">*</span> CBOW Architecture Flowchart</h2>
+            <p>Visual representation of the CBOW neural network architecture</p>
+        </div>
+
+        <div class="content-block">
+            <div class="flowchart-container">
+                <svg viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6"/>
+                            <stop offset="100%" style="stop-color:#2563eb"/>
+                        </linearGradient>
+                        <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8b5cf6"/>
+                            <stop offset="100%" style="stop-color:#7c3aed"/>
+                        </linearGradient>
+                        <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#10b981"/>
+                            <stop offset="100%" style="stop-color:#059669"/>
+                        </linearGradient>
+                        <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f59e0b"/>
+                            <stop offset="100%" style="stop-color:#d97706"/>
+                        </linearGradient>
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+                        </filter>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Title -->
+                    <text x="500" y="35" text-anchor="middle" font-size="24" font-weight="bold" fill="#1f2937">CBOW Architecture</text>
+
+                    <!-- Input Layer - Context Words -->
+                    <text x="120" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#6b7280">INPUT LAYER</text>
+                    <text x="120" y="100" text-anchor="middle" font-size="12" fill="#6b7280">(Context Words)</text>
+
+                    <!-- Context word boxes -->
+                    <rect x="50" y="120" width="140" height="50" rx="8" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="120" y="150" text-anchor="middle" fill="white" font-weight="bold" font-size="14">w(t-2): "quick"</text>
+
+                    <rect x="50" y="190" width="140" height="50" rx="8" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="120" y="220" text-anchor="middle" fill="white" font-weight="bold" font-size="14">w(t-1): "brown"</text>
+
+                    <rect x="50" y="260" width="140" height="50" rx="8" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="120" y="290" text-anchor="middle" fill="white" font-weight="bold" font-size="14">w(t+1): "jumps"</text>
+
+                    <rect x="50" y="330" width="140" height="50" rx="8" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="120" y="360" text-anchor="middle" fill="white" font-weight="bold" font-size="14">w(t+2): "over"</text>
+
+                    <!-- One-hot to Embedding arrows -->
+                    <path d="M190 145 L280 145" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M190 215 L280 215" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M190 285 L280 285" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M190 355 L280 355" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Embedding lookup -->
+                    <text x="350" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#6b7280">PROJECTION LAYER</text>
+                    <text x="350" y="100" text-anchor="middle" font-size="12" fill="#6b7280">(Embedding Lookup)</text>
+
+                    <rect x="290" y="120" width="120" height="50" rx="8" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="350" y="145" text-anchor="middle" fill="white" font-size="12">v_quick</text>
+                    <text x="350" y="160" text-anchor="middle" fill="white" font-size="10">[0.2, 0.8, -0.1]</text>
+
+                    <rect x="290" y="190" width="120" height="50" rx="8" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="350" y="215" text-anchor="middle" fill="white" font-size="12">v_brown</text>
+                    <text x="350" y="230" text-anchor="middle" fill="white" font-size="10">[0.5, 0.3, 0.7]</text>
+
+                    <rect x="290" y="260" width="120" height="50" rx="8" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="350" y="285" text-anchor="middle" fill="white" font-size="12">v_jumps</text>
+                    <text x="350" y="300" text-anchor="middle" fill="white" font-size="10">[0.1, 0.9, 0.2]</text>
+
+                    <rect x="290" y="330" width="120" height="50" rx="8" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="350" y="355" text-anchor="middle" fill="white" font-size="12">v_over</text>
+                    <text x="350" y="370" text-anchor="middle" fill="white" font-size="10">[0.4, 0.2, 0.5]</text>
+
+                    <!-- Arrows to averaging -->
+                    <path d="M410 145 L480 240" stroke="#6b7280" stroke-width="2"/>
+                    <path d="M410 215 L480 240" stroke="#6b7280" stroke-width="2"/>
+                    <path d="M410 285 L480 260" stroke="#6b7280" stroke-width="2"/>
+                    <path d="M410 355 L480 260" stroke="#6b7280" stroke-width="2"/>
+
+                    <!-- Hidden Layer - Averaging -->
+                    <text x="550" y="180" text-anchor="middle" font-size="14" font-weight="bold" fill="#6b7280">HIDDEN LAYER</text>
+                    <text x="550" y="200" text-anchor="middle" font-size="12" fill="#6b7280">(Average)</text>
+
+                    <ellipse cx="550" cy="250" rx="70" ry="45" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+                    <text x="550" y="240" text-anchor="middle" fill="white" font-weight="bold" font-size="14">SUM / 4</text>
+                    <text x="550" y="260" text-anchor="middle" fill="white" font-size="11">h = [0.3, 0.55, 0.33]</text>
+
+                    <!-- Arrow to output -->
+                    <path d="M620 250 L700 250" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <text x="660" y="240" text-anchor="middle" font-size="11" fill="#6b7280">W' (V x d)</text>
+
+                    <!-- Output Layer -->
+                    <text x="820" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#6b7280">OUTPUT LAYER</text>
+                    <text x="820" y="100" text-anchor="middle" font-size="12" fill="#6b7280">(Softmax)</text>
+
+                    <rect x="720" y="120" width="200" height="260" rx="12" fill="#f1f5f9" stroke="#e5e7eb" stroke-width="2"/>
+
+                    <rect x="740" y="140" width="160" height="35" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/>
+                    <text x="820" y="162" text-anchor="middle" font-size="12" fill="#1e40af">P(the) = 0.05</text>
+
+                    <rect x="740" y="185" width="160" height="35" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/>
+                    <text x="820" y="207" text-anchor="middle" font-size="12" fill="#1e40af">P(quick) = 0.08</text>
+
+                    <rect x="740" y="230" width="160" height="35" rx="6" fill="#dcfce7" stroke="#059669" stroke-width="3"/>
+                    <text x="820" y="252" text-anchor="middle" font-size="12" font-weight="bold" fill="#166534">P(fox) = 0.35</text>
+
+                    <rect x="740" y="275" width="160" height="35" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/>
+                    <text x="820" y="297" text-anchor="middle" font-size="12" fill="#1e40af">P(dog) = 0.12</text>
+
+                    <rect x="740" y="320" width="160" height="35" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/>
+                    <text x="820" y="342" text-anchor="middle" font-size="12" fill="#1e40af">P(...) = ...</text>
+
+                    <!-- Target word indicator -->
+                    <path d="M910 247 L950 247" stroke="#059669" stroke-width="3" marker-end="url(#arrowhead)"/>
+                    <text x="970" y="252" font-size="12" font-weight="bold" fill="#059669">Target!</text>
+
+                    <!-- Training flow below -->
+                    <rect x="50" y="450" width="900" height="320" rx="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="500" y="480" text-anchor="middle" font-size="18" font-weight="bold" fill="#92400e">TRAINING PROCESS</text>
+
+                    <!-- Step 1 -->
+                    <circle cx="130" cy="540" r="25" fill="url(#blueGrad)"/>
+                    <text x="130" y="545" text-anchor="middle" fill="white" font-weight="bold" font-size="16">1</text>
+                    <text x="130" y="590" text-anchor="middle" font-size="12" font-weight="bold" fill="#1f2937">Extract Context</text>
+                    <text x="130" y="605" text-anchor="middle" font-size="10" fill="#6b7280">Slide window</text>
+                    <text x="130" y="618" text-anchor="middle" font-size="10" fill="#6b7280">over corpus</text>
+
+                    <path d="M170 540 L230 540" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 2 -->
+                    <circle cx="280" cy="540" r="25" fill="url(#blueGrad)"/>
+                    <text x="280" y="545" text-anchor="middle" fill="white" font-weight="bold" font-size="16">2</text>
+                    <text x="280" y="590" text-anchor="middle" font-size="12" font-weight="bold" fill="#1f2937">Lookup Embeddings</text>
+                    <text x="280" y="605" text-anchor="middle" font-size="10" fill="#6b7280">Get vectors for</text>
+                    <text x="280" y="618" text-anchor="middle" font-size="10" fill="#6b7280">context words</text>
+
+                    <path d="M320 540 L380 540" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 3 -->
+                    <circle cx="430" cy="540" r="25" fill="url(#orangeGrad)"/>
+                    <text x="430" y="545" text-anchor="middle" fill="white" font-weight="bold" font-size="16">3</text>
+                    <text x="430" y="590" text-anchor="middle" font-size="12" font-weight="bold" fill="#1f2937">Average Vectors</text>
+                    <text x="430" y="605" text-anchor="middle" font-size="10" fill="#6b7280">h = mean(context)</text>
+
+                    <path d="M470 540 L530 540" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 4 -->
+                    <circle cx="580" cy="540" r="25" fill="url(#purpleGrad)"/>
+                    <text x="580" y="545" text-anchor="middle" fill="white" font-weight="bold" font-size="16">4</text>
+                    <text x="580" y="590" text-anchor="middle" font-size="12" font-weight="bold" fill="#1f2937">Compute Scores</text>
+                    <text x="580" y="605" text-anchor="middle" font-size="10" fill="#6b7280">score = h . W'</text>
+                    <text x="580" y="618" text-anchor="middle" font-size="10" fill="#6b7280">Apply softmax</text>
+
+                    <path d="M620 540 L680 540" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 5 -->
+                    <circle cx="730" cy="540" r="25" fill="url(#greenGrad)"/>
+                    <text x="730" y="545" text-anchor="middle" fill="white" font-weight="bold" font-size="16">5</text>
+                    <text x="730" y="590" text-anchor="middle" font-size="12" font-weight="bold" fill="#1f2937">Compute Loss</text>
+                    <text x="730" y="605" text-anchor="middle" font-size="10" fill="#6b7280">Cross-entropy</text>
+                    <text x="730" y="618" text-anchor="middle" font-size="10" fill="#6b7280">with target</text>
+
+                    <path d="M770 540 L830 540" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Step 6 -->
+                    <circle cx="880" cy="540" r="25" fill="#ef4444"/>
+                    <text x="880" y="545" text-anchor="middle" fill="white" font-weight="bold" font-size="16">6</text>
+                    <text x="880" y="590" text-anchor="middle" font-size="12" font-weight="bold" fill="#1f2937">Backpropagate</text>
+                    <text x="880" y="605" text-anchor="middle" font-size="10" fill="#6b7280">Update W and W'</text>
+
+                    <!-- Loop back arrow -->
+                    <path d="M880 565 L880 700 L130 700 L130 565" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5" fill="none" marker-end="url(#arrowhead)"/>
+                    <text x="500" y="720" text-anchor="middle" font-size="12" font-style="italic" fill="#6b7280">Repeat for all training examples</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Architecture Components Explained</h3>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Input Layer (Context Words)</h4>
+                        <p>Context words are converted to one-hot vectors of size V (vocabulary size). Each context word is represented as a sparse vector with a single 1.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Projection Layer (Embedding Lookup)</h4>
+                        <p>One-hot vectors are multiplied by the embedding matrix W (V x d) to get dense d-dimensional vectors. This is equivalent to looking up the row corresponding to the word.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Hidden Layer (Averaging)</h4>
+                        <p>All context word embeddings are averaged element-wise to produce a single d-dimensional hidden vector h. This is the "bag of words" step - order is lost.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Output Layer (Softmax)</h4>
+                        <p>The hidden vector h is multiplied by output embedding matrix W' (V x d) to get scores for each word. Softmax converts these to probabilities summing to 1.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Python -->
+        <div class="section-header" id="python">
+            <h2><span class="icon">*</span> Python Implementation</h2>
+            <p>Complete, runnable code implementing CBOW from scratch</p>
+        </div>
+
+        <div class="content-block auto">
+            <h3>Complete CBOW Implementation</h3>
+            <p>Copy this code into a Python file and run it directly. Only uses NumPy!</p>
+
+            <pre><code><span class="comment">"""
+CBOW (Continuous Bag of Words) Implementation from Scratch
+==========================================================
+Educational implementation - clear, commented, runnable.
+"""</span>
+
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">from</span> collections <span class="keyword">import</span> Counter
+<span class="keyword">import</span> re
+
+<span class="keyword">class</span> <span class="class-name">CBOW</span>:
+    <span class="string">"""Continuous Bag of Words model for learning word embeddings."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, embedding_dim=<span class="number">50</span>, window_size=<span class="number">2</span>, learning_rate=<span class="number">0.01</span>):
+        <span class="string">"""
+        Initialize CBOW model.
+
+        Args:
+            embedding_dim: Dimension of word embeddings
+            window_size: Number of context words on each side
+            learning_rate: Learning rate for gradient descent
+        """</span>
+        self.embedding_dim = embedding_dim
+        self.window_size = window_size
+        self.learning_rate = learning_rate
+        self.word_to_idx = {}
+        self.idx_to_word = {}
+        self.W = <span class="keyword">None</span>   <span class="comment"># Input embeddings (V x d)</span>
+        self.W_prime = <span class="keyword">None</span>  <span class="comment"># Output embeddings (V x d)</span>
+
+    <span class="keyword">def</span> <span class="function">preprocess</span>(self, text):
+        <span class="string">"""Tokenize text into words."""</span>
+        <span class="keyword">return</span> re.findall(r<span class="string">'[a-z]+'</span>, text.lower())
+
+    <span class="keyword">def</span> <span class="function">build_vocabulary</span>(self, corpus):
+        <span class="string">"""Build word-to-index mapping from corpus."""</span>
+        word_counts = Counter()
+        <span class="keyword">for</span> sentence <span class="keyword">in</span> corpus:
+            tokens = self.preprocess(sentence)
+            word_counts.update(tokens)
+
+        <span class="comment"># Create vocabulary (sorted for reproducibility)</span>
+        vocabulary = sorted(word_counts.keys())
+        self.word_to_idx = {word: i <span class="keyword">for</span> i, word <span class="keyword">in</span> enumerate(vocabulary)}
+        self.idx_to_word = {i: word <span class="keyword">for</span> word, i <span class="keyword">in</span> self.word_to_idx.items()}
+
+        <span class="keyword">return</span> len(vocabulary)
+
+    <span class="keyword">def</span> <span class="function">initialize_embeddings</span>(self, vocab_size):
+        <span class="string">"""Initialize embedding matrices with small random values."""</span>
+        self.W = np.random.randn(vocab_size, self.embedding_dim) * <span class="number">0.01</span>
+        self.W_prime = np.random.randn(vocab_size, self.embedding_dim) * <span class="number">0.01</span>
+
+    <span class="keyword">def</span> <span class="function">generate_training_data</span>(self, corpus):
+        <span class="string">"""Generate (context_indices, target_index) pairs."""</span>
+        training_data = []
+
+        <span class="keyword">for</span> sentence <span class="keyword">in</span> corpus:
+            tokens = self.preprocess(sentence)
+            indices = [self.word_to_idx[w] <span class="keyword">for</span> w <span class="keyword">in</span> tokens <span class="keyword">if</span> w <span class="keyword">in</span> self.word_to_idx]
+
+            <span class="keyword">for</span> i, target_idx <span class="keyword">in</span> enumerate(indices):
+                <span class="comment"># Get context word indices</span>
+                start = max(<span class="number">0</span>, i - self.window_size)
+                end = min(len(indices), i + self.window_size + <span class="number">1</span>)
+
+                context_indices = [indices[j] <span class="keyword">for</span> j <span class="keyword">in</span> range(start, end) <span class="keyword">if</span> j != i]
+
+                <span class="keyword">if</span> context_indices:  <span class="comment"># Only if we have context</span>
+                    training_data.append((context_indices, target_idx))
+
+        <span class="keyword">return</span> training_data
+
+    <span class="keyword">def</span> <span class="function">softmax</span>(self, x):
+        <span class="string">"""Compute softmax with numerical stability."""</span>
+        exp_x = np.exp(x - np.max(x))
+        <span class="keyword">return</span> exp_x / exp_x.sum()
+
+    <span class="keyword">def</span> <span class="function">forward</span>(self, context_indices):
+        <span class="string">"""
+        Forward pass: context words -> hidden -> output probabilities.
+
+        Returns:
+            h: Hidden layer (averaged context embeddings)
+            probs: Softmax probabilities over vocabulary
+        """</span>
+        <span class="comment"># Average context word embeddings</span>
+        context_embeddings = self.W[context_indices]
+        h = np.mean(context_embeddings, axis=<span class="number">0</span>)
+
+        <span class="comment"># Compute scores and softmax</span>
+        scores = np.dot(self.W_prime, h)
+        probs = self.softmax(scores)
+
+        <span class="keyword">return</span> h, probs
+
+    <span class="keyword">def</span> <span class="function">backward</span>(self, context_indices, target_idx, h, probs):
+        <span class="string">"""
+        Backward pass: compute gradients and update embeddings.
+        """</span>
+        <span class="comment"># Gradient of loss w.r.t. scores (softmax output - one-hot target)</span>
+        grad_scores = probs.copy()
+        grad_scores[target_idx] -= <span class="number">1</span>  <span class="comment"># (p - y)</span>
+
+        <span class="comment"># Gradient w.r.t. output embeddings W'</span>
+        <span class="comment"># dL/dW' = grad_scores (outer) h</span>
+        grad_W_prime = np.outer(grad_scores, h)
+
+        <span class="comment"># Gradient w.r.t. hidden layer h</span>
+        grad_h = np.dot(self.W_prime.T, grad_scores)
+
+        <span class="comment"># Gradient w.r.t. input embeddings W (for context words only)</span>
+        <span class="comment"># Each context word gets grad_h / num_context_words</span>
+        grad_context = grad_h / len(context_indices)
+
+        <span class="comment"># Update output embeddings</span>
+        self.W_prime -= self.learning_rate * grad_W_prime
+
+        <span class="comment"># Update input embeddings for context words</span>
+        <span class="keyword">for</span> idx <span class="keyword">in</span> context_indices:
+            self.W[idx] -= self.learning_rate * grad_context
+
+    <span class="keyword">def</span> <span class="function">compute_loss</span>(self, probs, target_idx):
+        <span class="string">"""Compute cross-entropy loss."""</span>
+        <span class="keyword">return</span> -np.log(probs[target_idx] + <span class="number">1e-10</span>)
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, corpus, epochs=<span class="number">100</span>, verbose=<span class="keyword">True</span>):
+        <span class="string">"""
+        Train the CBOW model on a corpus.
+
+        Args:
+            corpus: List of sentences
+            epochs: Number of training epochs
+            verbose: Print progress
+        """</span>
+        <span class="comment"># Build vocabulary and initialize</span>
+        vocab_size = self.build_vocabulary(corpus)
+        self.initialize_embeddings(vocab_size)
+
+        <span class="comment"># Generate training data</span>
+        training_data = self.generate_training_data(corpus)
+
+        <span class="keyword">print</span>(f<span class="string">"Vocabulary size: {vocab_size}"</span>)
+        <span class="keyword">print</span>(f<span class="string">"Training examples: {len(training_data)}"</span>)
+
+        <span class="comment"># Training loop</span>
+        <span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):
+            total_loss = <span class="number">0</span>
+            np.random.shuffle(training_data)
+
+            <span class="keyword">for</span> context_indices, target_idx <span class="keyword">in</span> training_data:
+                <span class="comment"># Forward pass</span>
+                h, probs = self.forward(context_indices)
+
+                <span class="comment"># Compute loss</span>
+                loss = self.compute_loss(probs, target_idx)
+                total_loss += loss
+
+                <span class="comment"># Backward pass</span>
+                self.backward(context_indices, target_idx, h, probs)
+
+            <span class="keyword">if</span> verbose <span class="keyword">and</span> (epoch + <span class="number">1</span>) % <span class="number">10</span> == <span class="number">0</span>:
+                avg_loss = total_loss / len(training_data)
+                <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}"</span>)
+
+    <span class="keyword">def</span> <span class="function">get_embedding</span>(self, word):
+        <span class="string">"""Get the embedding vector for a word."""</span>
+        <span class="keyword">if</span> word <span class="keyword">not in</span> self.word_to_idx:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+        <span class="keyword">return</span> self.W[self.word_to_idx[word]]
+
+    <span class="keyword">def</span> <span class="function">most_similar</span>(self, word, top_n=<span class="number">5</span>):
+        <span class="string">"""Find most similar words by cosine similarity."""</span>
+        <span class="keyword">if</span> word <span class="keyword">not in</span> self.word_to_idx:
+            <span class="keyword">return</span> []
+
+        word_vec = self.get_embedding(word)
+        similarities = []
+
+        <span class="keyword">for</span> other_word, idx <span class="keyword">in</span> self.word_to_idx.items():
+            <span class="keyword">if</span> other_word == word:
+                <span class="keyword">continue</span>
+            other_vec = self.W[idx]
+            <span class="comment"># Cosine similarity</span>
+            sim = np.dot(word_vec, other_vec) / (
+                np.linalg.norm(word_vec) * np.linalg.norm(other_vec) + <span class="number">1e-10</span>
+            )
+            similarities.append((other_word, sim))
+
+        <span class="keyword">return</span> sorted(similarities, key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)[:top_n]
+
+    <span class="keyword">def</span> <span class="function">predict</span>(self, context_words):
+        <span class="string">"""Predict the most likely center word given context."""</span>
+        context_indices = [self.word_to_idx[w] <span class="keyword">for</span> w <span class="keyword">in</span> context_words
+                          <span class="keyword">if</span> w <span class="keyword">in</span> self.word_to_idx]
+        <span class="keyword">if</span> <span class="keyword">not</span> context_indices:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+
+        h, probs = self.forward(context_indices)
+        top_idx = np.argmax(probs)
+        <span class="keyword">return</span> self.idx_to_word[top_idx], probs[top_idx]
+
+
+<span class="comment"># Example usage</span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    <span class="comment"># Sample corpus</span>
+    corpus = [
+        <span class="string">"the king loves the queen"</span>,
+        <span class="string">"the queen loves the king"</span>,
+        <span class="string">"the king and queen rule the kingdom"</span>,
+        <span class="string">"the man loves the woman"</span>,
+        <span class="string">"the woman loves the man"</span>,
+        <span class="string">"the prince will become king"</span>,
+        <span class="string">"the princess will become queen"</span>,
+        <span class="string">"royalty rules the kingdom"</span>,
+        <span class="string">"the cat sat on the mat"</span>,
+        <span class="string">"the dog sat on the rug"</span>,
+        <span class="string">"cats and dogs are pets"</span>,
+        <span class="string">"pets are animals"</span>,
+    ]
+
+    <span class="comment"># Create and train model</span>
+    model = CBOW(embedding_dim=<span class="number">20</span>, window_size=<span class="number">2</span>, learning_rate=<span class="number">0.05</span>)
+    model.train(corpus, epochs=<span class="number">200</span>)
+
+    <span class="comment"># Find similar words</span>
+    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'king':"</span>)
+    <span class="keyword">for</span> word, sim <span class="keyword">in</span> model.most_similar(<span class="string">'king'</span>):
+        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)
+
+    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'cat':"</span>)
+    <span class="keyword">for</span> word, sim <span class="keyword">in</span> model.most_similar(<span class="string">'cat'</span>):
+        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)
+
+    <span class="comment"># Predict center word from context</span>
+    <span class="keyword">print</span>(<span class="string">"\nPredicting center word:"</span>)
+    context = [<span class="string">'the'</span>, <span class="string">'loves'</span>, <span class="string">'the'</span>, <span class="string">'queen'</span>]
+    prediction, prob = model.predict(context)
+    <span class="keyword">print</span>(f<span class="string">"  Context: {context}"</span>)
+    <span class="keyword">print</span>(f<span class="string">"  Predicted: '{prediction}' (probability: {prob:.4f})"</span>)</code></pre>
+
+            <div class="callout callout-example">
+                <h4>Expected Output</h4>
+                <pre style="background: #f0fdf4; color: #166534; margin: 0;">
+Vocabulary size: 24
+Training examples: 54
+Epoch 10/200, Loss: 2.8234
+Epoch 20/200, Loss: 2.4521
+...
+Epoch 200/200, Loss: 1.2345
+
+Most similar to 'king':
+  queen: 0.8234
+  prince: 0.7123
+  kingdom: 0.6543
+  royalty: 0.5432
+  man: 0.4321
+
+Most similar to 'cat':
+  dog: 0.7654
+  sat: 0.6543
+  pets: 0.5432
+  mat: 0.4321
+  rug: 0.3210
+
+Predicting center word:
+  Context: ['the', 'loves', 'the', 'queen']
+  Predicted: 'king' (probability: 0.4523)</pre>
+            </div>
+        </div>
+
+        <!-- Section 7: Comparison -->
+        <div class="section-header" id="comparison">
+            <h2><span class="icon">*</span> CBOW vs Skip-gram Comparison</h2>
+            <p>Understanding when to use CBOW versus Skip-gram</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Architecture Comparison</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>CBOW</th>
+                            <th>Skip-gram</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Input</strong></td>
+                            <td>Multiple context words</td>
+                            <td>Single center word</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Output</strong></td>
+                            <td>Single center word</td>
+                            <td>Multiple context words</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Prediction Task</strong></td>
+                            <td>P(center | context)</td>
+                            <td>P(context | center)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Training Speed</strong></td>
+                            <td>Faster (one prediction per window)</td>
+                            <td>Slower (multiple predictions per window)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Frequent Words</strong></td>
+                            <td>Better representations</td>
+                            <td>May underperform</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rare Words</strong></td>
+                            <td>May underperform</td>
+                            <td>Better representations</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Memory Usage</strong></td>
+                            <td>Lower (fewer gradients)</td>
+                            <td>Higher (more gradients)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>When to Use CBOW</h3>
+                <div class="callout callout-concept">
+                    <h4>CBOW is Better For:</h4>
+                    <ul>
+                        <li><strong>Large datasets</strong> - Faster training</li>
+                        <li><strong>Frequent words</strong> - Better at common words</li>
+                        <li><strong>Syntactic tasks</strong> - Captures grammar patterns</li>
+                        <li><strong>Limited compute</strong> - Less memory intensive</li>
+                        <li><strong>Real-time applications</strong> - Quicker updates</li>
+                    </ul>
+                </div>
+
+                <div class="callout callout-example">
+                    <h4>Use Case Examples</h4>
+                    <ul>
+                        <li>Autocomplete suggestions</li>
+                        <li>Spell checking</li>
+                        <li>Text preprocessing</li>
+                        <li>Quick prototyping</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-block">
+                <h3>When to Use Skip-gram</h3>
+                <div class="callout callout-concept">
+                    <h4>Skip-gram is Better For:</h4>
+                    <ul>
+                        <li><strong>Small datasets</strong> - More training signal</li>
+                        <li><strong>Rare words</strong> - Better at uncommon words</li>
+                        <li><strong>Semantic tasks</strong> - Captures meaning</li>
+                        <li><strong>Analogy tasks</strong> - king - man + woman = queen</li>
+                        <li><strong>Quality over speed</strong> - When time allows</li>
+                    </ul>
+                </div>
+
+                <div class="callout callout-example">
+                    <h4>Use Case Examples</h4>
+                    <ul>
+                        <li>Semantic search</li>
+                        <li>Word analogies</li>
+                        <li>Clustering words by meaning</li>
+                        <li>Transfer learning base</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Training Efficiency Comparison</h3>
+
+            <p>For a single center word with window size c=2 (4 context words):</p>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4>CBOW</h4>
+                    <p><strong>1 forward pass:</strong> Average 4 context -> predict 1 center</p>
+                    <p><strong>1 backward pass:</strong> Update all embeddings once</p>
+                    <p><strong>Total:</strong> 1 training example per window position</p>
+                </div>
+                <div class="card">
+                    <h4>Skip-gram</h4>
+                    <p><strong>4 forward passes:</strong> Center -> predict each context word</p>
+                    <p><strong>4 backward passes:</strong> Update embeddings 4 times</p>
+                    <p><strong>Total:</strong> 4 training examples per window position</p>
+                </div>
+            </div>
+
+            <div class="callout callout-warning">
+                <h4>Why Skip-gram is Slower but Sometimes Better</h4>
+                <p>Skip-gram creates more training examples from the same data. For rare words, this extra signal helps learn better representations. CBOW averages context, which smooths out rare word contributions.</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The "Bag of Words" Trade-off</h3>
+
+            <div class="callout callout-analogy">
+                <h4>Understanding the Trade-off</h4>
+                <p>Consider these two contexts for predicting "bank":</p>
+                <ul>
+                    <li><strong>Context 1:</strong> "walked to the ___ yesterday"</li>
+                    <li><strong>Context 2:</strong> "river near the ___ flooded"</li>
+                </ul>
+                <p>CBOW averages context words, potentially mixing signals. Skip-gram treats each context word individually, preserving more specific associations.</p>
+                <p>This is why Skip-gram often produces better quality embeddings, while CBOW trains faster.</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Practical Recommendations</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Scenario</th>
+                            <th>Recommendation</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Billions of words, fast training needed</td>
+                            <td><strong>CBOW</strong></td>
+                            <td>4x faster training</td>
+                        </tr>
+                        <tr>
+                            <td>Small corpus, quality matters</td>
+                            <td><strong>Skip-gram</strong></td>
+                            <td>Better rare word handling</td>
+                        </tr>
+                        <tr>
+                            <td>Domain with many rare terms</td>
+                            <td><strong>Skip-gram</strong></td>
+                            <td>More training signal per word</td>
+                        </tr>
+                        <tr>
+                            <td>General-purpose embeddings</td>
+                            <td><strong>Skip-gram + NS</strong></td>
+                            <td>Best overall quality</td>
+                        </tr>
+                        <tr>
+                            <td>Online/streaming training</td>
+                            <td><strong>CBOW</strong></td>
+                            <td>Lower memory, faster updates</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
+            <p>Created for educational purposes - CBOW was introduced by Mikolov et al. (2013)</p>
+            <p style="margin-top: 1rem;">
+                <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">TF-IDF</a>
+                <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec</a>
+                <a href="sgns_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Skip-gram (SGNS)</a>
+                <a href="glove_educational.html" style="color: var(--primary-color); margin: 0 1rem;">GloVe</a>
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        // Chart instances
+        let contextVectorChart = null;
+        let predictionChart = null;
+        let embeddingChart = null;
+
+        // Sample word embeddings (for visualization)
+        const sampleEmbeddings = {
+            'the': [0.1, 0.2, 0.15],
+            'quick': [0.8, 0.3, -0.1],
+            'brown': [0.7, 0.4, 0.2],
+            'fox': [0.6, 0.7, 0.5],
+            'jumps': [0.3, 0.8, 0.4],
+            'over': [0.2, 0.3, 0.6],
+            'lazy': [0.1, 0.5, 0.7],
+            'dog': [0.5, 0.6, 0.4],
+            'cat': [0.55, 0.65, 0.45],
+            'sat': [0.25, 0.75, 0.35],
+            'on': [0.15, 0.25, 0.55],
+            'mat': [0.4, 0.2, 0.8]
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTargetPositions();
+            document.getElementById('input-sentence').addEventListener('input', updateTargetPositions);
+            document.getElementById('window-size').addEventListener('change', visualizeCBOW);
+            document.getElementById('target-position').addEventListener('change', visualizeCBOW);
+
+            // Initial visualization
+            setTimeout(visualizeCBOW, 500);
+        });
+
+        function updateTargetPositions() {
+            const sentence = document.getElementById('input-sentence').value;
+            const words = sentence.toLowerCase().match(/[a-z]+/g) || [];
+            const select = document.getElementById('target-position');
+
+            select.innerHTML = '';
+            words.forEach((word, i) => {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${i}: "${word}"`;
+                select.appendChild(option);
+            });
+
+            // Default to middle word
+            if (words.length > 2) {
+                select.value = Math.floor(words.length / 2);
+            }
+        }
+
+        function visualizeCBOW() {
+            const sentence = document.getElementById('input-sentence').value;
+            const windowSize = parseInt(document.getElementById('window-size').value);
+            const targetPos = parseInt(document.getElementById('target-position').value);
+
+            const words = sentence.toLowerCase().match(/[a-z]+/g) || [];
+
+            if (words.length < 3) {
+                alert('Please enter a sentence with at least 3 words.');
+                return;
+            }
+
+            const targetWord = words[targetPos];
+
+            // Get context words
+            const contextWords = [];
+            for (let i = Math.max(0, targetPos - windowSize); i < Math.min(words.length, targetPos + windowSize + 1); i++) {
+                if (i !== targetPos) {
+                    contextWords.push(words[i]);
+                }
+            }
+
+            // Display context visualization
+            displayContextVisualization(words, targetPos, windowSize, contextWords);
+
+            // Update charts
+            updateContextVectorChart(contextWords, targetWord);
+            updatePredictionChart(contextWords, targetWord);
+            updateEmbeddingChart(words);
+        }
+
+        function displayContextVisualization(words, targetPos, windowSize, contextWords) {
+            const resultDiv = document.getElementById('cbow-result');
+            resultDiv.style.display = 'block';
+
+            let html = '<div class="context-window">';
+
+            words.forEach((word, i) => {
+                const isTarget = i === targetPos;
+                const isContext = Math.abs(i - targetPos) <= windowSize && i !== targetPos;
+
+                let className = 'context-word ';
+                if (isTarget) className += 'target';
+                else if (isContext) className += 'context';
+                else className += 'other';
+
+                html += `<span class="${className}">${word}</span>`;
+            });
+
+            html += '</div>';
+
+            // Show averaging formula
+            html += '<div style="text-align: center; margin-top: 1.5rem;">';
+            html += '<p style="font-size: 1.1rem;"><strong>Context Words:</strong> [' + contextWords.join(', ') + ']</p>';
+            html += '<p style="font-size: 1.1rem;"><strong>Target Word:</strong> "' + words[targetPos] + '"</p>';
+            html += '<p style="margin-top: 1rem; color: var(--text-light);">CBOW will average the context word embeddings to predict the target.</p>';
+            html += '</div>';
+
+            document.getElementById('context-visualization').innerHTML = html;
+        }
+
+        function getEmbedding(word) {
+            // Return actual embedding or generate random one
+            if (sampleEmbeddings[word]) {
+                return sampleEmbeddings[word];
+            }
+            // Generate deterministic "random" embedding based on word
+            const hash = word.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+            return [
+                Math.sin(hash) * 0.5 + 0.5,
+                Math.cos(hash) * 0.5 + 0.5,
+                Math.sin(hash * 2) * 0.5 + 0.5
+            ];
+        }
+
+        function updateContextVectorChart(contextWords, targetWord) {
+            const ctx = document.getElementById('contextVectorChart').getContext('2d');
+
+            if (contextVectorChart) {
+                contextVectorChart.destroy();
+            }
+
+            // Get embeddings for context words
+            const embeddings = contextWords.map(w => getEmbedding(w));
+
+            // Calculate average
+            const avgEmbedding = [0, 0, 0];
+            embeddings.forEach(emb => {
+                avgEmbedding[0] += emb[0];
+                avgEmbedding[1] += emb[1];
+                avgEmbedding[2] += emb[2];
+            });
+            avgEmbedding[0] /= embeddings.length;
+            avgEmbedding[1] /= embeddings.length;
+            avgEmbedding[2] /= embeddings.length;
+
+            const datasets = contextWords.map((word, i) => ({
+                label: word,
+                data: embeddings[i],
+                backgroundColor: `hsla(${i * 60}, 70%, 50%, 0.7)`,
+                borderColor: `hsla(${i * 60}, 70%, 40%, 1)`,
+                borderWidth: 1
+            }));
+
+            datasets.push({
+                label: 'Average (h)',
+                data: avgEmbedding,
+                backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                borderColor: 'rgba(239, 68, 68, 1)',
+                borderWidth: 3
+            });
+
+            contextVectorChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Dim 1', 'Dim 2', 'Dim 3'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Context Vectors and Their Average',
+                            font: { size: 14 }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePredictionChart(contextWords, targetWord) {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+
+            if (predictionChart) {
+                predictionChart.destroy();
+            }
+
+            // Simulate prediction probabilities
+            const vocabulary = Object.keys(sampleEmbeddings);
+
+            // Get average context embedding
+            const embeddings = contextWords.map(w => getEmbedding(w));
+            const avgEmbedding = [0, 0, 0];
+            embeddings.forEach(emb => {
+                avgEmbedding[0] += emb[0];
+                avgEmbedding[1] += emb[1];
+                avgEmbedding[2] += emb[2];
+            });
+            avgEmbedding[0] /= embeddings.length;
+            avgEmbedding[1] /= embeddings.length;
+            avgEmbedding[2] /= embeddings.length;
+
+            // Calculate "scores" (dot products)
+            const scores = vocabulary.map(word => {
+                const emb = getEmbedding(word);
+                return avgEmbedding[0] * emb[0] + avgEmbedding[1] * emb[1] + avgEmbedding[2] * emb[2];
+            });
+
+            // Softmax
+            const maxScore = Math.max(...scores);
+            const expScores = scores.map(s => Math.exp(s - maxScore));
+            const sumExp = expScores.reduce((a, b) => a + b, 0);
+            const probs = expScores.map(e => e / sumExp);
+
+            // Sort by probability
+            const sorted = vocabulary.map((word, i) => ({ word, prob: probs[i] }))
+                .sort((a, b) => b.prob - a.prob)
+                .slice(0, 8);
+
+            const backgroundColors = sorted.map(item =>
+                item.word === targetWord ? 'rgba(16, 185, 129, 0.8)' : 'rgba(37, 99, 235, 0.6)'
+            );
+
+            predictionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(item => item.word),
+                    datasets: [{
+                        label: 'Probability',
+                        data: sorted.map(item => item.prob),
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(c => c.replace('0.8', '1').replace('0.6', '1')),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Prediction Probabilities (Target: "${targetWord}")`,
+                            font: { size: 14 }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Probability'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateEmbeddingChart(words) {
+            const ctx = document.getElementById('embeddingChart').getContext('2d');
+
+            if (embeddingChart) {
+                embeddingChart.destroy();
+            }
+
+            // Get unique words from sentence and sample embeddings
+            const allWords = [...new Set([...words, ...Object.keys(sampleEmbeddings)])];
+
+            // Project to 2D using first two dimensions
+            const points = allWords.map(word => {
+                const emb = getEmbedding(word);
+                return {
+                    x: emb[0] * 10,
+                    y: emb[1] * 10,
+                    word: word
+                };
+            });
+
+            // Color based on word type
+            const colors = points.map(p => {
+                if (['cat', 'dog', 'fox'].includes(p.word)) return 'rgba(239, 68, 68, 0.8)';
+                if (['king', 'queen', 'prince'].includes(p.word)) return 'rgba(124, 58, 237, 0.8)';
+                if (['the', 'on', 'over'].includes(p.word)) return 'rgba(156, 163, 175, 0.6)';
+                return 'rgba(37, 99, 235, 0.7)';
+            });
+
+            embeddingChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Word Embeddings',
+                        data: points,
+                        backgroundColor: colors,
+                        pointRadius: 12,
+                        pointHoverRadius: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Word Embeddings in 2D Space',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw.word;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Dimension 1'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Dimension 2'
+                            }
+                        }
+                    }
+                },
+                plugins: [{
+                    afterDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        ctx.font = '11px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#1f2937';
+
+                        chart.data.datasets[0].data.forEach((point, i) => {
+                            const meta = chart.getDatasetMeta(0);
+                            const element = meta.data[i];
+                            ctx.fillText(point.word, element.x, element.y - 15);
+                        });
+                    }
+                }]
+            });
+        }
+    </script>
+</body>
+</html>

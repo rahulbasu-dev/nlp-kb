@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive educational guide to Word2Vec word embeddings for classroom use">
+    <title>Understanding Word2Vec: A Complete Guide</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container - Wider Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks - Consistent Sizing */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-block.half {
+            min-height: calc(var(--block-min-height) / 2);
+        }
+
+        .content-block.auto {
+            min-height: auto;
+        }
+
+        /* Grid Layout for Side-by-Side Blocks */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .block-grid .content-block {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .block-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .icon {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #e0e7ff;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Flowchart */
+        .flowchart-container {
+            text-align: center;
+            margin: 2rem 0;
+            overflow-x: auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 1rem;
+        }
+
+        .flowchart-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        /* Steps */
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-color);
+            border-radius: 1rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Analogy Box */
+        .analogy-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .analogy-word {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow);
+        }
+
+        .analogy-operator {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .analogy-result {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Embedding visualization */
+        .embedding-visual {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+        }
+
+        .embedding-word {
+            font-weight: 700;
+            min-width: 80px;
+        }
+
+        .embedding-vector {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .embedding-dim {
+            width: 40px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .content-block {
+                padding: 1.5rem;
+                min-height: auto;
+            }
+
+            header {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+
+            .analogy-box {
+                flex-direction: column;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            nav {
+                display: none;
+            }
+
+            main {
+                padding-top: 1rem;
+            }
+
+            .content-block {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+
+        /* Scroll Snap for Presentation Feel */
+        @media (min-width: 1200px) {
+            main {
+                scroll-snap-type: y proximity;
+            }
+
+            .content-block, header {
+                scroll-snap-align: start;
+                scroll-margin-top: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">Word2Vec Guide</div>
+            <ul>
+                <li><a href="#intuition">Intuition</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#mathematics">Mathematics</a></li>
+                <li><a href="#flowchart">Flowchart</a></li>
+                <li><a href="#python">Python</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Header -->
+        <header>
+            <h1>Understanding Word2Vec</h1>
+            <p>Word2Vec transforms words into dense vector representations that capture semantic meaning, allowing machines to understand that "king" and "queen" are related, and enabling remarkable word analogies like king - man + woman = queen.</p>
+            <div class="subtitle">Neural Approach to Word Embeddings</div>
+        </header>
+
+        <!-- Section 1: Intuition -->
+        <div class="section-header" id="intuition">
+            <h2><span class="icon">*</span> Intuition</h2>
+            <p>Understanding the core idea behind Word2Vec through analogies and real-world examples</p>
+        </div>
+
+        <div class="content-block">
+            <h3>What is Word2Vec?</h3>
+            <p><strong>Word2Vec</strong> is a family of neural network models that learn to represent words as <span class="highlight">dense vectors</span> (lists of numbers) in a continuous vector space. Unlike sparse representations like TF-IDF where most values are zero, Word2Vec creates compact vectors where every dimension carries meaning.</p>
+
+            <p>The fundamental insight is captured by the <strong>distributional hypothesis</strong>:</p>
+
+            <div class="callout callout-concept">
+                <h4>The Distributional Hypothesis</h4>
+                <p><em>"You shall know a word by the company it keeps."</em> - J.R. Firth (1957)</p>
+                <p>Words that appear in similar contexts tend to have similar meanings. Word2Vec learns these patterns from massive amounts of text, discovering that "dog" and "cat" often appear near similar words (pet, food, vet), so they must be related.</p>
+            </div>
+
+            <div class="callout callout-analogy">
+                <h4>The Map Analogy</h4>
+                <p>Imagine creating a map where every word is a city. Word2Vec arranges these cities so that:</p>
+                <ul>
+                    <li><strong>Similar words are close together:</strong> "happy", "joyful", and "cheerful" are neighboring towns.</li>
+                    <li><strong>Relationships are preserved:</strong> The distance from "Paris" to "France" is similar to "Tokyo" to "Japan".</li>
+                    <li><strong>Directions have meaning:</strong> Moving in the "capital-of" direction from any country lands you near its capital.</li>
+                </ul>
+                <p>This "semantic map" lets computers reason about word relationships mathematically!</p>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Skip-gram Model</h3>
+                <p><strong>"Given a word, predict its context."</strong></p>
+                <p>Skip-gram takes a center word and tries to predict the words that surround it. This forces the model to learn which words tend to appear together.</p>
+
+                <div class="callout callout-example">
+                    <h4>Example</h4>
+                    <p>Given the sentence: "The quick brown <strong>fox</strong> jumps over"</p>
+                    <p>If "fox" is the center word with window size 2:</p>
+                    <ul>
+                        <li>Input: "fox"</li>
+                        <li>Predict: "quick", "brown", "jumps", "over"</li>
+                    </ul>
+                </div>
+
+                <p><strong>Best for:</strong> Rare words, smaller datasets</p>
+            </div>
+
+            <div class="content-block">
+                <h3>CBOW Model</h3>
+                <p><strong>"Given the context, predict the word."</strong></p>
+                <p>Continuous Bag of Words (CBOW) takes the surrounding words and tries to predict the center word. It's the reverse of Skip-gram.</p>
+
+                <div class="callout callout-example">
+                    <h4>Example</h4>
+                    <p>Given the sentence: "The quick brown <strong>___</strong> jumps over"</p>
+                    <p>With window size 2:</p>
+                    <ul>
+                        <li>Input: "quick", "brown", "jumps", "over"</li>
+                        <li>Predict: "fox"</li>
+                    </ul>
+                </div>
+
+                <p><strong>Best for:</strong> Frequent words, larger datasets, faster training</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Why Dense Vectors?</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Sparse (e.g., One-Hot, TF-IDF)</th>
+                            <th>Dense (Word2Vec)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Vector Size</td><td>Vocabulary size (10,000+)</td><td>Fixed small (100-300)</td></tr>
+                        <tr><td>Most Values</td><td>Zero</td><td>Non-zero</td></tr>
+                        <tr><td>Similarity</td><td>"cat" and "dog" are orthogonal</td><td>"cat" and "dog" are close</td></tr>
+                        <tr><td>Arithmetic</td><td>Meaningless</td><td>Captures relationships!</td></tr>
+                        <tr><td>Storage</td><td>Sparse matrix tricks needed</td><td>Compact</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Visualizing the Difference</h4>
+            <div class="embedding-visual">
+                <span class="embedding-word">One-Hot:</span>
+                <div class="embedding-vector">
+                    <span class="embedding-dim" style="background: #ef4444; color: white;">1</span>
+                    <span class="embedding-dim" style="background: #e5e7eb;">0</span>
+                    <span class="embedding-dim" style="background: #e5e7eb;">0</span>
+                    <span class="embedding-dim" style="background: #e5e7eb;">0</span>
+                    <span class="embedding-dim" style="background: #e5e7eb;">...</span>
+                    <span class="embedding-dim" style="background: #e5e7eb;">0</span>
+                </div>
+                <span style="color: var(--text-light);">(mostly zeros)</span>
+            </div>
+            <div class="embedding-visual">
+                <span class="embedding-word">Word2Vec:</span>
+                <div class="embedding-vector">
+                    <span class="embedding-dim" style="background: #3b82f6; color: white;">0.2</span>
+                    <span class="embedding-dim" style="background: #8b5cf6; color: white;">-0.5</span>
+                    <span class="embedding-dim" style="background: #10b981; color: white;">0.8</span>
+                    <span class="embedding-dim" style="background: #f59e0b; color: white;">-0.1</span>
+                    <span class="embedding-dim" style="background: #ef4444; color: white;">...</span>
+                    <span class="embedding-dim" style="background: #6366f1; color: white;">0.3</span>
+                </div>
+                <span style="color: var(--text-light);">(all meaningful)</span>
+            </div>
+        </div>
+
+        <!-- Section 2: Examples -->
+        <div class="section-header" id="examples">
+            <h2><span class="icon">*</span> Worked Examples</h2>
+            <p>Concrete examples of word relationships, analogies, and similarity scores</p>
+        </div>
+
+        <div class="content-block">
+            <h3>The Famous Analogy: King - Man + Woman = Queen</h3>
+
+            <p>The most celebrated property of Word2Vec is that vector arithmetic captures semantic relationships:</p>
+
+            <div class="analogy-box">
+                <span class="analogy-word">king</span>
+                <span class="analogy-operator">-</span>
+                <span class="analogy-word">man</span>
+                <span class="analogy-operator">+</span>
+                <span class="analogy-word">woman</span>
+                <span class="analogy-operator">=</span>
+                <span class="analogy-word analogy-result">queen</span>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>How Does This Work?</h4>
+                <p>The vectors encode multiple semantic dimensions. By subtracting "man" from "king", we remove the "maleness" component, leaving "royalty". Adding "woman" then gives us "female royalty" = "queen"!</p>
+                <p>In vector notation: <code class="inline-code">vec("king") - vec("man") + vec("woman") ≈ vec("queen")</code></p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>More Analogy Examples</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Relationship Type</th>
+                            <th>A</th>
+                            <th>is to</th>
+                            <th>B</th>
+                            <th>as</th>
+                            <th>C</th>
+                            <th>is to</th>
+                            <th>D (predicted)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Gender</td><td>man</td><td>:</td><td>woman</td><td>::</td><td>king</td><td>:</td><td><strong>queen</strong></td></tr>
+                        <tr><td>Country-Capital</td><td>France</td><td>:</td><td>Paris</td><td>::</td><td>Japan</td><td>:</td><td><strong>Tokyo</strong></td></tr>
+                        <tr><td>Verb Tense</td><td>walk</td><td>:</td><td>walked</td><td>::</td><td>swim</td><td>:</td><td><strong>swam</strong></td></tr>
+                        <tr><td>Comparative</td><td>big</td><td>:</td><td>bigger</td><td>::</td><td>small</td><td>:</td><td><strong>smaller</strong></td></tr>
+                        <tr><td>Superlative</td><td>good</td><td>:</td><td>best</td><td>::</td><td>bad</td><td>:</td><td><strong>worst</strong></td></tr>
+                        <tr><td>Profession</td><td>doctor</td><td>:</td><td>hospital</td><td>::</td><td>teacher</td><td>:</td><td><strong>school</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-warning">
+                <h4>Limitations</h4>
+                <p>Word2Vec analogies are not perfect. They work best for common, unambiguous relationships. The model can also encode biases present in the training data (e.g., gender stereotypes in professions).</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Word Similarity Scores</h3>
+
+            <p>Word2Vec measures similarity using <strong>cosine similarity</strong> - the cosine of the angle between two vectors. A score of 1 means identical, 0 means unrelated, -1 means opposite.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word Pair</th>
+                            <th>Cosine Similarity</th>
+                            <th>Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>cat - kitten</td><td><strong>0.89</strong></td><td>Very similar (same animal)</td></tr>
+                        <tr><td>cat - dog</td><td><strong>0.76</strong></td><td>Similar (both pets)</td></tr>
+                        <tr><td>cat - car</td><td><strong>0.21</strong></td><td>Unrelated</td></tr>
+                        <tr><td>good - bad</td><td><strong>0.72</strong></td><td>Related (antonyms share context)</td></tr>
+                        <tr><td>king - queen</td><td><strong>0.85</strong></td><td>Very similar (both royalty)</td></tr>
+                        <tr><td>Paris - France</td><td><strong>0.78</strong></td><td>Related (capital-country)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>Why Are Antonyms Similar?</h4>
+                <p>"Good" and "bad" have high similarity because they appear in similar contexts: "The movie was good/bad", "a good/bad idea". Word2Vec captures <em>relatedness</em>, not just synonymy. This is actually useful - it groups semantically related concepts together.</p>
+            </div>
+        </div>
+
+        <!-- Section 3: Visualization -->
+        <div class="section-header" id="visualization">
+            <h2><span class="icon">*</span> Interactive Visualization</h2>
+            <p>Explore word embeddings in 2D space</p>
+        </div>
+
+        <div class="content-block">
+            <div class="interactive-section">
+                <h3>Word Embedding Explorer</h3>
+                <p>This visualization shows pre-computed word embeddings projected into 2D space using t-SNE. Words that appear close together have similar meanings. Click the buttons to explore different word categories.</p>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+                    <button onclick="showCategory('animals')">Animals</button>
+                    <button onclick="showCategory('countries')">Countries</button>
+                    <button onclick="showCategory('royalty')">Royalty</button>
+                    <button onclick="showCategory('verbs')">Verbs</button>
+                    <button onclick="showCategory('all')">Show All</button>
+                </div>
+            </div>
+
+            <div class="chart-container" style="height: 500px;">
+                <canvas id="embeddingChart"></canvas>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Analogy Visualization</h3>
+                <p>See how vector arithmetic works geometrically. The vectors form parallelograms where opposite sides represent the same relationship.</p>
+                <div class="chart-container">
+                    <canvas id="analogyChart"></canvas>
+                </div>
+            </div>
+            <div class="content-block">
+                <h3>Similarity Heatmap</h3>
+                <p>Darker colors indicate higher cosine similarity between word pairs.</p>
+                <div class="chart-container">
+                    <canvas id="similarityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Mathematics -->
+        <div class="section-header" id="mathematics">
+            <h2><span class="icon">*</span> Mathematical Foundations</h2>
+            <p>The neural network architecture and loss functions behind Word2Vec</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Skip-gram Model Architecture</h3>
+            <p>Skip-gram is a shallow neural network with one hidden layer. Given a center word, it predicts the probability of each context word.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Skip-gram Objective</div>
+                \[ \text{maximize} \quad \frac{1}{T} \sum_{t=1}^{T} \sum_{-c \le j \le c, j \ne 0} \log P(w_{t+j} | w_t) \]
+                <div class="formula-description">
+                    <p>Where:</p>
+                    <ul>
+                        <li>\( T \) = Total number of words in the corpus</li>
+                        <li>\( c \) = Context window size (typically 5-10)</li>
+                        <li>\( w_t \) = Center word at position \( t \)</li>
+                        <li>\( w_{t+j} \) = Context word at offset \( j \) from center</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p>The probability is computed using the <strong>softmax function</strong> over all words in the vocabulary:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Softmax Probability</div>
+                \[ P(w_O | w_I) = \frac{\exp(\mathbf{v}'_{w_O} \cdot \mathbf{v}_{w_I})}{\sum_{w=1}^{V} \exp(\mathbf{v}'_w \cdot \mathbf{v}_{w_I})} \]
+                <div class="formula-description">
+                    <ul>
+                        <li>\( \mathbf{v}_{w_I} \) = Input (center word) embedding vector</li>
+                        <li>\( \mathbf{v}'_{w_O} \) = Output (context word) embedding vector</li>
+                        <li>\( V \) = Vocabulary size</li>
+                    </ul>
+                    <p>Note: Word2Vec maintains two sets of vectors - input and output embeddings. Usually, only the input embeddings are used after training.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The Softmax Problem and Solutions</h3>
+
+            <p>Computing the full softmax requires summing over the entire vocabulary (often 100,000+ words) for every training example. This is computationally prohibitive!</p>
+
+            <div class="callout callout-warning">
+                <h4>Computational Cost</h4>
+                <p>For vocabulary size V = 100,000 and embedding dimension d = 300:</p>
+                <p>Each softmax computation requires 100,000 dot products and exponentiations - billions of operations per training epoch!</p>
+            </div>
+
+            <h4>Solution 1: Hierarchical Softmax</h4>
+            <p>Organize vocabulary in a binary tree. Instead of computing over all words, traverse the tree from root to target word, making binary decisions at each node.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Hierarchical Softmax Complexity</div>
+                \[ O(V) \rightarrow O(\log_2 V) \]
+                <div class="formula-description">
+                    <p>Reduces computation from linear to logarithmic in vocabulary size. For V = 100,000, this is a 6,000x speedup!</p>
+                </div>
+            </div>
+
+            <h4>Solution 2: Negative Sampling (Most Popular)</h4>
+            <p>Instead of computing probabilities for all words, only update the correct word and a small sample of "negative" (incorrect) words.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Negative Sampling Objective</div>
+                \[ \log \sigma(\mathbf{v}'_{w_O} \cdot \mathbf{v}_{w_I}) + \sum_{i=1}^{k} \mathbb{E}_{w_i \sim P_n(w)} \left[ \log \sigma(-\mathbf{v}'_{w_i} \cdot \mathbf{v}_{w_I}) \right] \]
+                <div class="formula-description">
+                    <ul>
+                        <li>\( \sigma(x) = \frac{1}{1 + e^{-x}} \) is the sigmoid function</li>
+                        <li>\( k \) = Number of negative samples (typically 5-20)</li>
+                        <li>\( P_n(w) \) = Noise distribution (usually \( U(w)^{3/4} / Z \) )</li>
+                    </ul>
+                    <p>The model learns to distinguish real context pairs from random noise pairs.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>CBOW Model Architecture</h3>
+            <p>CBOW reverses Skip-gram: it predicts the center word from the surrounding context words.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">CBOW Objective</div>
+                \[ \text{maximize} \quad \frac{1}{T} \sum_{t=1}^{T} \log P(w_t | w_{t-c}, \ldots, w_{t-1}, w_{t+1}, \ldots, w_{t+c}) \]
+                <div class="formula-description">
+                    <p>The context representation is typically the <strong>average</strong> of all context word vectors:</p>
+                    \[ \mathbf{h} = \frac{1}{2c} \sum_{-c \le j \le c, j \ne 0} \mathbf{v}_{w_{t+j}} \]
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Skip-gram</th>
+                            <th>CBOW</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Input</td><td>Center word</td><td>Context words (averaged)</td></tr>
+                        <tr><td>Output</td><td>Context words</td><td>Center word</td></tr>
+                        <tr><td>Training Speed</td><td>Slower</td><td>Faster</td></tr>
+                        <tr><td>Rare Words</td><td>Better</td><td>Worse</td></tr>
+                        <tr><td>Training Pairs</td><td>More (one per context word)</td><td>Fewer (one per window)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Cosine Similarity</h3>
+            <p>Word similarity is measured using cosine similarity - the cosine of the angle between two vectors:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Cosine Similarity</div>
+                \[ \text{cos}(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{||\mathbf{A}|| \cdot ||\mathbf{B}||} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \cdot \sqrt{\sum_{i=1}^{n} B_i^2}} \]
+                <div class="formula-description">
+                    <ul>
+                        <li>Result ranges from -1 (opposite) to 1 (identical)</li>
+                        <li>0 indicates orthogonal/unrelated vectors</li>
+                        <li>Independent of vector magnitude (focuses on direction)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Flowchart -->
+        <div class="section-header" id="flowchart">
+            <h2><span class="icon">*</span> Word2Vec Training Pipeline</h2>
+            <p>Visual representation of the complete Word2Vec training process</p>
+        </div>
+
+        <div class="content-block">
+            <div class="flowchart-container">
+                <svg viewBox="0 0 1000 850" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6"/>
+                            <stop offset="100%" style="stop-color:#2563eb"/>
+                        </linearGradient>
+                        <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8b5cf6"/>
+                            <stop offset="100%" style="stop-color:#7c3aed"/>
+                        </linearGradient>
+                        <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#10b981"/>
+                            <stop offset="100%" style="stop-color:#059669"/>
+                        </linearGradient>
+                        <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f59e0b"/>
+                            <stop offset="100%" style="stop-color:#d97706"/>
+                        </linearGradient>
+                        <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ef4444"/>
+                            <stop offset="100%" style="stop-color:#dc2626"/>
+                        </linearGradient>
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+                        </filter>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Input -->
+                    <ellipse cx="500" cy="40" rx="150" ry="35" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="45" text-anchor="middle" fill="white" font-weight="bold" font-size="16">TEXT CORPUS</text>
+
+                    <path d="M500 75 L500 110" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Preprocessing -->
+                    <rect x="300" y="120" width="400" height="70" rx="12" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="150" text-anchor="middle" fill="white" font-weight="bold" font-size="15">1. PREPROCESSING</text>
+                    <text x="500" y="172" text-anchor="middle" fill="white" font-size="12">Tokenize, Build Vocabulary, Subsampling</text>
+
+                    <path d="M500 190 L500 230" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Training Pairs -->
+                    <rect x="300" y="240" width="400" height="70" rx="12" fill="url(#blueGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="265" text-anchor="middle" fill="white" font-weight="bold" font-size="15">2. GENERATE TRAINING PAIRS</text>
+                    <text x="500" y="287" text-anchor="middle" fill="white" font-size="12">Sliding window: (center word, context word) pairs</text>
+
+                    <!-- Split into Skip-gram and CBOW -->
+                    <path d="M500 310 L500 350 M500 350 L280 380 M500 350 L720 380" stroke="#6b7280" stroke-width="2"/>
+
+                    <!-- Skip-gram -->
+                    <rect x="100" y="390" width="300" height="100" rx="12" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+                    <text x="250" y="420" text-anchor="middle" fill="white" font-weight="bold" font-size="15">SKIP-GRAM</text>
+                    <text x="250" y="445" text-anchor="middle" fill="white" font-size="12">Input: center word</text>
+                    <text x="250" y="465" text-anchor="middle" fill="white" font-size="12">Predict: context words</text>
+
+                    <!-- CBOW -->
+                    <rect x="600" y="390" width="300" height="100" rx="12" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+                    <text x="750" y="420" text-anchor="middle" fill="white" font-weight="bold" font-size="15">CBOW</text>
+                    <text x="750" y="445" text-anchor="middle" fill="white" font-size="12">Input: context words (avg)</text>
+                    <text x="750" y="465" text-anchor="middle" fill="white" font-size="12">Predict: center word</text>
+
+                    <!-- Arrows down -->
+                    <path d="M250 490 L250 530 M750 490 L750 530" stroke="#6b7280" stroke-width="2"/>
+
+                    <!-- Neural Network -->
+                    <rect x="100" y="540" width="300" height="80" rx="12" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="250" y="570" text-anchor="middle" fill="white" font-weight="bold" font-size="14">3a. NEURAL NETWORK</text>
+                    <text x="250" y="595" text-anchor="middle" fill="white" font-size="11">Input -> Embedding -> Output</text>
+
+                    <rect x="600" y="540" width="300" height="80" rx="12" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+                    <text x="750" y="570" text-anchor="middle" fill="white" font-weight="bold" font-size="14">3b. NEURAL NETWORK</text>
+                    <text x="750" y="595" text-anchor="middle" fill="white" font-size="11">Context Avg -> Hidden -> Output</text>
+
+                    <!-- Merge arrows -->
+                    <path d="M250 620 L250 660 L400 680 M750 620 L750 660 L600 680" stroke="#6b7280" stroke-width="2"/>
+
+                    <!-- Loss + Optimization -->
+                    <ellipse cx="500" cy="710" rx="180" ry="45" fill="url(#redGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="700" text-anchor="middle" fill="white" font-weight="bold" font-size="14">4. LOSS + OPTIMIZATION</text>
+                    <text x="500" y="720" text-anchor="middle" fill="white" font-size="11">Negative Sampling / Hierarchical Softmax</text>
+                    <text x="500" y="740" text-anchor="middle" fill="white" font-size="11">SGD / Adam optimizer</text>
+
+                    <path d="M500 755 L500 790" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                    <!-- Output -->
+                    <rect x="300" y="800" width="400" height="50" rx="12" fill="url(#greenGrad)" filter="url(#shadow)"/>
+                    <text x="500" y="830" text-anchor="middle" fill="white" font-weight="bold" font-size="16">WORD EMBEDDINGS</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Process Steps Explained</h3>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Preprocessing</h4>
+                        <p><strong>Tokenization:</strong> Split text into words. <strong>Vocabulary:</strong> Build word-to-index mapping. <strong>Subsampling:</strong> Randomly remove frequent words (like "the") to balance training.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Generate Training Pairs</h4>
+                        <p>Slide a window across the text. For each position, create (center, context) pairs. Window size c typically ranges from 2-10 words on each side.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Neural Network Forward Pass</h4>
+                        <p><strong>Skip-gram:</strong> Look up center word embedding, predict context probabilities. <strong>CBOW:</strong> Average context embeddings, predict center word probability.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Loss and Backpropagation</h4>
+                        <p>Compute loss using negative sampling (most common) or hierarchical softmax. Update embeddings via gradient descent to make correct predictions more likely.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Python -->
+        <div class="section-header" id="python">
+            <h2><span class="icon">*</span> Python Implementation</h2>
+            <p>Complete, runnable code for Word2Vec using gensim and from scratch</p>
+        </div>
+
+        <div class="content-block auto">
+            <h3>Using Gensim (Recommended for Production)</h3>
+            <p>Gensim provides an optimized, battle-tested implementation of Word2Vec.</p>
+
+            <pre><code><span class="comment">"""
+Word2Vec with Gensim
+====================
+Production-ready implementation with pre-trained models.
+"""</span>
+
+<span class="keyword">from</span> gensim.models <span class="keyword">import</span> Word2Vec
+<span class="keyword">from</span> gensim.models <span class="keyword">import</span> KeyedVectors
+
+<span class="comment"># Sample corpus (list of tokenized sentences)</span>
+corpus = [
+    [<span class="string">"the"</span>, <span class="string">"king"</span>, <span class="string">"loves"</span>, <span class="string">"the"</span>, <span class="string">"queen"</span>],
+    [<span class="string">"the"</span>, <span class="string">"queen"</span>, <span class="string">"rules"</span>, <span class="string">"the"</span>, <span class="string">"kingdom"</span>],
+    [<span class="string">"a"</span>, <span class="string">"man"</span>, <span class="string">"works"</span>, <span class="string">"in"</span>, <span class="string">"the"</span>, <span class="string">"kingdom"</span>],
+    [<span class="string">"a"</span>, <span class="string">"woman"</span>, <span class="string">"lives"</span>, <span class="string">"in"</span>, <span class="string">"the"</span>, <span class="string">"castle"</span>],
+    [<span class="string">"the"</span>, <span class="string">"prince"</span>, <span class="string">"is"</span>, <span class="string">"young"</span>],
+    [<span class="string">"the"</span>, <span class="string">"princess"</span>, <span class="string">"is"</span>, <span class="string">"beautiful"</span>],
+]
+
+<span class="comment"># Train Word2Vec model</span>
+model = Word2Vec(
+    sentences=corpus,
+    vector_size=<span class="number">100</span>,    <span class="comment"># Embedding dimension</span>
+    window=<span class="number">5</span>,            <span class="comment"># Context window size</span>
+    min_count=<span class="number">1</span>,         <span class="comment"># Minimum word frequency</span>
+    sg=<span class="number">1</span>,                <span class="comment"># 1 = Skip-gram, 0 = CBOW</span>
+    negative=<span class="number">5</span>,          <span class="comment"># Negative samples</span>
+    epochs=<span class="number">100</span>           <span class="comment"># Training iterations</span>
+)
+
+<span class="comment"># Get word vector</span>
+vector = model.wv[<span class="string">"king"</span>]
+<span class="keyword">print</span>(f<span class="string">"Vector for 'king': {vector[:5]}..."</span>)
+
+<span class="comment"># Find similar words</span>
+similar = model.wv.most_similar(<span class="string">"king"</span>, topn=<span class="number">3</span>)
+<span class="keyword">print</span>(f<span class="string">"Similar to 'king': {similar}"</span>)
+
+<span class="comment"># Word analogy: king - man + woman = ?</span>
+result = model.wv.most_similar(
+    positive=[<span class="string">"king"</span>, <span class="string">"woman"</span>],
+    negative=[<span class="string">"man"</span>],
+    topn=<span class="number">1</span>
+)
+<span class="keyword">print</span>(f<span class="string">"king - man + woman = {result}"</span>)
+
+<span class="comment"># Compute similarity between two words</span>
+sim = model.wv.similarity(<span class="string">"king"</span>, <span class="string">"queen"</span>)
+<span class="keyword">print</span>(f<span class="string">"Similarity(king, queen): {sim:.4f}"</span>)
+
+<span class="comment"># Save and load model</span>
+model.save(<span class="string">"word2vec.model"</span>)
+loaded_model = Word2Vec.load(<span class="string">"word2vec.model"</span>)
+
+<span class="comment"># Using pre-trained Google News vectors (3 million words, 300 dimensions)</span>
+<span class="comment"># Download from: https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM</span>
+<span class="comment"># vectors = KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin', binary=True)</span></code></pre>
+        </div>
+
+        <div class="content-block auto">
+            <h3>Word2Vec from Scratch (Educational)</h3>
+            <p>A simplified Skip-gram implementation with negative sampling to understand the core concepts.</p>
+
+            <pre><code><span class="comment">"""
+Word2Vec Skip-gram from Scratch
+================================
+Educational implementation showing core concepts.
+"""</span>
+
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">from</span> collections <span class="keyword">import</span> Counter
+<span class="keyword">import</span> random
+
+<span class="keyword">class</span> <span class="class-name">Word2VecSkipGram</span>:
+    <span class="string">"""Simplified Skip-gram with Negative Sampling."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, embedding_dim=<span class="number">50</span>, window_size=<span class="number">2</span>,
+                 neg_samples=<span class="number">5</span>, learning_rate=<span class="number">0.01</span>):
+        self.embedding_dim = embedding_dim
+        self.window_size = window_size
+        self.neg_samples = neg_samples
+        self.lr = learning_rate
+
+    <span class="keyword">def</span> <span class="function">build_vocab</span>(self, sentences):
+        <span class="string">"""Build vocabulary from sentences."""</span>
+        word_counts = Counter(w <span class="keyword">for</span> s <span class="keyword">in</span> sentences <span class="keyword">for</span> w <span class="keyword">in</span> s)
+        self.vocab = sorted(word_counts.keys())
+        self.word2idx = {w: i <span class="keyword">for</span> i, w <span class="keyword">in</span> enumerate(self.vocab)}
+        self.idx2word = {i: w <span class="keyword">for</span> w, i <span class="keyword">in</span> self.word2idx.items()}
+        self.vocab_size = len(self.vocab)
+
+        <span class="comment"># Negative sampling distribution: P(w)^0.75</span>
+        counts = np.array([word_counts[w] <span class="keyword">for</span> w <span class="keyword">in</span> self.vocab])
+        self.neg_dist = np.power(counts, <span class="number">0.75</span>)
+        self.neg_dist /= self.neg_dist.sum()
+
+    <span class="keyword">def</span> <span class="function">init_embeddings</span>(self):
+        <span class="string">"""Initialize embedding matrices."""</span>
+        <span class="comment"># Input embeddings (center words)</span>
+        self.W_in = np.random.randn(self.vocab_size, self.embedding_dim) * <span class="number">0.01</span>
+        <span class="comment"># Output embeddings (context words)</span>
+        self.W_out = np.random.randn(self.vocab_size, self.embedding_dim) * <span class="number">0.01</span>
+
+    <span class="keyword">def</span> <span class="function">generate_training_pairs</span>(self, sentences):
+        <span class="string">"""Generate (center, context) training pairs."""</span>
+        pairs = []
+        <span class="keyword">for</span> sentence <span class="keyword">in</span> sentences:
+            indices = [self.word2idx[w] <span class="keyword">for</span> w <span class="keyword">in</span> sentence <span class="keyword">if</span> w <span class="keyword">in</span> self.word2idx]
+            <span class="keyword">for</span> i, center <span class="keyword">in</span> enumerate(indices):
+                <span class="keyword">for</span> j <span class="keyword">in</span> range(max(<span class="number">0</span>, i-self.window_size),
+                               min(len(indices), i+self.window_size+<span class="number">1</span>)):
+                    <span class="keyword">if</span> i != j:
+                        pairs.append((center, indices[j]))
+        <span class="keyword">return</span> pairs
+
+    <span class="keyword">def</span> <span class="function">sigmoid</span>(self, x):
+        <span class="string">"""Numerically stable sigmoid."""</span>
+        <span class="keyword">return</span> np.where(x >= <span class="number">0</span>,
+                        <span class="number">1</span> / (<span class="number">1</span> + np.exp(-x)),
+                        np.exp(x) / (<span class="number">1</span> + np.exp(x)))
+
+    <span class="keyword">def</span> <span class="function">train_pair</span>(self, center_idx, context_idx):
+        <span class="string">"""Train on one (center, context) pair with negative sampling."""</span>
+        <span class="comment"># Get center word embedding</span>
+        h = self.W_in[center_idx]
+
+        <span class="comment"># Positive sample: context word (label = 1)</span>
+        v_pos = self.W_out[context_idx]
+        score_pos = self.sigmoid(np.dot(h, v_pos))
+        grad_pos = (score_pos - <span class="number">1</span>) * h
+
+        <span class="comment"># Negative samples: random words (label = 0)</span>
+        neg_indices = np.random.choice(self.vocab_size, self.neg_samples,
+                                       p=self.neg_dist)
+        grad_h = (score_pos - <span class="number">1</span>) * v_pos
+
+        <span class="keyword">for</span> neg_idx <span class="keyword">in</span> neg_indices:
+            <span class="keyword">if</span> neg_idx == context_idx:
+                <span class="keyword">continue</span>
+            v_neg = self.W_out[neg_idx]
+            score_neg = self.sigmoid(np.dot(h, v_neg))
+            grad_neg = score_neg * h
+            grad_h += score_neg * v_neg
+            <span class="comment"># Update negative output embedding</span>
+            self.W_out[neg_idx] -= self.lr * grad_neg
+
+        <span class="comment"># Update positive output embedding</span>
+        self.W_out[context_idx] -= self.lr * grad_pos
+        <span class="comment"># Update input embedding</span>
+        self.W_in[center_idx] -= self.lr * grad_h
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, sentences, epochs=<span class="number">10</span>):
+        <span class="string">"""Train the model."""</span>
+        self.build_vocab(sentences)
+        self.init_embeddings()
+        pairs = self.generate_training_pairs(sentences)
+
+        <span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):
+            random.shuffle(pairs)
+            <span class="keyword">for</span> center, context <span class="keyword">in</span> pairs:
+                self.train_pair(center, context)
+            <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1}/{epochs} completed"</span>)
+
+    <span class="keyword">def</span> <span class="function">get_embedding</span>(self, word):
+        <span class="string">"""Get embedding for a word."""</span>
+        <span class="keyword">if</span> word <span class="keyword">not in</span> self.word2idx:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+        <span class="keyword">return</span> self.W_in[self.word2idx[word]]
+
+    <span class="keyword">def</span> <span class="function">similarity</span>(self, word1, word2):
+        <span class="string">"""Compute cosine similarity between two words."""</span>
+        v1, v2 = self.get_embedding(word1), self.get_embedding(word2)
+        <span class="keyword">if</span> v1 <span class="keyword">is</span> <span class="keyword">None</span> <span class="keyword">or</span> v2 <span class="keyword">is</span> <span class="keyword">None</span>:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+        <span class="keyword">return</span> np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+
+    <span class="keyword">def</span> <span class="function">most_similar</span>(self, word, topn=<span class="number">5</span>):
+        <span class="string">"""Find most similar words."""</span>
+        <span class="keyword">if</span> word <span class="keyword">not in</span> self.word2idx:
+            <span class="keyword">return</span> []
+        v = self.get_embedding(word)
+        similarities = []
+        <span class="keyword">for</span> w <span class="keyword">in</span> self.vocab:
+            <span class="keyword">if</span> w != word:
+                sim = self.similarity(word, w)
+                <span class="keyword">if</span> sim <span class="keyword">is not</span> <span class="keyword">None</span>:
+                    similarities.append((w, sim))
+        <span class="keyword">return</span> sorted(similarities, key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)[:topn]
+
+<span class="comment"># Example usage</span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    sentences = [
+        [<span class="string">"the"</span>, <span class="string">"king"</span>, <span class="string">"loves"</span>, <span class="string">"the"</span>, <span class="string">"queen"</span>],
+        [<span class="string">"the"</span>, <span class="string">"queen"</span>, <span class="string">"rules"</span>, <span class="string">"the"</span>, <span class="string">"kingdom"</span>],
+        [<span class="string">"a"</span>, <span class="string">"man"</span>, <span class="string">"works"</span>, <span class="string">"in"</span>, <span class="string">"the"</span>, <span class="string">"kingdom"</span>],
+        [<span class="string">"a"</span>, <span class="string">"woman"</span>, <span class="string">"lives"</span>, <span class="string">"in"</span>, <span class="string">"the"</span>, <span class="string">"castle"</span>],
+        [<span class="string">"the"</span>, <span class="string">"prince"</span>, <span class="string">"is"</span>, <span class="string">"young"</span>],
+        [<span class="string">"the"</span>, <span class="string">"princess"</span>, <span class="string">"is"</span>, <span class="string">"beautiful"</span>],
+    ]
+
+    model = Word2VecSkipGram(embedding_dim=<span class="number">50</span>, window_size=<span class="number">2</span>)
+    model.train(sentences, epochs=<span class="number">100</span>)
+
+    <span class="keyword">print</span>(<span class="string">"\nSimilar to 'king':"</span>)
+    <span class="keyword">for</span> word, score <span class="keyword">in</span> model.most_similar(<span class="string">"king"</span>, <span class="number">3</span>):
+        <span class="keyword">print</span>(f<span class="string">"  {word}: {score:.4f}"</span>)</code></pre>
+        </div>
+
+        <div class="content-block">
+            <h3>Applications of Word2Vec</h3>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4>Semantic Search</h4>
+                    <p>Find documents containing synonyms or related terms, not just exact keyword matches. Search for "automobile" and find documents about "car".</p>
+                </div>
+                <div class="card">
+                    <h4>Recommendation Systems</h4>
+                    <p>Treat products as "words" and user sessions as "sentences" to learn item embeddings. Similar items have similar vectors.</p>
+                </div>
+                <div class="card">
+                    <h4>Named Entity Recognition</h4>
+                    <p>Use word embeddings as features for sequence labeling models. Words with similar syntactic roles cluster together.</p>
+                </div>
+                <div class="card">
+                    <h4>Machine Translation</h4>
+                    <p>Embed words from different languages into the same space. "roi" (French) and "king" (English) become neighbors.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>When to Use Word2Vec vs. Modern Alternatives</h4>
+                <ul>
+                    <li><strong>Word2Vec:</strong> Fast training, interpretable, works well for many tasks. Good baseline.</li>
+                    <li><strong>FastText:</strong> Handles out-of-vocabulary words via subword embeddings. Better for morphologically rich languages.</li>
+                    <li><strong>GloVe:</strong> Combines count-based and neural approaches. Often similar performance to Word2Vec.</li>
+                    <li><strong>BERT/GPT:</strong> Contextual embeddings (same word, different vectors by context). State-of-the-art but much heavier.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
+            <p>Created for educational purposes. Word2Vec was introduced by Mikolov et al. at Google (2013)</p>
+            <p style="margin-top: 1rem;">
+                <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">TF-IDF</a>
+                <a href="sgns_educational.html" style="color: var(--primary-color); margin: 0 1rem;">SGNS</a>
+                <a href="cbow_educational.html" style="color: var(--primary-color); margin: 0 1rem;">CBOW</a>
+                <a href="glove_educational.html" style="color: var(--primary-color); margin: 0 1rem;">GloVe</a>
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        // Pre-computed "embeddings" for visualization (t-SNE projected to 2D)
+        const wordData = {
+            animals: {
+                words: ['cat', 'dog', 'lion', 'tiger', 'elephant', 'mouse', 'bird', 'fish'],
+                positions: [
+                    {x: 2.1, y: 3.2}, {x: 2.5, y: 2.8}, {x: 1.5, y: 4.5}, {x: 1.8, y: 4.2},
+                    {x: 0.8, y: 5.0}, {x: 3.0, y: 3.5}, {x: 4.5, y: 2.0}, {x: 5.0, y: 1.5}
+                ],
+                color: 'rgba(239, 68, 68, 0.8)'
+            },
+            countries: {
+                words: ['France', 'Paris', 'Japan', 'Tokyo', 'Germany', 'Berlin', 'Italy', 'Rome'],
+                positions: [
+                    {x: 7.0, y: 6.0}, {x: 7.5, y: 5.5}, {x: 8.5, y: 7.0}, {x: 9.0, y: 6.5},
+                    {x: 6.5, y: 7.0}, {x: 7.0, y: 6.5}, {x: 8.0, y: 5.5}, {x: 8.5, y: 5.0}
+                ],
+                color: 'rgba(34, 197, 94, 0.8)'
+            },
+            royalty: {
+                words: ['king', 'queen', 'prince', 'princess', 'man', 'woman', 'boy', 'girl'],
+                positions: [
+                    {x: 4.0, y: 7.5}, {x: 5.5, y: 7.8}, {x: 3.5, y: 6.5}, {x: 5.0, y: 6.8},
+                    {x: 3.0, y: 8.5}, {x: 4.5, y: 8.8}, {x: 2.5, y: 7.8}, {x: 4.0, y: 8.2}
+                ],
+                color: 'rgba(168, 85, 247, 0.8)'
+            },
+            verbs: {
+                words: ['run', 'running', 'walk', 'walking', 'swim', 'swimming', 'fly', 'flying'],
+                positions: [
+                    {x: 1.0, y: 1.0}, {x: 1.5, y: 0.8}, {x: 2.0, y: 1.5}, {x: 2.5, y: 1.3},
+                    {x: 0.5, y: 2.0}, {x: 1.0, y: 1.8}, {x: 3.0, y: 0.5}, {x: 3.5, y: 0.3}
+                ],
+                color: 'rgba(59, 130, 246, 0.8)'
+            }
+        };
+
+        let embeddingChart = null;
+        let analogyChart = null;
+        let similarityChart = null;
+        let currentCategory = 'all';
+
+        function createDataset(category, data) {
+            return {
+                label: category.charAt(0).toUpperCase() + category.slice(1),
+                data: data.positions.map((pos, i) => ({
+                    x: pos.x,
+                    y: pos.y,
+                    label: data.words[i]
+                })),
+                backgroundColor: data.color,
+                pointRadius: 8,
+                pointHoverRadius: 12
+            };
+        }
+
+        function showCategory(category) {
+            currentCategory = category;
+            updateEmbeddingChart();
+        }
+
+        function updateEmbeddingChart() {
+            const ctx = document.getElementById('embeddingChart').getContext('2d');
+
+            if (embeddingChart) {
+                embeddingChart.destroy();
+            }
+
+            let datasets = [];
+            if (currentCategory === 'all') {
+                for (const cat in wordData) {
+                    datasets.push(createDataset(cat, wordData[cat]));
+                }
+            } else {
+                datasets.push(createDataset(currentCategory, wordData[currentCategory]));
+            }
+
+            embeddingChart = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Word Embeddings in 2D Space (t-SNE projection)',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw.label;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: currentCategory === 'all'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Dimension 1' },
+                            min: 0,
+                            max: 10
+                        },
+                        y: {
+                            title: { display: true, text: 'Dimension 2' },
+                            min: 0,
+                            max: 10
+                        }
+                    }
+                },
+                plugins: [{
+                    afterDatasetsDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        chart.data.datasets.forEach((dataset, i) => {
+                            const meta = chart.getDatasetMeta(i);
+                            meta.data.forEach((point, index) => {
+                                const data = dataset.data[index];
+                                ctx.fillStyle = '#1f2937';
+                                ctx.font = 'bold 11px Inter, sans-serif';
+                                ctx.textAlign = 'center';
+                                ctx.fillText(data.label, point.x, point.y - 12);
+                            });
+                        });
+                    }
+                }]
+            });
+        }
+
+        function createAnalogyChart() {
+            const ctx = document.getElementById('analogyChart').getContext('2d');
+
+            // Simplified analogy visualization
+            const data = {
+                datasets: [{
+                    label: 'Words',
+                    data: [
+                        {x: 2, y: 4, label: 'king'},
+                        {x: 4, y: 5, label: 'queen'},
+                        {x: 1, y: 2, label: 'man'},
+                        {x: 3, y: 3, label: 'woman'}
+                    ],
+                    backgroundColor: 'rgba(37, 99, 235, 0.8)',
+                    pointRadius: 10,
+                    pointHoverRadius: 14
+                }]
+            };
+
+            analogyChart = new Chart(ctx, {
+                type: 'scatter',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'King - Man + Woman = Queen',
+                            font: { size: 14 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ctx.raw.label
+                            }
+                        },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { min: 0, max: 6, title: { display: false } },
+                        y: { min: 0, max: 7, title: { display: false } }
+                    }
+                },
+                plugins: [{
+                    afterDatasetsDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const meta = chart.getDatasetMeta(0);
+
+                        // Draw labels
+                        meta.data.forEach((point, index) => {
+                            const data = chart.data.datasets[0].data[index];
+                            ctx.fillStyle = '#1f2937';
+                            ctx.font = 'bold 12px Inter, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(data.label, point.x, point.y - 15);
+                        });
+
+                        // Draw parallelogram lines
+                        ctx.strokeStyle = 'rgba(124, 58, 237, 0.5)';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([5, 5]);
+
+                        // king -> queen (gender transformation)
+                        ctx.beginPath();
+                        ctx.moveTo(meta.data[0].x, meta.data[0].y);
+                        ctx.lineTo(meta.data[1].x, meta.data[1].y);
+                        ctx.stroke();
+
+                        // man -> woman (gender transformation)
+                        ctx.beginPath();
+                        ctx.moveTo(meta.data[2].x, meta.data[2].y);
+                        ctx.lineTo(meta.data[3].x, meta.data[3].y);
+                        ctx.stroke();
+
+                        // king -> man (royalty removal)
+                        ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+                        ctx.beginPath();
+                        ctx.moveTo(meta.data[0].x, meta.data[0].y);
+                        ctx.lineTo(meta.data[2].x, meta.data[2].y);
+                        ctx.stroke();
+
+                        // queen -> woman (royalty removal)
+                        ctx.beginPath();
+                        ctx.moveTo(meta.data[1].x, meta.data[1].y);
+                        ctx.lineTo(meta.data[3].x, meta.data[3].y);
+                        ctx.stroke();
+
+                        ctx.setLineDash([]);
+                    }
+                }]
+            });
+        }
+
+        function createSimilarityChart() {
+            const ctx = document.getElementById('similarityChart').getContext('2d');
+            const words = ['cat', 'dog', 'king', 'queen', 'Paris', 'France'];
+
+            // Simulated similarity scores
+            const similarities = [
+                [1.00, 0.76, 0.21, 0.19, 0.12, 0.14],
+                [0.76, 1.00, 0.23, 0.22, 0.15, 0.16],
+                [0.21, 0.23, 1.00, 0.85, 0.31, 0.29],
+                [0.19, 0.22, 0.85, 1.00, 0.28, 0.26],
+                [0.12, 0.15, 0.31, 0.28, 1.00, 0.78],
+                [0.14, 0.16, 0.29, 0.26, 0.78, 1.00]
+            ];
+
+            const data = [];
+            for (let i = 0; i < words.length; i++) {
+                for (let j = 0; j < words.length; j++) {
+                    data.push({
+                        x: j,
+                        y: i,
+                        v: similarities[i][j]
+                    });
+                }
+            }
+
+            similarityChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        data: data,
+                        backgroundColor: data.map(d => `rgba(37, 99, 235, ${d.v})`),
+                        pointRadius: 22,
+                        pointStyle: 'rect'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Cosine Similarity Matrix',
+                            font: { size: 14 }
+                        },
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${words[ctx.raw.y]} - ${words[ctx.raw.x]}: ${ctx.raw.v.toFixed(2)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            min: -0.5,
+                            max: words.length - 0.5,
+                            ticks: {
+                                callback: v => words[v],
+                                font: { size: 10 }
+                            }
+                        },
+                        y: {
+                            min: -0.5,
+                            max: words.length - 0.5,
+                            ticks: {
+                                callback: v => words[v],
+                                font: { size: 10 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize charts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateEmbeddingChart();
+            createAnalogyChart();
+            createSimilarityChart();
+        });
+    </script>
+</body>
+</html>

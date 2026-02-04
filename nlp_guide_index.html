@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive NLP Knowledge Base - Educational guides for TF-IDF, Word2Vec, SGNS, CBOW, and GloVe">
+    <title>NLP Knowledge Base - Word Embeddings Guide</title>
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            min-height: 100vh;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #2563eb 100%);
+            color: white;
+            padding: 6rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .hero p {
+            font-size: 1.35rem;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 0.95rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* Section Titles */
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.25rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .section-title p {
+            color: var(--text-light);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Topic Cards Grid */
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .topic-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .topic-card-header {
+            padding: 2rem;
+            color: white;
+            position: relative;
+        }
+
+        .topic-card-header.tfidf {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
+        .topic-card-header.word2vec {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        }
+
+        .topic-card-header.sgns {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .topic-card-header.cbow {
+            background: linear-gradient(135deg, #d97706, #b45309);
+        }
+
+        .topic-card-header.glove {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        .topic-card-header h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .topic-card-header .subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .topic-card-header .icon {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+
+        .topic-card-body {
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topic-card-body p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+
+        .topic-card-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-tag {
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 0.35rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .topic-card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            justify-content: center;
+        }
+
+        .topic-card-link:hover {
+            background: var(--primary-dark);
+            gap: 0.75rem;
+        }
+
+        /* Learning Path */
+        .learning-path {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 4rem;
+            box-shadow: var(--shadow);
+        }
+
+        .path-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            position: relative;
+            flex-wrap: wrap;
+        }
+
+        .path-steps::before {
+            content: '';
+            position: absolute;
+            top: 2rem;
+            left: 5%;
+            right: 5%;
+            height: 4px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed, #059669, #d97706, #dc2626);
+            border-radius: 2px;
+            z-index: 0;
+        }
+
+        .path-step {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .path-step-number {
+            width: 4rem;
+            height: 4rem;
+            background: var(--card-bg);
+            border: 4px solid var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0 auto 1rem;
+        }
+
+        .path-step:nth-child(1) .path-step-number { border-color: #2563eb; color: #2563eb; }
+        .path-step:nth-child(2) .path-step-number { border-color: #7c3aed; color: #7c3aed; }
+        .path-step:nth-child(3) .path-step-number { border-color: #059669; color: #059669; }
+        .path-step:nth-child(4) .path-step-number { border-color: #d97706; color: #d97706; }
+        .path-step:nth-child(5) .path-step-number { border-color: #dc2626; color: #dc2626; }
+
+        .path-step h4 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .path-step p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Comparison Table */
+        .comparison-section {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 4rem;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-color);
+            font-weight: 600;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        td:first-child {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Quick Start */
+        .quick-start {
+            background: linear-gradient(135deg, #1e3a8a, #7c3aed);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            color: white;
+            text-align: center;
+        }
+
+        .quick-start h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .quick-start p {
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .quick-start-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-start-link {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .quick-start-link:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .quick-start-link.primary {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .quick-start-link.primary:hover {
+            background: rgba(255,255,255,0.9);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-light);
+            border-top: 1px solid var(--border-color);
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 4rem 1.5rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .topics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            .learning-path, .comparison-section, .quick-start {
+                padding: 2rem 1.5rem;
+            }
+
+            .path-steps::before {
+                display: none;
+            }
+
+            .path-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .path-step {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>NLP Knowledge Base</h1>
+            <p>Master the fundamentals of Natural Language Processing with comprehensive, interactive guides to word embeddings and text representation.</p>
+            <div class="hero-badge">Classroom-Ready Educational Resources</div>
+        </div>
+    </section>
+
+    <main>
+        <!-- Learning Path -->
+        <section class="learning-path">
+            <div class="section-title">
+                <h2>Recommended Learning Path</h2>
+                <p>Follow this sequence for the best understanding of word representation techniques</p>
+            </div>
+
+            <div class="path-steps">
+                <div class="path-step">
+                    <div class="path-step-number">1</div>
+                    <h4>TF-IDF</h4>
+                    <p>Statistical foundations</p>
+                </div>
+                <div class="path-step">
+                    <div class="path-step-number">2</div>
+                    <h4>Word2Vec</h4>
+                    <p>Neural embeddings overview</p>
+                </div>
+                <div class="path-step">
+                    <div class="path-step-number">3</div>
+                    <h4>SGNS</h4>
+                    <p>Skip-gram deep dive</p>
+                </div>
+                <div class="path-step">
+                    <div class="path-step-number">4</div>
+                    <h4>CBOW</h4>
+                    <p>Alternative architecture</p>
+                </div>
+                <div class="path-step">
+                    <div class="path-step-number">5</div>
+                    <h4>GloVe</h4>
+                    <p>Global statistics approach</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic Cards -->
+        <div class="section-title">
+            <h2>Explore Topics</h2>
+            <p>Each guide includes intuition, examples, interactive visualizations, mathematics, flowcharts, and Python code</p>
+        </div>
+
+        <div class="topics-grid">
+            <!-- TF-IDF -->
+            <article class="topic-card">
+                <div class="topic-card-header tfidf">
+                    <h3>TF-IDF</h3>
+                    <div class="subtitle">Term Frequency-Inverse Document Frequency</div>
+                    <span class="icon">📊</span>
+                </div>
+                <div class="topic-card-body">
+                    <p>The foundational statistical technique for measuring word importance in documents. Learn how to identify distinctive terms that characterize each document in a collection.</p>
+                    <div class="topic-card-features">
+                        <span class="feature-tag">Statistical</span>
+                        <span class="feature-tag">Sparse Vectors</span>
+                        <span class="feature-tag">Search & Retrieval</span>
+                        <span class="feature-tag">Keyword Extraction</span>
+                    </div>
+                    <a href="tfidf_educational.html" class="topic-card-link">
+                        Start Learning <span>→</span>
+                    </a>
+                </div>
+            </article>
+
+            <!-- Word2Vec -->
+            <article class="topic-card">
+                <div class="topic-card-header word2vec">
+                    <h3>Word2Vec</h3>
+                    <div class="subtitle">Neural Word Embeddings</div>
+                    <span class="icon">🧠</span>
+                </div>
+                <div class="topic-card-body">
+                    <p>Revolutionary neural network approach that learns dense vector representations capturing semantic relationships. Discover how "king - man + woman = queen" becomes possible.</p>
+                    <div class="topic-card-features">
+                        <span class="feature-tag">Neural Networks</span>
+                        <span class="feature-tag">Dense Vectors</span>
+                        <span class="feature-tag">Semantic Similarity</span>
+                        <span class="feature-tag">Word Analogies</span>
+                    </div>
+                    <a href="word2vec_educational.html" class="topic-card-link">
+                        Start Learning <span>→</span>
+                    </a>
+                </div>
+            </article>
+
+            <!-- SGNS -->
+            <article class="topic-card">
+                <div class="topic-card-header sgns">
+                    <h3>Skip-gram + Negative Sampling</h3>
+                    <div class="subtitle">SGNS - Efficient Word Embedding Training</div>
+                    <span class="icon">🎯</span>
+                </div>
+                <div class="topic-card-body">
+                    <p>Deep dive into the Skip-gram architecture with negative sampling optimization. Learn how predicting context words and clever sampling tricks create powerful embeddings efficiently.</p>
+                    <div class="topic-card-features">
+                        <span class="feature-tag">Predict Context</span>
+                        <span class="feature-tag">Negative Sampling</span>
+                        <span class="feature-tag">Rare Words</span>
+                        <span class="feature-tag">Binary Classification</span>
+                    </div>
+                    <a href="sgns_educational.html" class="topic-card-link">
+                        Start Learning <span>→</span>
+                    </a>
+                </div>
+            </article>
+
+            <!-- CBOW -->
+            <article class="topic-card">
+                <div class="topic-card-header cbow">
+                    <h3>CBOW</h3>
+                    <div class="subtitle">Continuous Bag of Words</div>
+                    <span class="icon">📦</span>
+                </div>
+                <div class="topic-card-body">
+                    <p>The complementary Word2Vec architecture that predicts center words from context. Understand how averaging context vectors enables faster training and better handling of frequent words.</p>
+                    <div class="topic-card-features">
+                        <span class="feature-tag">Predict Center</span>
+                        <span class="feature-tag">Context Averaging</span>
+                        <span class="feature-tag">Fast Training</span>
+                        <span class="feature-tag">Frequent Words</span>
+                    </div>
+                    <a href="cbow_educational.html" class="topic-card-link">
+                        Start Learning <span>→</span>
+                    </a>
+                </div>
+            </article>
+
+            <!-- GloVe -->
+            <article class="topic-card">
+                <div class="topic-card-header glove">
+                    <h3>GloVe</h3>
+                    <div class="subtitle">Global Vectors for Word Representation</div>
+                    <span class="icon">🌐</span>
+                </div>
+                <div class="topic-card-body">
+                    <p>Stanford's elegant approach combining count-based and predictive methods. Learn how global co-occurrence statistics and probability ratios create meaningful word vectors.</p>
+                    <div class="topic-card-features">
+                        <span class="feature-tag">Co-occurrence Matrix</span>
+                        <span class="feature-tag">Global Statistics</span>
+                        <span class="feature-tag">Probability Ratios</span>
+                        <span class="feature-tag">Matrix Factorization</span>
+                    </div>
+                    <a href="glove_educational.html" class="topic-card-link">
+                        Start Learning <span>→</span>
+                    </a>
+                </div>
+            </article>
+        </div>
+
+        <!-- Comparison Table -->
+        <section class="comparison-section">
+            <div class="section-title">
+                <h2>Quick Comparison</h2>
+                <p>At-a-glance differences between word representation methods</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>TF-IDF</th>
+                        <th>Word2Vec</th>
+                        <th>SGNS</th>
+                        <th>CBOW</th>
+                        <th>GloVe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Type</td>
+                        <td>Statistical</td>
+                        <td>Neural</td>
+                        <td>Neural</td>
+                        <td>Neural</td>
+                        <td>Count + Neural</td>
+                    </tr>
+                    <tr>
+                        <td>Vector Type</td>
+                        <td>Sparse</td>
+                        <td>Dense</td>
+                        <td>Dense</td>
+                        <td>Dense</td>
+                        <td>Dense</td>
+                    </tr>
+                    <tr>
+                        <td>Captures Semantics</td>
+                        <td>Limited</td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Training Data</td>
+                        <td>Documents</td>
+                        <td>Text Corpus</td>
+                        <td>Text Corpus</td>
+                        <td>Text Corpus</td>
+                        <td>Co-occurrence Matrix</td>
+                    </tr>
+                    <tr>
+                        <td>Best For</td>
+                        <td>Search, Keywords</td>
+                        <td>Similarity, Analogies</td>
+                        <td>Rare Words</td>
+                        <td>Frequent Words</td>
+                        <td>Large Corpora</td>
+                    </tr>
+                    <tr>
+                        <td>Introduced</td>
+                        <td>1972</td>
+                        <td>2013</td>
+                        <td>2013</td>
+                        <td>2013</td>
+                        <td>2014</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Quick Start -->
+        <section class="quick-start">
+            <h2>Ready to Begin?</h2>
+            <p>Start with TF-IDF for foundational concepts, or jump directly to Word2Vec if you're already familiar with text statistics.</p>
+            <div class="quick-start-links">
+                <a href="tfidf_educational.html" class="quick-start-link primary">Start with TF-IDF</a>
+                <a href="word2vec_educational.html" class="quick-start-link">Jump to Word2Vec</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>NLP Knowledge Base - Educational Resources for Word Embeddings</p>
+        <p>Created for classroom use - Feel free to use, modify, and share</p>
+    </footer>
+</body>
+</html>
