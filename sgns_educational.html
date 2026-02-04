@@ -738,10 +738,12 @@
             <ul>
                 <li><a href="#intuition">Intuition</a></li>
                 <li><a href="#examples">Examples</a></li>
+                <li><a href="#numerical">Numerical</a></li>
                 <li><a href="#visualization">Visualization</a></li>
                 <li><a href="#mathematics">Mathematics</a></li>
                 <li><a href="#flowchart">Flowchart</a></li>
                 <li><a href="#python">Python</a></li>
+                <li><a href="#references">References</a></li>
             </ul>
         </div>
     </nav>
@@ -750,7 +752,7 @@
         <!-- Header -->
         <header>
             <h1>Skip-gram with Negative Sampling</h1>
-            <p>SGNS is the heart of Word2Vec - a revolutionary approach that learns word meanings by predicting context words from center words, using a clever negative sampling trick to make training tractable.</p>
+            <p>SGNS is the heart of Word2Vec [1][2] - a revolutionary approach that learns word meanings by predicting context words from center words, using a clever negative sampling trick to make training tractable.</p>
             <div class="subtitle">Neural Word Embeddings Made Efficient</div>
         </header>
 
@@ -762,9 +764,9 @@
 
         <div class="content-block">
             <h3>What is Skip-gram?</h3>
-            <p><strong>Skip-gram</strong> is a neural network architecture that learns word representations by training on a deceptively simple task: <span class="highlight">given a word, predict the words that appear nearby</span>.</p>
+            <p><strong>Skip-gram</strong> is a neural network architecture introduced by Mikolov et al. [1][2] that learns word representations by training on a deceptively simple task: <span class="highlight">given a word, predict the words that appear nearby</span>.</p>
 
-            <p>The key insight is that words appearing in similar contexts tend to have similar meanings. By learning to predict context, the model is forced to encode semantic information into the word vectors.</p>
+            <p>The key insight is that words appearing in similar contexts tend to have similar meanings - an idea known as the <em>distributional hypothesis</em>. By learning to predict context, the model is forced to encode semantic information into the word vectors.</p>
 
             <div class="callout callout-analogy">
                 <h4>The Party Guest Analogy</h4>
@@ -820,7 +822,7 @@
 
         <div class="content-block">
             <h3>The Negative Sampling Breakthrough</h3>
-            <p>Negative Sampling transforms the problem from multiclass classification (predict which of V words) into binary classification (is this pair real or fake?).</p>
+            <p>Negative Sampling, introduced in the foundational Word2Vec papers [1], transforms the problem from multiclass classification (predict which of V words) into binary classification (is this pair real or fake?). This technique was inspired by Noise Contrastive Estimation (NCE) [5], which provides a general framework for training unnormalized models.</p>
 
             <div class="callout callout-analogy">
                 <h4>The True/False Quiz Analogy</h4>
@@ -861,7 +863,7 @@
 
         <div class="content-block">
             <h3>Subsampling Frequent Words</h3>
-            <p>Common words like "the", "is", "and" appear millions of times but provide little semantic information. SGNS uses <strong>subsampling</strong> to randomly discard frequent words during training.</p>
+            <p>Common words like "the", "is", "and" appear millions of times but provide little semantic information. SGNS uses <strong>subsampling</strong> [1] to randomly discard frequent words during training.</p>
 
             <div class="formula-box">
                 <div class="formula-label">Subsampling Probability</div>
@@ -1011,6 +1013,337 @@
             </div>
         </div>
 
+        <!-- Section 2.5: Simple Numerical Examples -->
+        <div class="section-header" id="numerical">
+            <h2><span class="icon">&#128290;</span> Simple Numerical Examples</h2>
+            <p>A complete worked example with actual numbers you can verify by hand</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Tiny Corpus Example: "cat sat mat"</h3>
+            <p>Let's work through SGNS with the smallest possible meaningful example. Our corpus is a single sentence:</p>
+
+            <div class="callout callout-example">
+                <h4>The Corpus</h4>
+                <p style="font-size: 1.5rem; font-family: monospace; text-align: center; letter-spacing: 0.5rem;">"cat sat mat"</p>
+                <p style="text-align: center; margin-top: 1rem;"><strong>Vocabulary:</strong> {cat, sat, mat} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>V = 3</strong></p>
+            </div>
+
+            <h4>Step 1: Extract Context Window Pairs (window = 1)</h4>
+            <p>With a window size of 1, each word looks at its immediate neighbors:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Center Word</th>
+                            <th>Context Window</th>
+                            <th>Training Pairs Generated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>0</td>
+                            <td style="background: var(--primary-color); color: white; font-weight: bold;">cat</td>
+                            <td>[_, <span style="background: #fef08a;">sat</span>]</td>
+                            <td><span class="word-pair positive">cat -> sat</span></td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td style="background: var(--primary-color); color: white; font-weight: bold;">sat</td>
+                            <td>[<span style="background: #fef08a;">cat</span>, <span style="background: #fef08a;">mat</span>]</td>
+                            <td><span class="word-pair positive">sat -> cat</span> <span class="word-pair positive">sat -> mat</span></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td style="background: var(--primary-color); color: white; font-weight: bold;">mat</td>
+                            <td>[<span style="background: #fef08a;">sat</span>, _]</td>
+                            <td><span class="word-pair positive">mat -> sat</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p><strong>Total positive pairs:</strong> (cat, sat), (sat, cat), (sat, mat), (mat, sat) = <strong>4 pairs</strong></p>
+        </div>
+
+        <div class="content-block">
+            <h3>Step 2: Initialize Random 2D Vectors</h3>
+            <p>For visualization, we'll use 2-dimensional embeddings. We initialize two matrices: <strong>W</strong> (center word embeddings) and <strong>C</strong> (context word embeddings).</p>
+
+            <div class="block-grid">
+                <div>
+                    <h4>Center Word Matrix W (randomly initialized)</h4>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Word</th><th>w[0]</th><th>w[1]</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>cat</strong></td><td>0.5</td><td>-0.3</td></tr>
+                                <tr><td><strong>sat</strong></td><td>-0.2</td><td>0.4</td></tr>
+                                <tr><td><strong>mat</strong></td><td>0.1</td><td>0.6</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h4>Context Word Matrix C (randomly initialized)</h4>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Word</th><th>c[0]</th><th>c[1]</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>cat</strong></td><td>0.3</td><td>0.2</td></tr>
+                                <tr><td><strong>sat</strong></td><td>-0.4</td><td>0.1</td></tr>
+                                <tr><td><strong>mat</strong></td><td>0.2</td><td>-0.5</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Step 3: One Complete Training Step</h3>
+            <p>Let's train on the positive pair <strong>("cat", "sat")</strong> with one negative sample <strong>"mat"</strong>.</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Look Up Vectors</h4>
+                        <p><strong>Center word "cat":</strong> w_cat = [0.5, -0.3]</p>
+                        <p><strong>Positive context "sat":</strong> c_sat = [-0.4, 0.1]</p>
+                        <p><strong>Negative sample "mat":</strong> c_mat = [0.2, -0.5]</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Compute Dot Products (Similarity Scores)</h4>
+                        <div class="formula-box" style="text-align: left;">
+                            <p><strong>Positive pair (cat, sat):</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                score_pos = w_cat . c_sat<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = (0.5 * -0.4) + (-0.3 * 0.1)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = -0.20 + (-0.03)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <strong>-0.23</strong>
+                            </p>
+                            <p style="margin-top: 1rem;"><strong>Negative pair (cat, mat):</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                score_neg = w_cat . c_mat<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = (0.5 * 0.2) + (-0.3 * -0.5)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = 0.10 + 0.15<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <strong>0.25</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Apply Sigmoid Function</h4>
+                        <p>The sigmoid function converts scores to probabilities: sigmoid(x) = 1 / (1 + e^(-x))</p>
+                        <div class="formula-box" style="text-align: left;">
+                            <p><strong>Positive pair prediction:</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                P(real | cat, sat) = sigmoid(-0.23)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = 1 / (1 + e^0.23)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = 1 / (1 + 1.259)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <strong>0.443</strong>
+                            </p>
+                            <p style="margin-top: 1rem;"><strong>Negative pair prediction:</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                P(real | cat, mat) = sigmoid(0.25)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = 1 / (1 + e^-0.25)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = 1 / (1 + 0.779)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <strong>0.562</strong>
+                            </p>
+                        </div>
+                        <div class="callout callout-warning">
+                            <h4>Problem!</h4>
+                            <p>The model predicts 44.3% chance (cat, sat) is real, but 56.2% chance (cat, mat) is real.</p>
+                            <p>This is backwards! We want high probability for real pairs and low for fake pairs.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Compute Errors and Gradients</h4>
+                        <p>Error = prediction - target (we want to minimize this)</p>
+                        <div class="formula-box" style="text-align: left;">
+                            <p><strong>Positive pair (target = 1):</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                error_pos = 0.443 - 1 = <strong>-0.557</strong>
+                            </p>
+                            <p style="margin-top: 1rem;"><strong>Negative pair (target = 0):</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                error_neg = 0.562 - 0 = <strong>0.562</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Gradient Update with Learning Rate = 0.1</h4>
+                        <p>The gradient update rule [3] pushes vectors in the right direction:</p>
+                        <div class="formula-box" style="text-align: left;">
+                            <p><strong>Update center word "cat" (from positive pair):</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                grad_w_pos = error_pos * c_sat = -0.557 * [-0.4, 0.1] = [0.223, -0.056]<br>
+                                w_cat_new = w_cat - lr * grad_w_pos<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = [0.5, -0.3] - 0.1 * [0.223, -0.056]<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = [0.5 - 0.022, -0.3 + 0.006]<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <strong>[0.478, -0.294]</strong>
+                            </p>
+                            <p style="margin-top: 1rem;"><strong>Update center word "cat" (from negative pair):</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                grad_w_neg = error_neg * c_mat = 0.562 * [0.2, -0.5] = [0.112, -0.281]<br>
+                                w_cat_new = [0.478, -0.294] - 0.1 * [0.112, -0.281]<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = [0.478 - 0.011, -0.294 + 0.028]<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <strong>[0.467, -0.266]</strong>
+                            </p>
+                            <p style="margin-top: 1rem;"><strong>Update context word "sat" (positive):</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                grad_c_sat = error_pos * w_cat = -0.557 * [0.5, -0.3] = [-0.279, 0.167]<br>
+                                c_sat_new = [-0.4, 0.1] - 0.1 * [-0.279, 0.167]<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = [-0.4 + 0.028, 0.1 - 0.017]<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <strong>[-0.372, 0.083]</strong>
+                            </p>
+                            <p style="margin-top: 1rem;"><strong>Update context word "mat" (negative):</strong></p>
+                            <p style="font-family: monospace; margin-left: 2rem;">
+                                grad_c_mat = error_neg * w_cat = 0.562 * [0.5, -0.3] = [0.281, -0.169]<br>
+                                c_mat_new = [0.2, -0.5] - 0.1 * [0.281, -0.169]<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = [0.2 - 0.028, -0.5 + 0.017]<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <strong>[0.172, -0.483]</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Before vs. After: Vector Movement</h3>
+            <p>Let's see how one training step changed our vectors:</p>
+
+            <div class="block-grid">
+                <div>
+                    <h4>Before Training Step</h4>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Vector</th><th>Values</th><th>Dot Product</th></tr></thead>
+                            <tbody>
+                                <tr><td>w_cat</td><td>[0.500, -0.300]</td><td rowspan="2" style="vertical-align: middle; background: #fee2e2;"><strong>-0.23</strong><br>(too low!)</td></tr>
+                                <tr><td>c_sat</td><td>[-0.400, 0.100]</td></tr>
+                                <tr><td>w_cat</td><td>[0.500, -0.300]</td><td rowspan="2" style="vertical-align: middle; background: #fee2e2;"><strong>0.25</strong><br>(too high!)</td></tr>
+                                <tr><td>c_mat</td><td>[0.200, -0.500]</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h4>After Training Step</h4>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Vector</th><th>Values</th><th>Dot Product</th></tr></thead>
+                            <tbody>
+                                <tr><td>w_cat</td><td>[0.467, -0.266]</td><td rowspan="2" style="vertical-align: middle; background: #d1fae5;"><strong>-0.20</strong><br>(improved!)</td></tr>
+                                <tr><td>c_sat</td><td>[-0.372, 0.083]</td></tr>
+                                <tr><td>w_cat</td><td>[0.467, -0.266]</td><td rowspan="2" style="vertical-align: middle; background: #d1fae5;"><strong>0.21</strong><br>(improved!)</td></tr>
+                                <tr><td>c_mat</td><td>[0.172, -0.483]</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>What Happened?</h4>
+                <ul>
+                    <li><strong>Positive pair (cat, sat):</strong> Dot product increased from -0.23 to -0.20 (vectors moved slightly closer)</li>
+                    <li><strong>Negative pair (cat, mat):</strong> Dot product decreased from 0.25 to 0.21 (vectors moved slightly apart)</li>
+                </ul>
+                <p>After thousands of such updates, real co-occurring words will have high similarity while random pairs will have low similarity!</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Practice Problem for Students</h3>
+
+            <div class="callout callout-example">
+                <h4>Exercise: Complete One Training Step</h4>
+                <p>Given the following setup, compute one training step by hand:</p>
+
+                <p><strong>Training pair:</strong> ("sat", "mat") with negative sample "cat"</p>
+                <p><strong>Learning rate:</strong> 0.1</p>
+
+                <p><strong>Current vectors:</strong></p>
+                <ul>
+                    <li>w_sat = [0.2, 0.8]</li>
+                    <li>c_mat = [-0.3, 0.4]</li>
+                    <li>c_cat = [0.6, -0.2]</li>
+                </ul>
+
+                <p><strong>Tasks:</strong></p>
+                <ol>
+                    <li>Compute the dot products for both pairs</li>
+                    <li>Apply sigmoid to get predictions</li>
+                    <li>Calculate errors (target = 1 for positive, 0 for negative)</li>
+                    <li>Compute the updated vectors after gradient descent</li>
+                    <li>Verify: Did the positive pair similarity increase? Did the negative pair similarity decrease?</li>
+                </ol>
+            </div>
+
+            <details style="margin-top: 1.5rem; padding: 1.5rem; background: #f8fafc; border-radius: 1rem; border: 1px solid var(--border-color);">
+                <summary style="cursor: pointer; font-weight: bold; color: var(--primary-color);">Click to reveal solution</summary>
+                <div style="margin-top: 1rem;">
+                    <p><strong>1. Dot products:</strong></p>
+                    <ul>
+                        <li>score_pos = (0.2 * -0.3) + (0.8 * 0.4) = -0.06 + 0.32 = <strong>0.26</strong></li>
+                        <li>score_neg = (0.2 * 0.6) + (0.8 * -0.2) = 0.12 - 0.16 = <strong>-0.04</strong></li>
+                    </ul>
+
+                    <p><strong>2. Sigmoid predictions:</strong></p>
+                    <ul>
+                        <li>P(real | sat, mat) = sigmoid(0.26) = 1/(1 + e^-0.26) = <strong>0.565</strong></li>
+                        <li>P(real | sat, cat) = sigmoid(-0.04) = 1/(1 + e^0.04) = <strong>0.490</strong></li>
+                    </ul>
+
+                    <p><strong>3. Errors:</strong></p>
+                    <ul>
+                        <li>error_pos = 0.565 - 1 = <strong>-0.435</strong></li>
+                        <li>error_neg = 0.490 - 0 = <strong>0.490</strong></li>
+                    </ul>
+
+                    <p><strong>4. Updated vectors (after both updates to w_sat):</strong></p>
+                    <ul>
+                        <li>w_sat = [0.2, 0.8] - 0.1*(-0.435)*[-0.3, 0.4] - 0.1*(0.490)*[0.6, -0.2]</li>
+                        <li>w_sat = [0.2, 0.8] - [-0.013, 0.017] - [0.029, -0.010]</li>
+                        <li>w_sat = <strong>[0.184, 0.793]</strong></li>
+                        <li>c_mat = [-0.3, 0.4] - 0.1*(-0.435)*[0.2, 0.8] = <strong>[-0.291, 0.435]</strong></li>
+                        <li>c_cat = [0.6, -0.2] - 0.1*(0.490)*[0.2, 0.8] = <strong>[0.590, -0.239]</strong></li>
+                    </ul>
+
+                    <p><strong>5. Verification:</strong></p>
+                    <ul>
+                        <li>New dot(w_sat, c_mat) = 0.184*(-0.291) + 0.793*0.435 = -0.053 + 0.345 = <strong>0.292</strong> (up from 0.26)</li>
+                        <li>New dot(w_sat, c_cat) = 0.184*0.590 + 0.793*(-0.239) = 0.109 - 0.190 = <strong>-0.081</strong> (down from -0.04)</li>
+                    </ul>
+                    <p>Success! Positive pair similarity increased, negative pair similarity decreased.</p>
+                </div>
+            </details>
+        </div>
+
         <!-- Section 3: Visualization -->
         <div class="section-header" id="visualization">
             <h2><span class="icon">&#128202;</span> Interactive Visualization</h2>
@@ -1107,7 +1440,7 @@ the woman petted the cat</textarea>
 
         <div class="content-block">
             <h3>The Skip-gram Objective (Full Softmax)</h3>
-            <p>The original Skip-gram objective maximizes the probability of context words given center words:</p>
+            <p>The original Skip-gram objective [2] maximizes the probability of context words given center words:</p>
 
             <div class="formula-box">
                 <div class="formula-label">Skip-gram Objective</div>
@@ -1140,7 +1473,7 @@ the woman petted the cat</textarea>
 
         <div class="content-block">
             <h3>Negative Sampling Objective</h3>
-            <p>Negative sampling replaces the expensive softmax with a binary classification objective:</p>
+            <p>Negative sampling [1] replaces the expensive softmax with a binary classification objective:</p>
 
             <div class="formula-box">
                 <div class="formula-label">SGNS Objective (per word pair)</div>
@@ -1148,8 +1481,8 @@ the woman petted the cat</textarea>
                 <div class="formula-description">
                     <ul>
                         <li>\( \sigma(x) = \frac{1}{1 + e^{-x}} \) is the sigmoid function</li>
-                        <li>\( k \) = number of negative samples</li>
-                        <li>\( P_n(w) \propto f(w)^{0.75} \) = noise distribution (smoothed unigram)</li>
+                        <li>\( k \) = number of negative samples (typically 5-20 for small datasets, 2-5 for large ones [1])</li>
+                        <li>\( P_n(w) \propto f(w)^{0.75} \) = noise distribution (smoothed unigram) [1]</li>
                     </ul>
                 </div>
             </div>
@@ -1160,13 +1493,13 @@ the woman petted the cat</textarea>
                     <li><strong>First term:</strong> Maximize \( \sigma(\mathbf{u}_o^T \mathbf{v}_c) \) - push positive pairs to have high dot product</li>
                     <li><strong>Second term:</strong> Maximize \( \sigma(-\mathbf{u}_{w_i}^T \mathbf{v}_c) \) - push negative pairs to have low dot product</li>
                 </ul>
-                <p>The sigmoid converts dot products to probabilities, and we maximize log probability.</p>
+                <p>The sigmoid converts dot products to probabilities, and we maximize log probability. For a detailed derivation of this objective, see Goldberg and Levy [3].</p>
             </div>
         </div>
 
         <div class="content-block">
             <h3>Gradient Updates</h3>
-            <p>To train the model, we compute gradients of the loss with respect to embeddings:</p>
+            <p>To train the model, we compute gradients of the loss with respect to embeddings [3]:</p>
 
             <div class="formula-box">
                 <div class="formula-label">Gradient for Center Word Embedding</div>
@@ -1193,13 +1526,13 @@ the woman petted the cat</textarea>
 
         <div class="content-block">
             <h3>The Noise Distribution</h3>
-            <p>Negative samples are drawn from a modified unigram distribution:</p>
+            <p>Negative samples are drawn from a modified unigram distribution [1]:</p>
 
             <div class="formula-box">
                 <div class="formula-label">Noise Distribution</div>
                 \[ P_n(w) = \frac{f(w)^{0.75}}{\sum_{w'} f(w')^{0.75}} \]
                 <div class="formula-description">
-                    <p>The exponent 0.75 smooths the distribution:</p>
+                    <p>The exponent 0.75 was empirically determined to work well [1]:</p>
                     <ul>
                         <li>Pure unigram (1.0): Too many common words as negatives</li>
                         <li>Uniform (0.0): Rare words sampled too often</li>
@@ -1676,7 +2009,7 @@ Most similar to 'dog':
             <div class="cards-grid">
                 <div class="card">
                     <h4>Two Embedding Matrices</h4>
-                    <p>W holds center word vectors, C holds context word vectors. After training, typically use W as final embeddings, or W + C.</p>
+                    <p>W holds center word vectors, C holds context word vectors. After training, typically use W as final embeddings, or W + C. Levy and Goldberg [4] showed that SGNS implicitly factorizes a shifted PMI matrix.</p>
                 </div>
                 <div class="card">
                     <h4>Sparse Updates</h4>
@@ -1693,9 +2026,139 @@ Most similar to 'dog':
             </div>
         </div>
 
+        <!-- Section 8: References & Bibliography -->
+        <div class="section-header" id="references">
+            <h2><span class="icon">&#128218;</span> References & Bibliography</h2>
+            <p>Key papers for understanding SGNS and word embeddings</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Primary References</h3>
+            <p>The following papers are essential reading for understanding SGNS and its theoretical foundations:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Reference</th>
+                            <th>Key Contribution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>[1]</strong></td>
+                            <td>
+                                <p><strong>Mikolov, T., Sutskever, I., Chen, K., Corrado, G. S., & Dean, J. (2013).</strong></p>
+                                <p>"Distributed representations of words and phrases and their compositionality."</p>
+                                <p><em>Advances in Neural Information Processing Systems (NIPS 2013)</em>, pp. 3111-3119.</p>
+                            </td>
+                            <td>Introduces negative sampling, subsampling of frequent words, and phrase learning. The primary reference for SGNS as implemented in Word2Vec.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>[2]</strong></td>
+                            <td>
+                                <p><strong>Mikolov, T., Chen, K., Corrado, G., & Dean, J. (2013).</strong></p>
+                                <p>"Efficient estimation of word representations in vector space."</p>
+                                <p><em>ICLR Workshop 2013</em>. arXiv:1301.3781.</p>
+                            </td>
+                            <td>The original Word2Vec paper introducing Skip-gram and CBOW architectures. Demonstrates word analogies and semantic relationships.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>[3]</strong></td>
+                            <td>
+                                <p><strong>Goldberg, Y., & Levy, O. (2014).</strong></p>
+                                <p>"word2vec Explained: deriving Mikolov et al.'s negative-sampling word-embedding method."</p>
+                                <p><em>arXiv:1402.3722</em>.</p>
+                            </td>
+                            <td>Provides a clear mathematical derivation of the SGNS objective function and gradient updates. Excellent pedagogical resource.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>[4]</strong></td>
+                            <td>
+                                <p><strong>Levy, O., & Goldberg, Y. (2014).</strong></p>
+                                <p>"Neural word embedding as implicit matrix factorization."</p>
+                                <p><em>Advances in Neural Information Processing Systems (NIPS 2014)</em>, pp. 2177-2185.</p>
+                            </td>
+                            <td>Shows that SGNS implicitly factorizes a shifted PMI (Pointwise Mutual Information) matrix. Bridges neural and count-based methods.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>[5]</strong></td>
+                            <td>
+                                <p><strong>Gutmann, M., & Hyvarinen, A. (2010).</strong></p>
+                                <p>"Noise-contrastive estimation: A new estimation principle for unnormalized statistical models."</p>
+                                <p><em>Proceedings of the 13th International Conference on Artificial Intelligence and Statistics (AISTATS 2010)</em>, pp. 297-304.</p>
+                            </td>
+                            <td>Introduces Noise Contrastive Estimation (NCE), the theoretical foundation for negative sampling. Essential for understanding why negative sampling works.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>Reading Order Recommendation</h4>
+                <p>For a thorough understanding of SGNS, we recommend reading in this order:</p>
+                <ol>
+                    <li><strong>[2]</strong> - Start with the original Word2Vec paper for intuition</li>
+                    <li><strong>[3]</strong> - Read Goldberg & Levy for clear mathematical explanations</li>
+                    <li><strong>[1]</strong> - Dive into negative sampling and practical improvements</li>
+                    <li><strong>[5]</strong> - Understand the theoretical foundations of NCE</li>
+                    <li><strong>[4]</strong> - Connect to classical methods via matrix factorization</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Citation Index</h3>
+            <p>Where each reference is cited in this document:</p>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4>[1] Mikolov et al. (NIPS 2013)</h4>
+                    <ul>
+                        <li>Negative sampling introduction</li>
+                        <li>Noise distribution (f(w)^0.75)</li>
+                        <li>Number of negative samples (k)</li>
+                        <li>Subsampling frequent words</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>[2] Mikolov et al. (ICLR 2013)</h4>
+                    <ul>
+                        <li>Skip-gram architecture</li>
+                        <li>Word2Vec introduction</li>
+                        <li>Distributional hypothesis</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>[3] Goldberg & Levy (2014)</h4>
+                    <ul>
+                        <li>Objective function derivation</li>
+                        <li>Gradient update rules</li>
+                        <li>Mathematical explanations</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>[4] Levy & Goldberg (NIPS 2014)</h4>
+                    <ul>
+                        <li>PMI matrix factorization</li>
+                        <li>Two embedding matrices</li>
+                        <li>Connection to count methods</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>[5] Gutmann & Hyvarinen (2010)</h4>
+                    <ul>
+                        <li>NCE theoretical foundation</li>
+                        <li>Why negative sampling works</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
-            <p>Created for educational purposes | SGNS was introduced by Mikolov et al. (2013)</p>
+            <p>Created for educational purposes | SGNS was introduced by Mikolov et al. (2013) [1][2]</p>
             <p style="margin-top: 1rem;">
                 <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">TF-IDF</a>
                 <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec</a>

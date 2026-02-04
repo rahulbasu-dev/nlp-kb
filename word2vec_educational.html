@@ -497,6 +497,44 @@
             border-radius: 0.25rem;
         }
 
+        /* Citation superscripts */
+        sup {
+            font-size: 0.7em;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-left: 1px;
+        }
+
+        sup a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        sup a:hover {
+            text-decoration: underline;
+        }
+
+        /* Details/Summary for expandable content */
+        details {
+            margin-top: 1rem;
+        }
+
+        details summary {
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: 0.5rem;
+            transition: background 0.2s ease;
+        }
+
+        details summary:hover {
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        details[open] summary {
+            margin-bottom: 1rem;
+        }
+
         /* Cards Grid */
         .cards-grid {
             display: grid;
@@ -734,6 +772,8 @@
                 <li><a href="#mathematics">Mathematics</a></li>
                 <li><a href="#flowchart">Flowchart</a></li>
                 <li><a href="#python">Python</a></li>
+                <li><a href="#numerical">Numerical Examples</a></li>
+                <li><a href="#references">References</a></li>
             </ul>
         </div>
     </nav>
@@ -742,7 +782,7 @@
         <!-- Header -->
         <header>
             <h1>Understanding Word2Vec</h1>
-            <p>Word2Vec transforms words into dense vector representations that capture semantic meaning, allowing machines to understand that "king" and "queen" are related, and enabling remarkable word analogies like king - man + woman = queen.</p>
+            <p>Word2Vec transforms words into dense vector representations that capture semantic meaning, allowing machines to understand that "king" and "queen" are related, and enabling remarkable word analogies like king - man + woman = queen.<sup>[1]</sup></p>
             <div class="subtitle">Neural Approach to Word Embeddings</div>
         </header>
 
@@ -754,14 +794,14 @@
 
         <div class="content-block">
             <h3>What is Word2Vec?</h3>
-            <p><strong>Word2Vec</strong> is a family of neural network models that learn to represent words as <span class="highlight">dense vectors</span> (lists of numbers) in a continuous vector space. Unlike sparse representations like TF-IDF where most values are zero, Word2Vec creates compact vectors where every dimension carries meaning.</p>
+            <p><strong>Word2Vec</strong> is a family of neural network models that learn to represent words as <span class="highlight">dense vectors</span> (lists of numbers) in a continuous vector space.<sup>[1]</sup> Unlike sparse representations like TF-IDF where most values are zero, Word2Vec creates compact vectors where every dimension carries meaning.</p>
 
             <p>The fundamental insight is captured by the <strong>distributional hypothesis</strong>:</p>
 
             <div class="callout callout-concept">
                 <h4>The Distributional Hypothesis</h4>
                 <p><em>"You shall know a word by the company it keeps."</em> - J.R. Firth (1957)</p>
-                <p>Words that appear in similar contexts tend to have similar meanings. Word2Vec learns these patterns from massive amounts of text, discovering that "dog" and "cat" often appear near similar words (pet, food, vet), so they must be related.</p>
+                <p>Words that appear in similar contexts tend to have similar meanings. Word2Vec learns these patterns from massive amounts of text, discovering that "dog" and "cat" often appear near similar words (pet, food, vet), so they must be related.<sup>[1][2]</sup></p>
             </div>
 
             <div class="callout callout-analogy">
@@ -779,7 +819,7 @@
         <div class="block-grid">
             <div class="content-block">
                 <h3>Skip-gram Model</h3>
-                <p><strong>"Given a word, predict its context."</strong></p>
+                <p><strong>"Given a word, predict its context."</strong><sup>[1]</sup></p>
                 <p>Skip-gram takes a center word and tries to predict the words that surround it. This forces the model to learn which words tend to appear together.</p>
 
                 <div class="callout callout-example">
@@ -797,7 +837,7 @@
 
             <div class="content-block">
                 <h3>CBOW Model</h3>
-                <p><strong>"Given the context, predict the word."</strong></p>
+                <p><strong>"Given the context, predict the word."</strong><sup>[1]</sup></p>
                 <p>Continuous Bag of Words (CBOW) takes the surrounding words and tries to predict the center word. It's the reverse of Skip-gram.</p>
 
                 <div class="callout callout-example">
@@ -872,7 +912,7 @@
         <div class="content-block">
             <h3>The Famous Analogy: King - Man + Woman = Queen</h3>
 
-            <p>The most celebrated property of Word2Vec is that vector arithmetic captures semantic relationships:</p>
+            <p>The most celebrated property of Word2Vec is that vector arithmetic captures semantic relationships:<sup>[2]</sup></p>
 
             <div class="analogy-box">
                 <span class="analogy-word">king</span>
@@ -921,7 +961,7 @@
 
             <div class="callout callout-warning">
                 <h4>Limitations</h4>
-                <p>Word2Vec analogies are not perfect. They work best for common, unambiguous relationships. The model can also encode biases present in the training data (e.g., gender stereotypes in professions).</p>
+                <p>Word2Vec analogies are not perfect. They work best for common, unambiguous relationships.<sup>[5]</sup> The model can also encode biases present in the training data (e.g., gender stereotypes in professions).</p>
             </div>
         </div>
 
@@ -1006,7 +1046,7 @@
 
         <div class="content-block">
             <h3>Skip-gram Model Architecture</h3>
-            <p>Skip-gram is a shallow neural network with one hidden layer. Given a center word, it predicts the probability of each context word.</p>
+            <p>Skip-gram is a shallow neural network with one hidden layer. Given a center word, it predicts the probability of each context word.<sup>[1][4]</sup></p>
 
             <div class="formula-box">
                 <div class="formula-label">Skip-gram Objective</div>
@@ -1041,7 +1081,7 @@
         <div class="content-block">
             <h3>The Softmax Problem and Solutions</h3>
 
-            <p>Computing the full softmax requires summing over the entire vocabulary (often 100,000+ words) for every training example. This is computationally prohibitive!</p>
+            <p>Computing the full softmax requires summing over the entire vocabulary (often 100,000+ words) for every training example. This is computationally prohibitive!<sup>[2][3]</sup></p>
 
             <div class="callout callout-warning">
                 <h4>Computational Cost</h4>
@@ -1061,7 +1101,7 @@
             </div>
 
             <h4>Solution 2: Negative Sampling (Most Popular)</h4>
-            <p>Instead of computing probabilities for all words, only update the correct word and a small sample of "negative" (incorrect) words.</p>
+            <p>Instead of computing probabilities for all words, only update the correct word and a small sample of "negative" (incorrect) words.<sup>[2][3]</sup></p>
 
             <div class="formula-box">
                 <div class="formula-label">Negative Sampling Objective</div>
@@ -1072,14 +1112,14 @@
                         <li>\( k \) = Number of negative samples (typically 5-20)</li>
                         <li>\( P_n(w) \) = Noise distribution (usually \( U(w)^{3/4} / Z \) )</li>
                     </ul>
-                    <p>The model learns to distinguish real context pairs from random noise pairs.</p>
+                    <p>The model learns to distinguish real context pairs from random noise pairs.<sup>[3]</sup></p>
                 </div>
             </div>
         </div>
 
         <div class="content-block">
             <h3>CBOW Model Architecture</h3>
-            <p>CBOW reverses Skip-gram: it predicts the center word from the surrounding context words.</p>
+            <p>CBOW reverses Skip-gram: it predicts the center word from the surrounding context words.<sup>[1][4]</sup></p>
 
             <div class="formula-box">
                 <div class="formula-label">CBOW Objective</div>
@@ -1506,17 +1546,243 @@ Educational implementation showing core concepts.
             <div class="callout callout-concept">
                 <h4>When to Use Word2Vec vs. Modern Alternatives</h4>
                 <ul>
-                    <li><strong>Word2Vec:</strong> Fast training, interpretable, works well for many tasks. Good baseline.</li>
+                    <li><strong>Word2Vec:</strong> Fast training, interpretable, works well for many tasks. Good baseline.<sup>[1][2]</sup></li>
                     <li><strong>FastText:</strong> Handles out-of-vocabulary words via subword embeddings. Better for morphologically rich languages.</li>
                     <li><strong>GloVe:</strong> Combines count-based and neural approaches. Often similar performance to Word2Vec.</li>
                     <li><strong>BERT/GPT:</strong> Contextual embeddings (same word, different vectors by context). State-of-the-art but much heavier.</li>
                 </ul>
+                <p style="margin-top: 1rem; font-size: 0.95rem;">Word2Vec has been shown to implicitly perform matrix factorization on a word-context co-occurrence matrix.<sup>[5]</sup></p>
+            </div>
+        </div>
+
+        <!-- Section 7: Simple Numerical Examples -->
+        <div class="section-header" id="numerical">
+            <h2><span class="icon">*</span> Simple Numerical Examples</h2>
+            <p>Hands-on calculations with small vectors to understand the math behind Word2Vec</p>
+        </div>
+
+        <div class="content-block">
+            <h3>The King-Queen Analogy with Real Numbers</h3>
+            <p>Let's work through the famous analogy using simplified 3-dimensional vectors. In practice, Word2Vec uses 100-300 dimensions, but the same principles apply.<sup>[2]</sup></p>
+
+            <div class="callout callout-concept">
+                <h4>Simplified Word Vectors (3D)</h4>
+                <p>Imagine our 3 dimensions encode: <strong>[royalty, gender (male=1), age]</strong></p>
+                <div style="margin-top: 1rem; font-family: 'JetBrains Mono', monospace;">
+                    <div class="embedding-visual">
+                        <span class="embedding-word">king</span>
+                        <span style="font-weight: bold;">=</span>
+                        <div class="embedding-vector">
+                            <span class="embedding-dim" style="background: #8b5cf6; color: white;">1</span>
+                            <span class="embedding-dim" style="background: #3b82f6; color: white;">1</span>
+                            <span class="embedding-dim" style="background: #10b981; color: white;">1</span>
+                        </div>
+                        <span style="color: var(--text-light);">(royal, male, adult)</span>
+                    </div>
+                    <div class="embedding-visual">
+                        <span class="embedding-word">man</span>
+                        <span style="font-weight: bold;">=</span>
+                        <div class="embedding-vector">
+                            <span class="embedding-dim" style="background: #e5e7eb; color: #333;">0</span>
+                            <span class="embedding-dim" style="background: #3b82f6; color: white;">1</span>
+                            <span class="embedding-dim" style="background: #10b981; color: white;">1</span>
+                        </div>
+                        <span style="color: var(--text-light);">(not royal, male, adult)</span>
+                    </div>
+                    <div class="embedding-visual">
+                        <span class="embedding-word">woman</span>
+                        <span style="font-weight: bold;">=</span>
+                        <div class="embedding-vector">
+                            <span class="embedding-dim" style="background: #e5e7eb; color: #333;">0</span>
+                            <span class="embedding-dim" style="background: #e5e7eb; color: #333;">0</span>
+                            <span class="embedding-dim" style="background: #10b981; color: white;">1</span>
+                        </div>
+                        <span style="color: var(--text-light);">(not royal, female, adult)</span>
+                    </div>
+                    <div class="embedding-visual">
+                        <span class="embedding-word">queen</span>
+                        <span style="font-weight: bold;">=</span>
+                        <div class="embedding-vector">
+                            <span class="embedding-dim" style="background: #8b5cf6; color: white;">1</span>
+                            <span class="embedding-dim" style="background: #e5e7eb; color: #333;">0</span>
+                            <span class="embedding-dim" style="background: #10b981; color: white;">1</span>
+                        </div>
+                        <span style="color: var(--text-light);">(royal, female, adult)</span>
+                    </div>
+                </div>
+            </div>
+
+            <h4>Step-by-Step Vector Arithmetic</h4>
+            <div class="formula-box">
+                <div class="formula-label">King - Man + Woman = ?</div>
+                <div style="text-align: left; font-family: 'JetBrains Mono', monospace; padding: 1rem;">
+                    <p><strong>Step 1:</strong> king - man</p>
+                    <p style="margin-left: 2rem;">[1, 1, 1] - [0, 1, 1] = [1, 0, 0]</p>
+                    <p style="margin-left: 2rem; color: var(--text-light);">(This extracts the "royalty" concept)</p>
+                    <br>
+                    <p><strong>Step 2:</strong> (king - man) + woman</p>
+                    <p style="margin-left: 2rem;">[1, 0, 0] + [0, 0, 1] = [1, 0, 1]</p>
+                    <p style="margin-left: 2rem; color: var(--text-light);">(Add "femaleness" to royalty)</p>
+                    <br>
+                    <p><strong>Result:</strong> [1, 0, 1] = queen!</p>
+                </div>
+            </div>
+
+            <p>The vector [1, 0, 1] exactly matches our "queen" vector. In real Word2Vec, the result would be close to (not exactly) the queen vector, and we would use cosine similarity to find the nearest word.</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Cosine Similarity Calculation</h3>
+            <p>Let's calculate the cosine similarity between "king" and "queen" step-by-step.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Cosine Similarity Formula</div>
+                \[ \text{cos}(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{||\mathbf{A}|| \cdot ||\mathbf{B}||} \]
+            </div>
+
+            <h4>Example: Similarity between king [1, 1, 1] and queen [1, 0, 1]</h4>
+            <div class="formula-box" style="text-align: left;">
+                <p><strong>Step 1: Calculate the dot product (A . B)</strong></p>
+                <p style="margin-left: 2rem; font-family: monospace;">
+                    A . B = (1)(1) + (1)(0) + (1)(1) = 1 + 0 + 1 = <strong>2</strong>
+                </p>
+                <br>
+                <p><strong>Step 2: Calculate the magnitude of A (||A||)</strong></p>
+                <p style="margin-left: 2rem; font-family: monospace;">
+                    ||A|| = sqrt(1^2 + 1^2 + 1^2) = sqrt(3) = <strong>1.732</strong>
+                </p>
+                <br>
+                <p><strong>Step 3: Calculate the magnitude of B (||B||)</strong></p>
+                <p style="margin-left: 2rem; font-family: monospace;">
+                    ||B|| = sqrt(1^2 + 0^2 + 1^2) = sqrt(2) = <strong>1.414</strong>
+                </p>
+                <br>
+                <p><strong>Step 4: Compute cosine similarity</strong></p>
+                <p style="margin-left: 2rem; font-family: monospace;">
+                    cos(theta) = 2 / (1.732 x 1.414) = 2 / 2.449 = <strong>0.816</strong>
+                </p>
+                <br>
+                <p><strong>Interpretation:</strong> A similarity of 0.816 indicates "king" and "queen" are highly similar, which makes sense - they share the "royalty" and "adult" dimensions!</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Practice Problem for Students</h3>
+
+            <div class="callout callout-example">
+                <h4>Exercise: Country-Capital Analogy</h4>
+                <p>Given the following 3D vectors (dimensions: [European, capital_city, large_population]):</p>
+                <ul style="font-family: 'JetBrains Mono', monospace; margin: 1rem 0 1rem 2rem;">
+                    <li><strong>France</strong> = [1, 0, 1]</li>
+                    <li><strong>Paris</strong> = [1, 1, 1]</li>
+                    <li><strong>Japan</strong> = [0, 0, 1]</li>
+                    <li><strong>Tokyo</strong> = [0, 1, 1]</li>
+                </ul>
+
+                <p><strong>Questions:</strong></p>
+                <ol>
+                    <li>Calculate: Paris - France + Japan = ?</li>
+                    <li>Does the result match Tokyo?</li>
+                    <li>Calculate the cosine similarity between France [1, 0, 1] and Japan [0, 0, 1]</li>
+                </ol>
+            </div>
+
+            <div class="callout callout-concept" style="margin-top: 2rem;">
+                <h4>Solution (Click to Reveal)</h4>
+                <details>
+                    <summary style="cursor: pointer; font-weight: bold; padding: 0.5rem;">Show Solution</summary>
+                    <div style="margin-top: 1rem;">
+                        <p><strong>1. Paris - France + Japan:</strong></p>
+                        <p style="margin-left: 2rem; font-family: monospace;">[1, 1, 1] - [1, 0, 1] + [0, 0, 1]</p>
+                        <p style="margin-left: 2rem; font-family: monospace;">= [0, 1, 0] + [0, 0, 1]</p>
+                        <p style="margin-left: 2rem; font-family: monospace;">= [0, 1, 1]</p>
+                        <br>
+                        <p><strong>2. Yes!</strong> [0, 1, 1] = Tokyo</p>
+                        <br>
+                        <p><strong>3. Cosine similarity between France and Japan:</strong></p>
+                        <p style="margin-left: 2rem; font-family: monospace;">Dot product: (1)(0) + (0)(0) + (1)(1) = 1</p>
+                        <p style="margin-left: 2rem; font-family: monospace;">||France|| = sqrt(1 + 0 + 1) = sqrt(2) = 1.414</p>
+                        <p style="margin-left: 2rem; font-family: monospace;">||Japan|| = sqrt(0 + 0 + 1) = 1</p>
+                        <p style="margin-left: 2rem; font-family: monospace;">Cosine = 1 / (1.414 x 1) = <strong>0.707</strong></p>
+                        <p style="margin-top: 0.5rem;">This moderate similarity reflects that both are countries with large populations, but differ in being European.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- Section 8: References & Bibliography -->
+        <div class="section-header" id="references">
+            <h2><span class="icon">*</span> References & Bibliography</h2>
+            <p>Academic papers and resources for further reading</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Primary Sources</h3>
+
+            <div style="margin: 1.5rem 0;">
+                <p style="margin-bottom: 1.5rem; padding-left: 2rem; text-indent: -2rem;">
+                    <strong>[1]</strong> Mikolov, T., Chen, K., Corrado, G., & Dean, J. (2013). "Efficient estimation of word representations in vector space." <em>arXiv preprint arXiv:1301.3781</em>.
+                    <a href="https://arxiv.org/abs/1301.3781" style="color: var(--primary-color);">https://arxiv.org/abs/1301.3781</a>
+                    <br><span style="color: var(--text-light); font-size: 0.9rem;">The original Word2Vec paper introducing Skip-gram and CBOW architectures.</span>
+                </p>
+
+                <p style="margin-bottom: 1.5rem; padding-left: 2rem; text-indent: -2rem;">
+                    <strong>[2]</strong> Mikolov, T., Sutskever, I., Chen, K., Corrado, G. S., & Dean, J. (2013). "Distributed representations of words and phrases and their compositionality." <em>Advances in Neural Information Processing Systems</em>, 26.
+                    <a href="https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality" style="color: var(--primary-color);">NeurIPS</a>
+                    <br><span style="color: var(--text-light); font-size: 0.9rem;">Introduces negative sampling and demonstrates phrase-level embeddings. The famous king-queen analogy is demonstrated here.</span>
+                </p>
+
+                <p style="margin-bottom: 1.5rem; padding-left: 2rem; text-indent: -2rem;">
+                    <strong>[3]</strong> Goldberg, Y., & Levy, O. (2014). "word2vec Explained: deriving Mikolov et al.'s negative-sampling word-embedding method." <em>arXiv preprint arXiv:1402.3722</em>.
+                    <a href="https://arxiv.org/abs/1402.3722" style="color: var(--primary-color);">https://arxiv.org/abs/1402.3722</a>
+                    <br><span style="color: var(--text-light); font-size: 0.9rem;">A clear mathematical derivation of the negative sampling objective function.</span>
+                </p>
+
+                <p style="margin-bottom: 1.5rem; padding-left: 2rem; text-indent: -2rem;">
+                    <strong>[4]</strong> Rong, X. (2014). "word2vec Parameter Learning Explained." <em>arXiv preprint arXiv:1411.2738</em>.
+                    <a href="https://arxiv.org/abs/1411.2738" style="color: var(--primary-color);">https://arxiv.org/abs/1411.2738</a>
+                    <br><span style="color: var(--text-light); font-size: 0.9rem;">Detailed tutorial on the backpropagation and gradient updates in Word2Vec. Excellent for understanding implementation details.</span>
+                </p>
+
+                <p style="margin-bottom: 1.5rem; padding-left: 2rem; text-indent: -2rem;">
+                    <strong>[5]</strong> Levy, O., & Goldberg, Y. (2014). "Neural Word Embedding as Implicit Matrix Factorization." <em>Advances in Neural Information Processing Systems</em>, 27.
+                    <a href="https://papers.nips.cc/paper/5477-neural-word-embedding-as-implicit-matrix-factorization" style="color: var(--primary-color);">NeurIPS</a>
+                    <br><span style="color: var(--text-light); font-size: 0.9rem;">Shows that Skip-gram with negative sampling implicitly factorizes a word-context PMI matrix, connecting neural and count-based methods.</span>
+                </p>
+            </div>
+
+            <h3>Recommended Further Reading</h3>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4>Tutorials & Guides</h4>
+                    <ul>
+                        <li>Rong (2014) - word2vec Parameter Learning Explained<sup>[4]</sup></li>
+                        <li>TensorFlow Word2Vec Tutorial</li>
+                        <li>Gensim Word2Vec Documentation</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Related Embedding Methods</h4>
+                    <ul>
+                        <li>GloVe: Global Vectors for Word Representation (Pennington et al., 2014)</li>
+                        <li>FastText: Enriching Word Vectors with Subword Information (Bojanowski et al., 2017)</li>
+                        <li>ELMo: Deep contextualized word representations (Peters et al., 2018)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Analysis & Critiques</h4>
+                    <ul>
+                        <li>Levy & Goldberg (2014) - Matrix Factorization perspective<sup>[5]</sup></li>
+                        <li>Bolukbasi et al. (2016) - Man is to Computer Programmer as Woman is to Homemaker? (bias in embeddings)</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
         <!-- Footer -->
         <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
-            <p>Created for educational purposes. Word2Vec was introduced by Mikolov et al. at Google (2013)</p>
+            <p>Created for educational purposes. Word2Vec was introduced by Mikolov et al. at Google (2013)<sup>[1][2]</sup></p>
             <p style="margin-top: 1rem;">
                 <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">TF-IDF</a>
                 <a href="sgns_educational.html" style="color: var(--primary-color); margin: 0 1rem;">SGNS</a>

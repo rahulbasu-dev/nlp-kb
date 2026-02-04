@@ -701,6 +701,8 @@
                 <li><a href="#flowchart">Flowchart</a></li>
                 <li><a href="#python">Python</a></li>
                 <li><a href="#comparison">Comparison</a></li>
+                <li><a href="#numerical-examples">Numerical</a></li>
+                <li><a href="#references">References</a></li>
             </ul>
         </div>
     </nav>
@@ -709,7 +711,7 @@
         <!-- Header -->
         <header>
             <h1>Understanding GloVe</h1>
-            <p>Global Vectors for Word Representation combines the best of count-based and prediction-based methods to learn word embeddings that capture semantic meaning from global co-occurrence statistics.</p>
+            <p>Global Vectors for Word Representation combines the best of count-based and prediction-based methods to learn word embeddings that capture semantic meaning from global co-occurrence statistics [1].</p>
             <div class="subtitle">Bridging Count-Based and Neural Methods</div>
         </header>
 
@@ -721,9 +723,9 @@
 
         <div class="content-block">
             <h3>What is GloVe?</h3>
-            <p><strong>GloVe</strong> stands for <span class="highlight">Global Vectors for Word Representation</span>. Developed at Stanford in 2014, it's a word embedding technique that learns vector representations by analyzing how often words co-occur across an entire text corpus.</p>
+            <p><strong>GloVe</strong> stands for <span class="highlight">Global Vectors for Word Representation</span>. Developed at Stanford in 2014, it's a word embedding technique that learns vector representations by analyzing how often words co-occur across an entire text corpus [1].</p>
 
-            <p>The key insight is powerful: <strong>The ratio of co-occurrence probabilities between words encodes semantic relationships more effectively than raw counts or probabilities alone.</strong></p>
+            <p>The key insight is powerful: <strong>The ratio of co-occurrence probabilities between words encodes semantic relationships more effectively than raw counts or probabilities alone</strong> [1].</p>
 
             <div class="callout callout-analogy">
                 <h4>&#127970; The Social Network Analogy</h4>
@@ -781,21 +783,21 @@
 
             <div class="callout callout-concept">
                 <h4>&#128301; GloVe's Unique Position</h4>
-                <p>GloVe bridges two major approaches to word embeddings:</p>
+                <p>GloVe bridges two major approaches to word embeddings [1][5]:</p>
                 <ul>
-                    <li><strong>Count-based methods</strong> (LSA, HAL): Use global corpus statistics, efficient, but miss nuanced relationships</li>
-                    <li><strong>Prediction-based methods</strong> (Word2Vec): Learn local context patterns, capture analogy relationships, but don't use global statistics directly</li>
+                    <li><strong>Count-based methods</strong> (LSA, HAL): Use global corpus statistics, efficient, but miss nuanced relationships [5]</li>
+                    <li><strong>Prediction-based methods</strong> (Word2Vec): Learn local context patterns, capture analogy relationships, but don't use global statistics directly [4]</li>
                 </ul>
-                <p><strong>GloVe combines both:</strong> It uses global co-occurrence statistics but learns vectors through a prediction-style objective!</p>
+                <p><strong>GloVe combines both:</strong> It uses global co-occurrence statistics but learns vectors through a prediction-style objective! [1]</p>
             </div>
 
             <div class="formula-box">
-                <div class="formula-label">The Core Idea</div>
+                <div class="formula-label">The Core Idea [1]</div>
                 <p style="font-size: 1.3rem; font-weight: bold; color: var(--primary-color);">
                     w<sub>i</sub> &middot; w<sub>j</sub> + biases = log(X<sub>ij</sub>)
                 </p>
                 <div class="formula-description">
-                    <p>GloVe learns word vectors such that their dot product approximates the log of how often they co-occur:</p>
+                    <p>GloVe learns word vectors such that their dot product approximates the log of how often they co-occur [1]:</p>
                     <ul>
                         <li><strong>High co-occurrence</strong> = high dot product = similar vectors</li>
                         <li><strong>Low co-occurrence</strong> = low dot product = different vectors</li>
@@ -922,11 +924,11 @@
 
             <div class="callout callout-analogy">
                 <h4>&#127919; The King-Queen Analogy</h4>
-                <p>This is why GloVe (like Word2Vec) captures analogies:</p>
+                <p>This is why GloVe (like Word2Vec) captures analogies [1][4]:</p>
                 <p style="text-align: center; font-size: 1.2rem; margin: 1rem 0;">
                     <strong>king - man + woman &asymp; queen</strong>
                 </p>
-                <p>The co-occurrence ratios encode gender relationships consistently across the corpus, and GloVe's vectors preserve these ratios through their dot products!</p>
+                <p>The co-occurrence ratios encode gender relationships consistently across the corpus, and GloVe's vectors preserve these ratios through their dot products! [1]</p>
             </div>
         </div>
 
@@ -1024,7 +1026,7 @@ the mat was soft and warm</textarea>
             </div>
 
             <h3>The Ratio that Captures Meaning</h3>
-            <p>The key insight of GloVe is that <strong>ratios</strong> of co-occurrence probabilities encode semantic relationships:</p>
+            <p>The key insight of GloVe is that <strong>ratios</strong> of co-occurrence probabilities encode semantic relationships [1]:</p>
 
             <div class="formula-box">
                 <div class="formula-label">Probability Ratio</div>
@@ -1042,7 +1044,7 @@ the mat was soft and warm</textarea>
 
         <div class="content-block">
             <h3>The GloVe Model</h3>
-            <p>GloVe learns word vectors \( w_i \) and context vectors \( \tilde{w}_j \) such that their dot product relates to the log co-occurrence:</p>
+            <p>GloVe learns word vectors \( w_i \) and context vectors \( \tilde{w}_j \) such that their dot product relates to the log co-occurrence [1]:</p>
 
             <div class="formula-box">
                 <div class="formula-label">GloVe Relationship</div>
@@ -1058,7 +1060,7 @@ the mat was soft and warm</textarea>
             </div>
 
             <div class="callout callout-concept">
-                <h4>&#10067; Why Logarithm?</h4>
+                <h4>&#10067; Why Logarithm? [1]</h4>
                 <ol>
                     <li><strong>Converts multiplicative to additive:</strong> Ratios become differences in log space</li>
                     <li><strong>Enables vector arithmetic:</strong> \( w_i - w_j \) captures the ratio relationship</li>
@@ -1071,10 +1073,10 @@ the mat was soft and warm</textarea>
             <h3>The GloVe Objective Function</h3>
 
             <div class="formula-box">
-                <div class="formula-label">GloVe Cost Function</div>
+                <div class="formula-label">GloVe Cost Function [1]</div>
                 \[ J = \sum_{i,j=1}^{V} f(X_{ij}) \left( w_i^T \tilde{w}_j + b_i + \tilde{b}_j - \log X_{ij} \right)^2 \]
                 <div class="formula-description">
-                    <p>This is a weighted least squares objective where:</p>
+                    <p>This is a weighted least squares objective where [1]:</p>
                     <ul>
                         <li>We minimize the squared error between the dot product and log co-occurrence</li>
                         <li>\( f(X_{ij}) \) is a weighting function that controls the importance of each co-occurrence</li>
@@ -1084,13 +1086,13 @@ the mat was soft and warm</textarea>
             </div>
 
             <h4>The Weighting Function f(x)</h4>
-            <p>The weighting function prevents frequent but uninformative word pairs from dominating:</p>
+            <p>The weighting function prevents frequent but uninformative word pairs from dominating [1]:</p>
 
             <div class="formula-box">
-                <div class="formula-label">Weighting Function</div>
+                <div class="formula-label">Weighting Function [1]</div>
                 \[ f(x) = \begin{cases} (x/x_{\max})^\alpha & \text{if } x < x_{\max} \\ 1 & \text{otherwise} \end{cases} \]
                 <div class="formula-description">
-                    <p>Typical values: \( x_{\max} = 100 \), \( \alpha = 0.75 \)</p>
+                    <p>Typical values: \( x_{\max} = 100 \), \( \alpha = 0.75 \) [1]</p>
                     <ul>
                         <li><strong>Rare co-occurrences:</strong> Get lower weight (might be noise)</li>
                         <li><strong>Frequent co-occurrences:</strong> Capped at weight 1 (don't over-emphasize)</li>
@@ -1553,19 +1555,19 @@ Most similar to 'queen':
                     <thead>
                         <tr>
                             <th>Aspect</th>
-                            <th>GloVe</th>
-                            <th>Word2Vec (Skip-gram)</th>
+                            <th>GloVe [1]</th>
+                            <th>Word2Vec (Skip-gram) [4]</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td><strong>Training Approach</strong></td>
-                            <td>Factorizes co-occurrence matrix</td>
+                            <td>Factorizes co-occurrence matrix [1][2]</td>
                             <td>Predicts context words</td>
                         </tr>
                         <tr>
                             <td><strong>Statistics Used</strong></td>
-                            <td>Global corpus statistics</td>
+                            <td>Global corpus statistics [1]</td>
                             <td>Local context windows</td>
                         </tr>
                         <tr>
@@ -1626,11 +1628,11 @@ Most similar to 'queen':
 
             <div class="callout callout-concept">
                 <h4>&#128161; In Practice</h4>
-                <p>Both methods produce high-quality embeddings that perform similarly on most tasks. The choice often comes down to:</p>
+                <p>Both methods produce high-quality embeddings that perform similarly on most tasks [3]. The choice often comes down to:</p>
                 <ul>
                     <li><strong>Pre-trained availability:</strong> Both have excellent pre-trained models (GloVe from Stanford, Word2Vec from Google)</li>
                     <li><strong>Implementation preference:</strong> Word2Vec is often easier to train on custom data</li>
-                    <li><strong>Theoretical interest:</strong> GloVe's explicit matrix factorization is more interpretable</li>
+                    <li><strong>Theoretical interest:</strong> GloVe's explicit matrix factorization is more interpretable [2]</li>
                 </ul>
             </div>
         </div>
@@ -1640,11 +1642,11 @@ Most similar to 'queen':
 
             <div class="callout callout-analogy">
                 <h4>&#127919; Why Ratios Matter</h4>
-                <p>The GloVe authors showed that Word2Vec's skip-gram implicitly factorizes a shifted PMI matrix:</p>
+                <p>The GloVe authors showed that Word2Vec's skip-gram implicitly factorizes a shifted PMI matrix [2]:</p>
                 <p style="text-align: center; font-family: monospace; margin: 1rem 0;">
                     w_i &middot; w_j &asymp; PMI(i,j) - log(k)
                 </p>
-                <p>GloVe makes this explicit and shows that working with <strong>probability ratios</strong> directly leads to better semantic analogies. The ratio P(k|ice)/P(k|steam) directly encodes meaning in a way that raw probabilities don't!</p>
+                <p>GloVe makes this explicit and shows that working with <strong>probability ratios</strong> directly leads to better semantic analogies [1]. The ratio P(k|ice)/P(k|steam) directly encodes meaning in a way that raw probabilities don't!</p>
             </div>
 
             <div class="table-container">
@@ -1658,8 +1660,8 @@ Most similar to 'queen':
                     </thead>
                     <tbody>
                         <tr><td><strong>TF-IDF</strong></td><td>Word importance in documents</td><td>Information retrieval, keyword extraction</td></tr>
-                        <tr><td><strong>Word2Vec</strong></td><td>Predictive word relationships</td><td>General semantic similarity</td></tr>
-                        <tr><td><strong>GloVe</strong></td><td>Co-occurrence ratios</td><td>Analogy tasks, semantic relationships</td></tr>
+                        <tr><td><strong>Word2Vec</strong></td><td>Predictive word relationships</td><td>General semantic similarity [4]</td></tr>
+                        <tr><td><strong>GloVe</strong></td><td>Co-occurrence ratios</td><td>Analogy tasks, semantic relationships [1]</td></tr>
                         <tr><td><strong>FastText</strong></td><td>Subword + word embeddings</td><td>Morphologically rich languages, rare words</td></tr>
                         <tr><td><strong>BERT</strong></td><td>Contextualized embeddings</td><td>Context-dependent meaning</td></tr>
                     </tbody>
@@ -1667,9 +1669,416 @@ Most similar to 'queen':
             </div>
         </div>
 
+        <!-- Section 8: Simple Numerical Examples -->
+        <div class="section-header" id="numerical-examples">
+            <h2><span class="icon">&#128290;</span> Simple Numerical Examples</h2>
+            <p>Step-by-step calculations with concrete numbers to understand GloVe training</p>
+        </div>
+
+        <div class="content-block">
+            <h3>A Tiny 4-Word Corpus</h3>
+            <p>Let's work through GloVe with the smallest possible meaningful example [1]. Consider a corpus with just 4 unique words:</p>
+
+            <div class="callout callout-example">
+                <h4>&#128218; Our Minimal Corpus (window size = 1)</h4>
+                <ul>
+                    <li><strong>Sentence 1:</strong> "ice cold"</li>
+                    <li><strong>Sentence 2:</strong> "steam hot"</li>
+                    <li><strong>Sentence 3:</strong> "ice water"</li>
+                    <li><strong>Sentence 4:</strong> "steam water"</li>
+                </ul>
+                <p><strong>Vocabulary:</strong> {ice, cold, steam, hot, water} - 5 words total</p>
+            </div>
+
+            <h4>Step 1: Build the Co-occurrence Matrix X</h4>
+            <p>With window size = 1, we count adjacent word pairs:</p>
+
+            <div class="matrix-display">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>X</th>
+                            <th>ice</th>
+                            <th>cold</th>
+                            <th>steam</th>
+                            <th>hot</th>
+                            <th>water</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="row-header">ice</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+                        <tr><td class="row-header">cold</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                        <tr><td class="row-header">steam</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+                        <tr><td class="row-header">hot</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+                        <tr><td class="row-header">water</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Row sums give us X<sub>i</sub> (total context count for word i):</p>
+            <ul>
+                <li>X<sub>ice</sub> = 0 + 1 + 0 + 0 + 1 = <strong>2</strong></li>
+                <li>X<sub>cold</sub> = 1 + 0 + 0 + 0 + 0 = <strong>1</strong></li>
+                <li>X<sub>steam</sub> = 0 + 0 + 0 + 1 + 1 = <strong>2</strong></li>
+                <li>X<sub>hot</sub> = 0 + 0 + 1 + 0 + 0 = <strong>1</strong></li>
+                <li>X<sub>water</sub> = 1 + 0 + 1 + 0 + 0 = <strong>2</strong></li>
+            </ul>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 2: Calculate Co-occurrence Probabilities P(k|word)</h4>
+            <p>The probability P(k|i) = X<sub>ik</sub> / X<sub>i</sub> represents how likely word k appears in the context of word i [1]:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>P(k|word)</th>
+                            <th>k = cold</th>
+                            <th>k = hot</th>
+                            <th>k = water</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="row-header">P(k|ice)</td>
+                            <td>1/2 = <strong>0.50</strong></td>
+                            <td>0/2 = <strong>0.00</strong></td>
+                            <td>1/2 = <strong>0.50</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="row-header">P(k|steam)</td>
+                            <td>0/2 = <strong>0.00</strong></td>
+                            <td>1/2 = <strong>0.50</strong></td>
+                            <td>1/2 = <strong>0.50</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Step 3: Calculate and Interpret Ratios</h4>
+            <p>The ratio P(k|ice)/P(k|steam) reveals semantic relationships [1]:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Probe Word k</th>
+                            <th>P(k|ice)</th>
+                            <th>P(k|steam)</th>
+                            <th>Ratio</th>
+                            <th>Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>cold</strong></td>
+                            <td>0.50</td>
+                            <td>0.00 (use 0.001)</td>
+                            <td class="highlight-cell">500 (large)</td>
+                            <td>Strongly associated with "ice"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>hot</strong></td>
+                            <td>0.00 (use 0.001)</td>
+                            <td>0.50</td>
+                            <td class="highlight-cell">0.002 (small)</td>
+                            <td>Strongly associated with "steam"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>water</strong></td>
+                            <td>0.50</td>
+                            <td>0.50</td>
+                            <td class="highlight-cell">1.0</td>
+                            <td>Equally associated with both</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>&#128161; The Key Insight [1]</h4>
+                <p>The ratio perfectly captures semantic relationships:</p>
+                <ul>
+                    <li><strong>Ratio >> 1:</strong> Probe word is more ice-related (like "cold")</li>
+                    <li><strong>Ratio << 1:</strong> Probe word is more steam-related (like "hot")</li>
+                    <li><strong>Ratio ~ 1:</strong> Probe word is equally related to both (like "water")</li>
+                </ul>
+                <p>GloVe learns vectors where (w<sub>ice</sub> - w<sub>steam</sub>) &middot; w<sub>k</sub> approximates log(ratio)!</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>One Iteration of GloVe Training</h3>
+            <p>Let's trace through one complete training step for the word pair (ice, cold) [1]:</p>
+
+            <h4>Initial Setup (2D vectors for simplicity)</h4>
+            <div class="callout callout-example">
+                <h4>&#128203; Initial Random Vectors and Biases</h4>
+                <pre style="background: #f8fafc; color: #1f2937; padding: 1rem; border-radius: 0.5rem; font-family: monospace;">
+<strong>Word vectors (W):</strong>
+  w_ice   = [0.5, -0.3]
+  w_cold  = [0.2, 0.4]
+
+<strong>Context vectors (W_ctx):</strong>
+  w_ctx_ice  = [-0.1, 0.6]
+  w_ctx_cold = [0.3, -0.2]
+
+<strong>Biases:</strong>
+  b_ice = 0.1,  b_cold = -0.05
+  b_ctx_ice = 0.05,  b_ctx_cold = 0.02
+
+<strong>Co-occurrence:</strong>
+  X[ice, cold] = 1
+</pre>
+            </div>
+
+            <h4>Step 1: Forward Pass - Compute Prediction</h4>
+            <p>For the pair (i=ice, j=cold), compute the dot product plus biases:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Prediction Calculation</div>
+                <div style="text-align: left; font-family: monospace; line-height: 2;">
+                    <p><strong>Dot product:</strong> w<sub>ice</sub> &middot; w<sub>ctx_cold</sub></p>
+                    <p style="margin-left: 2rem;">= [0.5, -0.3] &middot; [0.3, -0.2]</p>
+                    <p style="margin-left: 2rem;">= (0.5 &times; 0.3) + (-0.3 &times; -0.2)</p>
+                    <p style="margin-left: 2rem;">= 0.15 + 0.06 = <strong>0.21</strong></p>
+                    <br>
+                    <p><strong>Full prediction:</strong></p>
+                    <p style="margin-left: 2rem;">pred = dot + b<sub>ice</sub> + b<sub>ctx_cold</sub></p>
+                    <p style="margin-left: 2rem;">= 0.21 + 0.1 + 0.02 = <strong>0.33</strong></p>
+                </div>
+            </div>
+
+            <h4>Step 2: Compute Target and Error</h4>
+            <p>The target is log(X<sub>ij</sub>), and we compute the error:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Error Calculation</div>
+                <div style="text-align: left; font-family: monospace; line-height: 2;">
+                    <p><strong>Target:</strong> log(X[ice, cold]) = log(1) = <strong>0.0</strong></p>
+                    <br>
+                    <p><strong>Error (diff):</strong></p>
+                    <p style="margin-left: 2rem;">diff = prediction - target</p>
+                    <p style="margin-left: 2rem;">= 0.33 - 0.0 = <strong>0.33</strong></p>
+                </div>
+            </div>
+
+            <h4>Step 3: Calculate Weighted Loss</h4>
+            <p>Apply the weighting function f(x) to control the contribution of this pair [1]:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Loss Calculation</div>
+                <div style="text-align: left; font-family: monospace; line-height: 2;">
+                    <p><strong>Weighting function</strong> (with x<sub>max</sub>=100, &alpha;=0.75):</p>
+                    <p style="margin-left: 2rem;">f(X[ice,cold]) = f(1) = (1/100)<sup>0.75</sup></p>
+                    <p style="margin-left: 2rem;">= 0.01<sup>0.75</sup> = <strong>0.0316</strong></p>
+                    <br>
+                    <p><strong>Weighted loss for this pair:</strong></p>
+                    <p style="margin-left: 2rem;">L = f(x) &times; diff<sup>2</sup></p>
+                    <p style="margin-left: 2rem;">= 0.0316 &times; (0.33)<sup>2</sup></p>
+                    <p style="margin-left: 2rem;">= 0.0316 &times; 0.1089 = <strong>0.00344</strong></p>
+                </div>
+            </div>
+
+            <h4>Step 4: Compute Gradients</h4>
+            <p>The gradient of the loss with respect to each parameter:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Gradient Calculation</div>
+                <div style="text-align: left; font-family: monospace; line-height: 2;">
+                    <p><strong>Common gradient factor:</strong></p>
+                    <p style="margin-left: 2rem;">grad_common = 2 &times; f(x) &times; diff</p>
+                    <p style="margin-left: 2rem;">= 2 &times; 0.0316 &times; 0.33 = <strong>0.0209</strong></p>
+                    <br>
+                    <p><strong>Gradient for w<sub>ice</sub>:</strong></p>
+                    <p style="margin-left: 2rem;">&nabla;w<sub>ice</sub> = grad_common &times; w<sub>ctx_cold</sub></p>
+                    <p style="margin-left: 2rem;">= 0.0209 &times; [0.3, -0.2]</p>
+                    <p style="margin-left: 2rem;">= <strong>[0.00627, -0.00418]</strong></p>
+                    <br>
+                    <p><strong>Gradient for w<sub>ctx_cold</sub>:</strong></p>
+                    <p style="margin-left: 2rem;">&nabla;w<sub>ctx_cold</sub> = grad_common &times; w<sub>ice</sub></p>
+                    <p style="margin-left: 2rem;">= 0.0209 &times; [0.5, -0.3]</p>
+                    <p style="margin-left: 2rem;">= <strong>[0.01045, -0.00627]</strong></p>
+                    <br>
+                    <p><strong>Gradient for biases:</strong></p>
+                    <p style="margin-left: 2rem;">&nabla;b<sub>ice</sub> = grad_common = <strong>0.0209</strong></p>
+                    <p style="margin-left: 2rem;">&nabla;b<sub>ctx_cold</sub> = grad_common = <strong>0.0209</strong></p>
+                </div>
+            </div>
+
+            <h4>Step 5: Update Parameters (using simple SGD with lr=0.05)</h4>
+            <div class="formula-box">
+                <div class="formula-label">Parameter Updates</div>
+                <div style="text-align: left; font-family: monospace; line-height: 2;">
+                    <p><strong>Update w<sub>ice</sub>:</strong></p>
+                    <p style="margin-left: 2rem;">w<sub>ice</sub> = w<sub>ice</sub> - lr &times; &nabla;w<sub>ice</sub></p>
+                    <p style="margin-left: 2rem;">= [0.5, -0.3] - 0.05 &times; [0.00627, -0.00418]</p>
+                    <p style="margin-left: 2rem;">= [0.5 - 0.000314, -0.3 + 0.000209]</p>
+                    <p style="margin-left: 2rem;">= <strong>[0.49969, -0.29979]</strong></p>
+                    <br>
+                    <p><strong>Update w<sub>ctx_cold</sub>:</strong></p>
+                    <p style="margin-left: 2rem;">w<sub>ctx_cold</sub> = [0.3, -0.2] - 0.05 &times; [0.01045, -0.00627]</p>
+                    <p style="margin-left: 2rem;">= <strong>[0.29948, -0.19969]</strong></p>
+                    <br>
+                    <p><strong>Update biases:</strong></p>
+                    <p style="margin-left: 2rem;">b<sub>ice</sub> = 0.1 - 0.05 &times; 0.0209 = <strong>0.0990</strong></p>
+                    <p style="margin-left: 2rem;">b<sub>ctx_cold</sub> = 0.02 - 0.05 &times; 0.0209 = <strong>0.0190</strong></p>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>&#128161; What Just Happened?</h4>
+                <p>Since our prediction (0.33) was <strong>higher</strong> than the target (0.0), the gradient update:</p>
+                <ul>
+                    <li>Slightly <strong>reduced</strong> the dot product between w<sub>ice</sub> and w<sub>ctx_cold</sub></li>
+                    <li>Slightly <strong>reduced</strong> both biases</li>
+                </ul>
+                <p>Over many iterations across all word pairs, the vectors converge to represent semantic relationships!</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Practice Problem</h3>
+
+            <div class="callout callout-analogy">
+                <h4>&#127919; Try It Yourself!</h4>
+                <p>Given the following setup, complete one iteration of GloVe training for the pair (steam, hot):</p>
+
+                <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; font-family: monospace;">
+                    <p><strong>Given:</strong></p>
+                    <ul style="list-style: none; margin-left: 0;">
+                        <li>w<sub>steam</sub> = [0.4, 0.2]</li>
+                        <li>w<sub>ctx_hot</sub> = [0.1, 0.5]</li>
+                        <li>b<sub>steam</sub> = 0.08</li>
+                        <li>b<sub>ctx_hot</sub> = -0.03</li>
+                        <li>X[steam, hot] = 1</li>
+                        <li>x<sub>max</sub> = 100, &alpha; = 0.75, lr = 0.05</li>
+                    </ul>
+                </div>
+
+                <p><strong>Questions:</strong></p>
+                <ol>
+                    <li>What is the dot product w<sub>steam</sub> &middot; w<sub>ctx_hot</sub>?</li>
+                    <li>What is the full prediction (dot product + biases)?</li>
+                    <li>What is the target value log(X[steam, hot])?</li>
+                    <li>What is the error (diff)?</li>
+                    <li>What is the weighting f(1)?</li>
+                    <li>What is the gradient for w<sub>steam</sub>?</li>
+                </ol>
+
+                <details style="margin-top: 1rem;">
+                    <summary style="cursor: pointer; color: var(--primary-color); font-weight: bold;">Click to reveal answers</summary>
+                    <div style="background: #d1fae5; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;">
+                        <ol>
+                            <li><strong>Dot product:</strong> (0.4 &times; 0.1) + (0.2 &times; 0.5) = 0.04 + 0.10 = <strong>0.14</strong></li>
+                            <li><strong>Prediction:</strong> 0.14 + 0.08 + (-0.03) = <strong>0.19</strong></li>
+                            <li><strong>Target:</strong> log(1) = <strong>0.0</strong></li>
+                            <li><strong>Error:</strong> 0.19 - 0.0 = <strong>0.19</strong></li>
+                            <li><strong>Weighting:</strong> (1/100)<sup>0.75</sup> = <strong>0.0316</strong></li>
+                            <li><strong>Gradient for w<sub>steam</sub>:</strong>
+                                <br>grad_common = 2 &times; 0.0316 &times; 0.19 = 0.0120
+                                <br>&nabla;w<sub>steam</sub> = 0.0120 &times; [0.1, 0.5] = <strong>[0.00120, 0.00600]</strong>
+                            </li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- Section 9: References & Bibliography -->
+        <div class="section-header" id="references">
+            <h2><span class="icon">&#128218;</span> References & Bibliography</h2>
+            <p>Key papers and resources for further study</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Primary References</h3>
+
+            <div class="callout callout-concept">
+                <h4>[1] The Original GloVe Paper</h4>
+                <p><strong>Pennington, J., Socher, R., & Manning, C. D. (2014).</strong> "GloVe: Global Vectors for Word Representation." <em>Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em>, pages 1532-1543.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">The foundational paper introducing GloVe, demonstrating how ratio of co-occurrence probabilities can capture semantic meaning, and presenting the weighted least-squares objective function.</p>
+                <p style="margin-top: 0.5rem;"><a href="https://nlp.stanford.edu/pubs/glove.pdf" style="color: var(--primary-color);">PDF</a> | <a href="https://nlp.stanford.edu/projects/glove/" style="color: var(--primary-color);">Project Page</a></p>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>[2] Word2Vec as Implicit Matrix Factorization</h4>
+                <p><strong>Levy, O., & Goldberg, Y. (2014).</strong> "Neural Word Embedding as Implicit Matrix Factorization." <em>Advances in Neural Information Processing Systems (NIPS)</em>, 27.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">Shows that Skip-gram with Negative Sampling (SGNS) implicitly factorizes a shifted PMI matrix, providing theoretical connections between neural and count-based methods.</p>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>[3] Improving Distributional Similarity</h4>
+                <p><strong>Levy, O., Goldberg, Y., & Dagan, I. (2015).</strong> "Improving Distributional Similarity with Lessons Learned from Word Embeddings." <em>Transactions of the Association for Computational Linguistics (TACL)</em>, 3, 211-225.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">Systematic comparison showing that much of word embeddings' success comes from hyperparameter tuning, with practical recommendations for both neural and count-based methods.</p>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>[4] Count vs. Predict Comparison</h4>
+                <p><strong>Baroni, M., Dinu, G., & Kruszewski, G. (2014).</strong> "Don't count, predict! A systematic comparison of context-counting vs. context-predicting semantic vectors." <em>Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics (ACL)</em>, pages 238-247.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">Comprehensive evaluation showing prediction-based models (like Word2Vec) outperforming count-based models across various semantic tasks, motivating hybrid approaches like GloVe.</p>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>[5] Vector Space Models Survey</h4>
+                <p><strong>Turney, P. D., & Pantel, P. (2010).</strong> "From Frequency to Meaning: Vector Space Models of Semantics." <em>Journal of Artificial Intelligence Research (JAIR)</em>, 37, 141-188.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">Comprehensive survey of vector space models for semantics, covering the theoretical foundations that underpin both count-based methods and modern word embeddings.</p>
+            </div>
+
+            <h3>Additional Resources</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Resource</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="https://nlp.stanford.edu/projects/glove/" style="color: var(--primary-color);">Stanford GloVe Project</a></td>
+                            <td>Website</td>
+                            <td>Official project page with pre-trained vectors and code</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://github.com/stanfordnlp/GloVe" style="color: var(--primary-color);">GloVe GitHub Repository</a></td>
+                            <td>Code</td>
+                            <td>Official C implementation for training GloVe</td>
+                        </tr>
+                        <tr>
+                            <td>Jurafsky & Martin, Ch. 6</td>
+                            <td>Textbook</td>
+                            <td>Speech and Language Processing (3rd ed.) - Vector Semantics chapter</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://web.stanford.edu/class/cs224n/" style="color: var(--primary-color);">Stanford CS224N</a></td>
+                            <td>Course</td>
+                            <td>NLP with Deep Learning - includes GloVe lectures</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-warning">
+                <h4>&#9888;&#65039; Citation Note</h4>
+                <p>When using GloVe in academic work, please cite the original paper [1]:</p>
+                <pre style="background: #f8fafc; color: #1f2937; padding: 1rem; font-size: 0.85rem; overflow-x: auto;">@inproceedings{pennington2014glove,
+  title={GloVe: Global Vectors for Word Representation},
+  author={Pennington, Jeffrey and Socher, Richard and Manning, Christopher D},
+  booktitle={Proceedings of the 2014 Conference on Empirical Methods
+             in Natural Language Processing (EMNLP)},
+  pages={1532--1543},
+  year={2014}
+}</pre>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
-            <p>Created for educational purposes &bull; GloVe was developed by Pennington, Socher, and Manning at Stanford (2014)</p>
+            <p>Created for educational purposes &bull; GloVe was developed by Pennington, Socher, and Manning at Stanford (2014) [1]</p>
             <p style="margin-top: 1rem;">
                 <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">&larr; TF-IDF</a>
                 <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec &rarr;</a>

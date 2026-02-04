@@ -736,6 +736,8 @@
                 <li><a href="#flowchart">Flowchart</a></li>
                 <li><a href="#python">Python</a></li>
                 <li><a href="#comparison">Comparison</a></li>
+                <li><a href="#numerical">Numerical</a></li>
+                <li><a href="#references">References</a></li>
             </ul>
         </div>
     </nav>
@@ -745,7 +747,7 @@
         <header>
             <h1>Understanding CBOW</h1>
             <p>Continuous Bag of Words (CBOW) is a neural network architecture that learns word embeddings by predicting a target word from its surrounding context words - like a fill-in-the-blank game for machines.</p>
-            <div class="subtitle">Part of the Word2Vec Family</div>
+            <div class="subtitle">Part of the Word2Vec Family [1][2]</div>
         </header>
 
         <!-- Section 1: Intuition -->
@@ -756,13 +758,13 @@
 
         <div class="content-block">
             <h3>What is CBOW?</h3>
-            <p><strong>CBOW</strong> stands for <span class="highlight">Continuous Bag of Words</span>. It's a neural network model that learns to represent words as dense vectors (embeddings) by training on a simple task: <strong>predict the center word given its surrounding context words</strong>.</p>
+            <p><strong>CBOW</strong> stands for <span class="highlight">Continuous Bag of Words</span>. It's a neural network model that learns to represent words as dense vectors (embeddings) by training on a simple task: <strong>predict the center word given its surrounding context words</strong> [1][2].</p>
 
-            <p>The key insight is elegantly simple: <strong>words that appear in similar contexts should have similar meanings, and therefore similar vector representations.</strong></p>
+            <p>The key insight is elegantly simple: <strong>words that appear in similar contexts should have similar meanings, and therefore similar vector representations.</strong> This principle, known as the distributional hypothesis, forms the foundation of modern word embeddings [4].</p>
 
             <div class="callout callout-analogy">
                 <h4>Fill-in-the-Blank Game</h4>
-                <p>CBOW is like playing a fill-in-the-blank game:</p>
+                <p>CBOW is like playing a fill-in-the-blank game [3]:</p>
                 <ul>
                     <li><strong>Sentence:</strong> "The cat sat on the ___"</li>
                     <li><strong>Context words:</strong> "The", "cat", "sat", "on", "the"</li>
@@ -796,7 +798,7 @@
             <div class="content-block">
                 <h3>Why "Bag of Words"?</h3>
                 <p><strong>"Order doesn't matter!"</strong></p>
-                <p>CBOW averages the context word vectors together, ignoring their order. It treats context as a "bag" - knowing which words are present, not their sequence.</p>
+                <p>CBOW averages the context word vectors together, ignoring their order [1]. It treats context as a "bag" - knowing which words are present, not their sequence.</p>
 
                 <div class="callout callout-concept">
                     <h4>Bag of Words Concept</h4>
@@ -821,7 +823,7 @@
                     <li><strong>If you see "delicious" near "food", "meal", "taste",</strong> you learn it relates to eating</li>
                     <li><strong>If you see "fast" near "car", "run", "quick",</strong> you learn it relates to speed</li>
                 </ul>
-                <p>CBOW learns word meanings the same way - purely from context, without any dictionaries!</p>
+                <p>CBOW learns word meanings the same way - purely from context, without any dictionaries! This approach was inspired by earlier neural language models [4] and unified NLP architectures [5].</p>
             </div>
 
             <div class="formula-box">
@@ -1048,7 +1050,7 @@
 
         <div class="content-block">
             <h3>CBOW Objective Function</h3>
-            <p>The goal of CBOW is to maximize the probability of predicting the correct center word given its context. This is formalized as:</p>
+            <p>The goal of CBOW is to maximize the probability of predicting the correct center word given its context [1][3]. This is formalized as:</p>
 
             <div class="formula-box">
                 <div class="formula-label">CBOW Objective (Log-Likelihood)</div>
@@ -1067,7 +1069,7 @@
 
         <div class="content-block">
             <h3>Context Vector Averaging</h3>
-            <p>CBOW computes a hidden representation by averaging the input embeddings of all context words:</p>
+            <p>CBOW computes a hidden representation by averaging the input embeddings of all context words [1][3]:</p>
 
             <div class="formula-box">
                 <div class="formula-label">Hidden Layer (Average of Context Vectors)</div>
@@ -1095,7 +1097,7 @@
 
         <div class="content-block">
             <h3>Softmax Output Layer</h3>
-            <p>The probability of each word being the target is computed using softmax over dot products:</p>
+            <p>The probability of each word being the target is computed using softmax over dot products [3]:</p>
 
             <div class="formula-box">
                 <div class="formula-label">Softmax Probability</div>
@@ -1115,13 +1117,13 @@
             <div class="callout callout-warning">
                 <h4>Computational Challenge</h4>
                 <p>The denominator sums over ALL words in the vocabulary (often 100K+ words). This makes training slow!</p>
-                <p><strong>Solutions:</strong> Hierarchical Softmax or Negative Sampling (see comparison section).</p>
+                <p><strong>Solutions:</strong> Hierarchical Softmax or Negative Sampling [2] (see comparison section).</p>
             </div>
         </div>
 
         <div class="content-block">
             <h3>Loss Function and Gradients</h3>
-            <p>We minimize the negative log-likelihood (cross-entropy loss):</p>
+            <p>We minimize the negative log-likelihood (cross-entropy loss) [3][4]:</p>
 
             <div class="formula-box">
                 <div class="formula-label">Loss Function</div>
@@ -1158,7 +1160,7 @@
 
         <div class="content-block">
             <h3>Two Sets of Embeddings</h3>
-            <p>CBOW maintains two separate embedding matrices:</p>
+            <p>CBOW maintains two separate embedding matrices [3]:</p>
 
             <div class="table-container">
                 <table>
@@ -1830,7 +1832,7 @@ Predicting center word:
 
             <div class="callout callout-warning">
                 <h4>Why Skip-gram is Slower but Sometimes Better</h4>
-                <p>Skip-gram creates more training examples from the same data. For rare words, this extra signal helps learn better representations. CBOW averages context, which smooths out rare word contributions.</p>
+                <p>Skip-gram creates more training examples from the same data [1][2]. For rare words, this extra signal helps learn better representations. CBOW averages context, which smooths out rare word contributions.</p>
             </div>
         </div>
 
@@ -1892,9 +1894,390 @@ Predicting center word:
             </div>
         </div>
 
+        <!-- Section 8: Simple Numerical Examples -->
+        <div class="section-header" id="numerical">
+            <h2><span class="icon">*</span> Simple Numerical Examples</h2>
+            <p>Step-by-step calculations with actual numbers to build intuition</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Tiny Example: Predict "sat" from ["the", "cat", "on", "mat"]</h3>
+            <p>Let's work through a complete CBOW forward pass with concrete numbers. We'll use a tiny vocabulary and 2-dimensional embeddings for clarity [3].</p>
+
+            <div class="callout callout-example">
+                <h4>Setup</h4>
+                <p><strong>Sentence:</strong> "the cat sat on the mat"</p>
+                <p><strong>Target word:</strong> "sat" (position 2)</p>
+                <p><strong>Context words (window=2):</strong> ["the", "cat", "on", "mat"]</p>
+                <p><strong>Vocabulary:</strong> {the, cat, sat, on, mat} (V = 5)</p>
+                <p><strong>Embedding dimension:</strong> d = 2</p>
+            </div>
+
+            <h4>Step 1: Define Input Embeddings (W)</h4>
+            <p>Each word has a 2D input embedding vector:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Index</th>
+                            <th>Input Embedding v</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>the</td><td>0</td><td>[0.2, 0.8]</td></tr>
+                        <tr><td>cat</td><td>1</td><td>[0.9, 0.3]</td></tr>
+                        <tr><td>sat</td><td>2</td><td>[0.5, 0.6]</td></tr>
+                        <tr><td>on</td><td>3</td><td>[0.1, 0.7]</td></tr>
+                        <tr><td>mat</td><td>4</td><td>[0.8, 0.4]</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Step 2: Average Context Embeddings</h4>
+            <p>CBOW averages the embeddings of all context words to create the hidden layer h [1]:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Context Word Embeddings</div>
+                <p style="font-family: monospace; font-size: 1rem;">
+                    v<sub>the</sub> = [0.2, 0.8]<br>
+                    v<sub>cat</sub> = [0.9, 0.3]<br>
+                    v<sub>on</sub> = [0.1, 0.7]<br>
+                    v<sub>mat</sub> = [0.8, 0.4]
+                </p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Hidden Layer Calculation</div>
+                \[ \mathbf{h} = \frac{1}{4}(\mathbf{v}_{the} + \mathbf{v}_{cat} + \mathbf{v}_{on} + \mathbf{v}_{mat}) \]
+                <p style="font-family: monospace; font-size: 1.1rem; margin-top: 1rem;">
+                    h[0] = (0.2 + 0.9 + 0.1 + 0.8) / 4 = 2.0 / 4 = <strong>0.50</strong><br>
+                    h[1] = (0.8 + 0.3 + 0.7 + 0.4) / 4 = 2.2 / 4 = <strong>0.55</strong>
+                </p>
+                <p style="font-size: 1.2rem; color: var(--accent-color); font-weight: bold; margin-top: 1rem;">
+                    h = [0.50, 0.55]
+                </p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 3: Define Output Embeddings (W')</h4>
+            <p>We also need output embeddings for computing prediction scores [3]:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Index</th>
+                            <th>Output Embedding v'</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>the</td><td>0</td><td>[0.3, 0.5]</td></tr>
+                        <tr><td>cat</td><td>1</td><td>[0.7, 0.2]</td></tr>
+                        <tr style="background: #d1fae5;"><td><strong>sat</strong></td><td>2</td><td><strong>[0.6, 0.8]</strong></td></tr>
+                        <tr><td>on</td><td>3</td><td>[0.2, 0.6]</td></tr>
+                        <tr><td>mat</td><td>4</td><td>[0.5, 0.3]</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Step 4: Compute Dot Products (Scores)</h4>
+            <p>For each word in the vocabulary, compute the dot product of h with its output embedding:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Score Calculation: score<sub>w</sub> = h . v'<sub>w</sub></div>
+                <p style="font-family: monospace; font-size: 1rem; text-align: left; padding-left: 2rem;">
+                    score<sub>the</sub> = 0.50 x 0.3 + 0.55 x 0.5 = 0.15 + 0.275 = <strong>0.425</strong><br>
+                    score<sub>cat</sub> = 0.50 x 0.7 + 0.55 x 0.2 = 0.35 + 0.110 = <strong>0.460</strong><br>
+                    score<sub>sat</sub> = 0.50 x 0.6 + 0.55 x 0.8 = 0.30 + 0.440 = <strong>0.740</strong><br>
+                    score<sub>on</sub> = 0.50 x 0.2 + 0.55 x 0.6 = 0.10 + 0.330 = <strong>0.430</strong><br>
+                    score<sub>mat</sub> = 0.50 x 0.5 + 0.55 x 0.3 = 0.25 + 0.165 = <strong>0.415</strong>
+                </p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 5: Apply Softmax</h4>
+            <p>Convert scores to probabilities using the softmax function [3]:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Softmax Formula</div>
+                \[ P(w) = \frac{e^{score_w}}{\sum_{i=1}^{V} e^{score_i}} \]
+            </div>
+
+            <p>First, compute the exponentials:</p>
+            <div class="formula-box">
+                <p style="font-family: monospace; font-size: 1rem; text-align: left; padding-left: 2rem;">
+                    e<sup>0.425</sup> = 1.530<br>
+                    e<sup>0.460</sup> = 1.584<br>
+                    e<sup>0.740</sup> = 2.096<br>
+                    e<sup>0.430</sup> = 1.537<br>
+                    e<sup>0.415</sup> = 1.514
+                </p>
+                <p style="font-family: monospace; font-size: 1rem; margin-top: 1rem;">
+                    Sum = 1.530 + 1.584 + 2.096 + 1.537 + 1.514 = <strong>8.261</strong>
+                </p>
+            </div>
+
+            <p>Now compute probabilities:</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Score</th>
+                            <th>e<sup>score</sup></th>
+                            <th>Probability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>the</td><td>0.425</td><td>1.530</td><td>1.530 / 8.261 = <strong>0.185</strong></td></tr>
+                        <tr><td>cat</td><td>0.460</td><td>1.584</td><td>1.584 / 8.261 = <strong>0.192</strong></td></tr>
+                        <tr style="background: #d1fae5;"><td><strong>sat</strong></td><td>0.740</td><td>2.096</td><td>2.096 / 8.261 = <strong>0.254</strong></td></tr>
+                        <tr><td>on</td><td>0.430</td><td>1.537</td><td>1.537 / 8.261 = <strong>0.186</strong></td></tr>
+                        <tr><td>mat</td><td>0.415</td><td>1.514</td><td>1.514 / 8.261 = <strong>0.183</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>Observation</h4>
+                <p>The model assigns the highest probability (0.254 or 25.4%) to "sat" - which is our target word! The model is making the correct prediction, though the probability should ideally be much higher. Training would adjust the embeddings to increase P(sat).</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 6: Calculate Cross-Entropy Loss</h4>
+            <p>The loss measures how wrong our prediction is. For the correct word "sat" [3][4]:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Cross-Entropy Loss</div>
+                \[ \mathcal{L} = -\log P(w_{target}) = -\log P(\text{sat}) \]
+                <p style="font-family: monospace; font-size: 1.2rem; margin-top: 1rem;">
+                    L = -log(0.254) = -(-1.370) = <strong>1.370</strong>
+                </p>
+            </div>
+
+            <div class="callout callout-warning">
+                <h4>Interpreting the Loss</h4>
+                <ul>
+                    <li><strong>Perfect prediction (P=1.0):</strong> Loss = -log(1) = 0</li>
+                    <li><strong>Our prediction (P=0.254):</strong> Loss = 1.370</li>
+                    <li><strong>Random guess (P=0.2):</strong> Loss = -log(0.2) = 1.609</li>
+                </ul>
+                <p>Our model is better than random guessing! Training will minimize this loss by adjusting embeddings.</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Summary of the Forward Pass</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Get Context Embeddings</h4>
+                        <p>Look up input embeddings for context words: v<sub>the</sub>, v<sub>cat</sub>, v<sub>on</sub>, v<sub>mat</sub></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Average to Get Hidden Layer</h4>
+                        <p>h = [0.50, 0.55] (element-wise average)</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Compute Scores</h4>
+                        <p>Dot product of h with each output embedding v'</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Apply Softmax</h4>
+                        <p>Convert scores to probabilities summing to 1</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Compute Loss</h4>
+                        <p>Cross-entropy: L = -log(P(sat)) = 1.370</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Practice Problem</h3>
+            <div class="callout callout-analogy">
+                <h4>Try It Yourself!</h4>
+                <p>Given the same embeddings, predict the word "cat" from context ["the", "sat", "on"].</p>
+
+                <p><strong>Input Embeddings:</strong></p>
+                <ul>
+                    <li>v<sub>the</sub> = [0.2, 0.8]</li>
+                    <li>v<sub>sat</sub> = [0.5, 0.6]</li>
+                    <li>v<sub>on</sub> = [0.1, 0.7]</li>
+                </ul>
+
+                <p><strong>Output Embeddings (same as before):</strong></p>
+                <ul>
+                    <li>v'<sub>the</sub> = [0.3, 0.5]</li>
+                    <li>v'<sub>cat</sub> = [0.7, 0.2]</li>
+                    <li>v'<sub>sat</sub> = [0.6, 0.8]</li>
+                    <li>v'<sub>on</sub> = [0.2, 0.6]</li>
+                    <li>v'<sub>mat</sub> = [0.5, 0.3]</li>
+                </ul>
+
+                <p><strong>Questions:</strong></p>
+                <ol>
+                    <li>What is the hidden layer h?</li>
+                    <li>What is the score for "cat"?</li>
+                    <li>What is the probability P(cat)?</li>
+                    <li>What is the cross-entropy loss?</li>
+                </ol>
+            </div>
+
+            <details style="margin-top: 1.5rem;">
+                <summary style="cursor: pointer; font-weight: bold; color: var(--primary-color); padding: 1rem; background: #f1f5f9; border-radius: 0.5rem;">Click to reveal the solution</summary>
+                <div class="callout callout-example" style="margin-top: 1rem;">
+                    <h4>Solution</h4>
+
+                    <p><strong>1. Hidden Layer h:</strong></p>
+                    <p style="font-family: monospace; padding-left: 1rem;">
+                        h[0] = (0.2 + 0.5 + 0.1) / 3 = 0.8 / 3 = 0.267<br>
+                        h[1] = (0.8 + 0.6 + 0.7) / 3 = 2.1 / 3 = 0.700<br>
+                        <strong>h = [0.267, 0.700]</strong>
+                    </p>
+
+                    <p><strong>2. Score for "cat":</strong></p>
+                    <p style="font-family: monospace; padding-left: 1rem;">
+                        score<sub>cat</sub> = 0.267 x 0.7 + 0.700 x 0.2 = 0.187 + 0.140 = <strong>0.327</strong>
+                    </p>
+
+                    <p><strong>3. All scores and softmax:</strong></p>
+                    <p style="font-family: monospace; padding-left: 1rem;">
+                        score<sub>the</sub> = 0.267 x 0.3 + 0.700 x 0.5 = 0.430<br>
+                        score<sub>cat</sub> = 0.327<br>
+                        score<sub>sat</sub> = 0.267 x 0.6 + 0.700 x 0.8 = 0.720<br>
+                        score<sub>on</sub> = 0.267 x 0.2 + 0.700 x 0.6 = 0.473<br>
+                        score<sub>mat</sub> = 0.267 x 0.5 + 0.700 x 0.3 = 0.344<br><br>
+                        Sum of exp(scores) = 1.537 + 1.387 + 2.054 + 1.605 + 1.411 = 7.994<br><br>
+                        <strong>P(cat) = 1.387 / 7.994 = 0.173 (17.3%)</strong>
+                    </p>
+
+                    <p><strong>4. Cross-entropy loss:</strong></p>
+                    <p style="font-family: monospace; padding-left: 1rem;">
+                        L = -log(0.173) = <strong>1.754</strong>
+                    </p>
+
+                    <p><em>Note: The loss is higher than for "sat" because the context ["the", "sat", "on"] doesn't predict "cat" as well with these embeddings.</em></p>
+                </div>
+            </details>
+        </div>
+
+        <!-- Section 9: References & Bibliography -->
+        <div class="section-header" id="references">
+            <h2><span class="icon">*</span> References & Bibliography</h2>
+            <p>Key papers and resources for further reading</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Primary Sources</h3>
+
+            <div class="callout callout-concept" style="margin-bottom: 1.5rem;">
+                <h4>[1] Original Word2Vec Paper (CBOW & Skip-gram Introduction)</h4>
+                <p><strong>Mikolov, T., Chen, K., Corrado, G., & Dean, J.</strong> (2013). "Efficient estimation of word representations in vector space." <em>ICLR Workshop 2013</em>.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">This paper introduced both CBOW and Skip-gram architectures, demonstrating that simple neural network models can learn high-quality word embeddings efficiently from large text corpora.</p>
+                <p style="margin-top: 0.5rem;"><a href="https://arxiv.org/abs/1301.3781" style="color: var(--primary-color);">arXiv:1301.3781</a></p>
+            </div>
+
+            <div class="callout callout-concept" style="margin-bottom: 1.5rem;">
+                <h4>[2] Negative Sampling and Phrase Embeddings</h4>
+                <p><strong>Mikolov, T., Sutskever, I., Chen, K., Corrado, G. S., & Dean, J.</strong> (2013). "Distributed representations of words and phrases and their compositionality." <em>Advances in Neural Information Processing Systems (NIPS 2013)</em>.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">This follow-up paper introduced negative sampling as an efficient alternative to hierarchical softmax, along with techniques for learning phrase embeddings and subsampling frequent words.</p>
+                <p style="margin-top: 0.5rem;"><a href="https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality" style="color: var(--primary-color);">NIPS Proceedings</a></p>
+            </div>
+
+            <div class="callout callout-concept" style="margin-bottom: 1.5rem;">
+                <h4>[3] Detailed Mathematical Explanation</h4>
+                <p><strong>Rong, X.</strong> (2014). "word2vec parameter learning explained." <em>arXiv preprint arXiv:1411.2738</em>.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">An excellent tutorial that provides detailed derivations of the gradients and learning algorithms for both CBOW and Skip-gram, including hierarchical softmax and negative sampling optimizations.</p>
+                <p style="margin-top: 0.5rem;"><a href="https://arxiv.org/abs/1411.2738" style="color: var(--primary-color);">arXiv:1411.2738</a></p>
+            </div>
+
+            <h3>Foundational Work</h3>
+
+            <div class="callout callout-concept" style="margin-bottom: 1.5rem;">
+                <h4>[4] Neural Probabilistic Language Model</h4>
+                <p><strong>Bengio, Y., Ducharme, R., Vincent, P., & Jauvin, C.</strong> (2003). "A neural probabilistic language model." <em>Journal of Machine Learning Research (JMLR), 3</em>, 1137-1155.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">This seminal paper introduced the concept of learning distributed word representations through neural language modeling. It established the foundation for later work including Word2Vec, showing that neural networks can learn meaningful word embeddings as a byproduct of language modeling.</p>
+                <p style="margin-top: 0.5rem;"><a href="https://www.jmlr.org/papers/v3/bengio03a.html" style="color: var(--primary-color);">JMLR Link</a></p>
+            </div>
+
+            <div class="callout callout-concept" style="margin-bottom: 1.5rem;">
+                <h4>[5] Unified Architecture for NLP</h4>
+                <p><strong>Collobert, R., & Weston, J.</strong> (2008). "A unified architecture for natural language processing: Deep neural networks with multitask learning." <em>Proceedings of the 25th International Conference on Machine Learning (ICML 2008)</em>.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">This paper demonstrated that a single neural network architecture with learned word embeddings could achieve strong performance across multiple NLP tasks, paving the way for transfer learning approaches and influencing the development of Word2Vec.</p>
+                <p style="margin-top: 0.5rem;"><a href="https://dl.acm.org/doi/10.1145/1390156.1390177" style="color: var(--primary-color);">ACM Digital Library</a></p>
+            </div>
+
+            <h3>Citation Summary</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ref</th>
+                            <th>Authors</th>
+                            <th>Year</th>
+                            <th>Key Contribution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>[1]</td>
+                            <td>Mikolov et al.</td>
+                            <td>2013</td>
+                            <td>Introduced CBOW and Skip-gram architectures</td>
+                        </tr>
+                        <tr>
+                            <td>[2]</td>
+                            <td>Mikolov et al.</td>
+                            <td>2013</td>
+                            <td>Negative sampling, phrase embeddings</td>
+                        </tr>
+                        <tr>
+                            <td>[3]</td>
+                            <td>Rong</td>
+                            <td>2014</td>
+                            <td>Detailed gradient derivations for Word2Vec</td>
+                        </tr>
+                        <tr>
+                            <td>[4]</td>
+                            <td>Bengio et al.</td>
+                            <td>2003</td>
+                            <td>Neural language model with learned embeddings</td>
+                        </tr>
+                        <tr>
+                            <td>[5]</td>
+                            <td>Collobert & Weston</td>
+                            <td>2008</td>
+                            <td>Unified neural architecture for NLP tasks</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
-            <p>Created for educational purposes - CBOW was introduced by Mikolov et al. (2013)</p>
+            <p>Created for educational purposes - CBOW was introduced by Mikolov et al. (2013) [1][2]</p>
             <p style="margin-top: 1rem;">
                 <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">TF-IDF</a>
                 <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec</a>

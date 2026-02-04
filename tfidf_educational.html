@@ -622,6 +622,107 @@
             }
         }
 
+        /* Citation Styles */
+        .citation {
+            color: var(--primary-color);
+            font-size: 0.85em;
+            vertical-align: super;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .citation:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        /* References Section */
+        .references-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .references-list li {
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            background: var(--bg-color);
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .references-list li:hover {
+            background: #e0e7ff;
+        }
+
+        .ref-number {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 2rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .ref-content {
+            display: inline;
+        }
+
+        .ref-title {
+            font-style: italic;
+        }
+
+        .ref-journal {
+            color: var(--text-light);
+        }
+
+        /* Try It Yourself Box */
+        .try-it-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px dashed var(--warning-color);
+            border-radius: 1rem;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .try-it-box h4 {
+            color: var(--warning-color);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .try-it-box .solution {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .try-it-box .solution.show {
+            display: block;
+        }
+
+        .try-it-box button {
+            background: var(--warning-color);
+            margin-top: 1rem;
+        }
+
+        .try-it-box button:hover {
+            background: #b45309;
+        }
+
         /* Print Styles */
         @media print {
             nav {
@@ -659,12 +760,14 @@
             <div class="logo">📊 TF-IDF Guide</div>
             <ul>
                 <li><a href="#intuition">Intuition</a></li>
-                <li><a href="#examples">Examples</a></li>
+                <li><a href="#simple-examples">Simple Examples</a></li>
+                <li><a href="#examples">Worked Examples</a></li>
                 <li><a href="#visualization">Visualization</a></li>
                 <li><a href="#mathematics">Mathematics</a></li>
                 <li><a href="#flowchart">Flowchart</a></li>
                 <li><a href="#python">Python</a></li>
                 <li><a href="#variants">Variants</a></li>
+                <li><a href="#references">References</a></li>
             </ul>
         </div>
     </nav>
@@ -685,9 +788,9 @@
 
         <div class="content-block">
             <h3>What is TF-IDF?</h3>
-            <p><strong>TF-IDF</strong> stands for <span class="highlight">Term Frequency-Inverse Document Frequency</span>. It's a numerical statistic that reflects how important a word is to a document within a collection (or corpus) of documents.</p>
+            <p><strong>TF-IDF</strong> stands for <span class="highlight">Term Frequency-Inverse Document Frequency</span>. It's a numerical statistic that reflects how important a word is to a document within a collection (or corpus) of documents. The concept of term specificity was first introduced by Karen Sparck Jones in her seminal 1972 paper<a href="#ref1" class="citation">[1]</a>, which laid the foundation for modern information retrieval.</p>
 
-            <p>The key insight is simple but powerful: <strong>words that appear frequently in a specific document but rarely across all documents are likely the most important for understanding what that document is about.</strong></p>
+            <p>The key insight is simple but powerful: <strong>words that appear frequently in a specific document but rarely across all documents are likely the most important for understanding what that document is about.</strong> This principle was further refined and formalized by Salton and Buckley in their influential 1988 work on term weighting<a href="#ref2" class="citation">[2]</a>.</p>
 
             <div class="callout callout-analogy">
                 <h4>🏠 The Library Analogy</h4>
@@ -720,7 +823,7 @@
             <div class="content-block">
                 <h3>Inverse Document Frequency (IDF)</h3>
                 <p><strong>"How special is this word?"</strong></p>
-                <p>If a word appears in almost every document, it's probably not very informative. But if it appears in only a few documents, it's distinctive.</p>
+                <p>If a word appears in almost every document, it's probably not very informative. But if it appears in only a few documents, it's distinctive. Robertson<a href="#ref3" class="citation">[3]</a> provides an excellent theoretical justification for why IDF works so well in practice.</p>
 
                 <div class="callout callout-example">
                     <h4>📝 Example</h4>
@@ -757,6 +860,156 @@
                         <li><strong>Low</strong> when a word appears rarely here OR appears in many documents</li>
                         <li><strong>Zero</strong> when a word doesn't appear in the document at all</li>
                     </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Simple Numerical Examples -->
+        <div class="section-header" id="simple-examples">
+            <h2><span class="icon">🔢</span> Simple Numerical Examples</h2>
+            <p>A minimal 2-document example worked through completely by hand</p>
+        </div>
+
+        <div class="content-block">
+            <h3>The Simplest Possible Example</h3>
+            <p>Let's work through TF-IDF with the absolute minimum: <strong>2 documents</strong> and <strong>3 unique words</strong>. This will let you verify every calculation by hand.</p>
+
+            <div class="callout callout-example">
+                <h4>📚 Our Tiny Corpus</h4>
+                <ul>
+                    <li><strong>Document 1:</strong> "cat cat dog"</li>
+                    <li><strong>Document 2:</strong> "dog dog dog"</li>
+                </ul>
+                <p><strong>Vocabulary:</strong> {cat, dog} (only 2 unique words!)</p>
+            </div>
+
+            <h4>Step 1: Count the Words</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Count in Doc 1</th>
+                            <th>Count in Doc 2</th>
+                            <th>Appears in # Docs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>cat</strong></td><td>2</td><td>0</td><td>1</td></tr>
+                        <tr><td><strong>dog</strong></td><td>1</td><td>3</td><td>2</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 2: Calculate Term Frequency (TF)</h4>
+            <p>TF = (word count in document) / (total words in document)</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Document 1 has 3 words total</div>
+                <p>TF(cat, Doc1) = 2/3 = <strong>0.667</strong></p>
+                <p>TF(dog, Doc1) = 1/3 = <strong>0.333</strong></p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Document 2 has 3 words total</div>
+                <p>TF(cat, Doc2) = 0/3 = <strong>0.000</strong></p>
+                <p>TF(dog, Doc2) = 3/3 = <strong>1.000</strong></p>
+            </div>
+
+            <h4>Step 3: Calculate Inverse Document Frequency (IDF)</h4>
+            <p>IDF = log<sub>10</sub>(Total Documents / Documents containing word)</p>
+            <p>We have N = 2 total documents.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">IDF Calculations</div>
+                <p>IDF(cat) = log<sub>10</sub>(2/1) = log<sub>10</sub>(2) = <strong>0.301</strong></p>
+                <p style="color: var(--text-light);">"cat" appears in 1 document → distinctive!</p>
+                <br>
+                <p>IDF(dog) = log<sub>10</sub>(2/2) = log<sub>10</sub>(1) = <strong>0.000</strong></p>
+                <p style="color: var(--text-light);">"dog" appears in both documents → not distinctive!</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 4: Calculate TF-IDF = TF × IDF</h4>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Doc 1: TF × IDF = TF-IDF</th>
+                            <th>Doc 2: TF × IDF = TF-IDF</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>cat</strong></td>
+                            <td>0.667 × 0.301 = <strong>0.201</strong></td>
+                            <td>0.000 × 0.301 = <strong>0.000</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>dog</strong></td>
+                            <td>0.333 × 0.000 = <strong>0.000</strong></td>
+                            <td>1.000 × 0.000 = <strong>0.000</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>🎯 Key Insight</h4>
+                <p><strong>"cat" has the only non-zero TF-IDF score (0.201) in Document 1!</strong></p>
+                <p>Why? Because:</p>
+                <ul>
+                    <li>"cat" appears frequently in Doc 1 (high TF) AND only in Doc 1 (high IDF)</li>
+                    <li>"dog" appears in BOTH documents, so IDF = 0, making ALL its TF-IDF scores = 0</li>
+                </ul>
+                <p>This perfectly captures what makes Document 1 unique: <strong>it's the one about cats!</strong></p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Work out TF-IDF for this corpus:</p>
+                <ul>
+                    <li><strong>Document A:</strong> "apple apple banana"</li>
+                    <li><strong>Document B:</strong> "banana cherry cherry"</li>
+                </ul>
+                <p><em>Hint: Which word(s) will have IDF = 0? Which word(s) will best distinguish each document?</em></p>
+
+                <button onclick="document.getElementById('solution1').classList.toggle('show')">Show/Hide Solution</button>
+
+                <div id="solution1" class="solution">
+                    <p><strong>Step 1 - Counts:</strong></p>
+                    <ul>
+                        <li>apple: Doc A = 2, Doc B = 0, appears in 1 doc</li>
+                        <li>banana: Doc A = 1, Doc B = 1, appears in 2 docs</li>
+                        <li>cherry: Doc A = 0, Doc B = 2, appears in 1 doc</li>
+                    </ul>
+
+                    <p><strong>Step 2 - TF:</strong></p>
+                    <ul>
+                        <li>TF(apple, A) = 2/3 = 0.667, TF(apple, B) = 0</li>
+                        <li>TF(banana, A) = 1/3 = 0.333, TF(banana, B) = 1/3 = 0.333</li>
+                        <li>TF(cherry, A) = 0, TF(cherry, B) = 2/3 = 0.667</li>
+                    </ul>
+
+                    <p><strong>Step 3 - IDF:</strong></p>
+                    <ul>
+                        <li>IDF(apple) = log(2/1) = 0.301</li>
+                        <li>IDF(banana) = log(2/2) = 0.000 (appears in both!)</li>
+                        <li>IDF(cherry) = log(2/1) = 0.301</li>
+                    </ul>
+
+                    <p><strong>Step 4 - TF-IDF:</strong></p>
+                    <ul>
+                        <li>Doc A: apple = 0.667 × 0.301 = <strong>0.201</strong>, banana = 0, cherry = 0</li>
+                        <li>Doc B: apple = 0, banana = 0, cherry = 0.667 × 0.301 = <strong>0.201</strong></li>
+                    </ul>
+
+                    <p><strong>Conclusion:</strong> "apple" best distinguishes Doc A, "cherry" best distinguishes Doc B, and "banana" (appearing in both) has TF-IDF = 0 everywhere!</p>
                 </div>
             </div>
         </div>
@@ -986,7 +1239,7 @@
                 <h4>❓ Why Use Logarithm?</h4>
                 <ol>
                     <li><strong>Dampening:</strong> Without log, a word appearing in 1 document vs. 1000 would have IDF differing by a factor of 1000. The log smooths this to a more manageable range.</li>
-                    <li><strong>Information Theory:</strong> Rare events carry more "information" (measured in bits), and the formula for information is logarithmic.</li>
+                    <li><strong>Information Theory:</strong> Rare events carry more "information" (measured in bits), and the formula for information is logarithmic. Robertson<a href="#ref3" class="citation">[3]</a> provides a rigorous probabilistic derivation connecting IDF to information-theoretic principles.</li>
                 </ol>
             </div>
         </div>
@@ -1008,7 +1261,7 @@
 
             <div class="callout callout-warning">
                 <h4>⚠️ Edge Case: Division by Zero</h4>
-                <p>If a term doesn't appear in any document, the IDF formula would divide by zero. Common solutions:</p>
+                <p>If a term doesn't appear in any document, the IDF formula would divide by zero. Common solutions include smoothing techniques described in detail by Manning et al.<a href="#ref4" class="citation">[4]</a>:</p>
                 <p><strong>Smoothed IDF:</strong> \[ \text{IDF}(t) = \log \frac{N + 1}{1 + |\{d \in D : t \in d\}|} \]</p>
             </div>
         </div>
@@ -1300,12 +1553,13 @@ Doc 3:
 
         <div class="content-block">
             <h3>Common TF-IDF Variants</h3>
+            <p>Salton and Buckley<a href="#ref2" class="citation">[2]</a> conducted extensive experiments comparing different term-weighting approaches. Here are some of the most common variants:</p>
 
             <div class="cards-grid">
                 <div class="card">
                     <h4>Log-Normalized TF</h4>
                     <p>\[ \text{TF} = 1 + \log(f_{t,d}) \]</p>
-                    <p>Dampens high frequency. A word appearing 100× isn't 100× more important.</p>
+                    <p>Dampens high frequency. A word appearing 100x isn't 100x more important.</p>
                 </div>
                 <div class="card">
                     <h4>Double Normalization</h4>
@@ -1330,6 +1584,7 @@ Doc 3:
 
             <div class="callout callout-concept">
                 <h4>✅ TF-IDF Excels At</h4>
+                <p>As discussed extensively in the information retrieval literature<a href="#ref4" class="citation">[4]</a>, TF-IDF excels at:</p>
                 <ul>
                     <li>Feature extraction for traditional ML models</li>
                     <li>Keyword extraction and summarization</li>
@@ -1355,14 +1610,81 @@ Doc 3:
             </div>
         </div>
 
+        <!-- Section: References & Bibliography -->
+        <div class="section-header" id="references">
+            <h2><span class="icon">📚</span> References & Bibliography</h2>
+            <p>Key academic works that established and advanced TF-IDF methodology</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Primary Sources</h3>
+            <p>The following seminal works form the theoretical foundation of TF-IDF and modern information retrieval:</p>
+
+            <ul class="references-list">
+                <li id="ref1">
+                    <span class="ref-number">1</span>
+                    <span class="ref-content">
+                        Sparck Jones, K. (1972).
+                        <span class="ref-title">"A statistical interpretation of term specificity and its application in retrieval."</span>
+                        <span class="ref-journal">Journal of Documentation, 28(1), 11-21.</span>
+                        <br><br>
+                        <em>The foundational paper that introduced the concept of inverse document frequency (IDF). Sparck Jones demonstrated that term specificity—how well a term discriminates between documents—could be quantified statistically, laying the groundwork for modern text retrieval systems.</em>
+                    </span>
+                </li>
+
+                <li id="ref2">
+                    <span class="ref-number">2</span>
+                    <span class="ref-content">
+                        Salton, G., & Buckley, C. (1988).
+                        <span class="ref-title">"Term-weighting approaches in automatic text retrieval."</span>
+                        <span class="ref-journal">Information Processing & Management, 24(5), 513-523.</span>
+                        <br><br>
+                        <em>A comprehensive experimental study comparing various term-weighting schemes. This paper established best practices for TF-IDF variants and demonstrated their effectiveness across different document collections, becoming one of the most cited works in information retrieval.</em>
+                    </span>
+                </li>
+
+                <li id="ref3">
+                    <span class="ref-number">3</span>
+                    <span class="ref-content">
+                        Robertson, S. (2004).
+                        <span class="ref-title">"Understanding inverse document frequency: on theoretical arguments for IDF."</span>
+                        <span class="ref-journal">Journal of Documentation, 60(5), 503-520.</span>
+                        <br><br>
+                        <em>A rigorous theoretical analysis providing probabilistic justifications for why IDF works. Robertson connects IDF to information theory and the probability ranking principle, offering deep insights into the mathematical foundations of term weighting.</em>
+                    </span>
+                </li>
+
+                <li id="ref4">
+                    <span class="ref-number">4</span>
+                    <span class="ref-content">
+                        Manning, C. D., Raghavan, P., & Schutze, H. (2008).
+                        <span class="ref-title">"Introduction to Information Retrieval."</span>
+                        <span class="ref-journal">Cambridge University Press.</span>
+                        <br><br>
+                        <em>The definitive textbook on information retrieval, providing comprehensive coverage of TF-IDF, vector space models, and their applications. Freely available online, this book is an essential resource for anyone studying text analysis and search systems.</em>
+                    </span>
+                </li>
+            </ul>
+
+            <div class="callout callout-concept">
+                <h4>📖 Further Reading</h4>
+                <p>For those interested in exploring beyond TF-IDF:</p>
+                <ul>
+                    <li><strong>BM25:</strong> Robertson, S., & Zaragoza, H. (2009). "The Probabilistic Relevance Framework: BM25 and Beyond." Foundations and Trends in Information Retrieval.</li>
+                    <li><strong>Word Embeddings:</strong> Mikolov, T., et al. (2013). "Efficient Estimation of Word Representations in Vector Space." (Word2Vec paper)</li>
+                    <li><strong>Neural IR:</strong> Mitra, B., & Craswell, N. (2018). "An Introduction to Neural Information Retrieval." Foundations and Trends in Information Retrieval.</li>
+                </ul>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
-            <p>Created for educational purposes • TF-IDF was popularized by Karen Spärck Jones (1972)</p>
+            <p>Created for educational purposes | TF-IDF was popularized by Karen Sparck Jones (1972)<a href="#ref1" class="citation">[1]</a></p>
             <p style="margin-top: 1rem;">
-                <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec →</a>
-                <a href="sgns_educational.html" style="color: var(--primary-color); margin: 0 1rem;">SGNS →</a>
-                <a href="cbow_educational.html" style="color: var(--primary-color); margin: 0 1rem;">CBOW →</a>
-                <a href="glove_educational.html" style="color: var(--primary-color); margin: 0 1rem;">GloVe →</a>
+                <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec</a>
+                <a href="sgns_educational.html" style="color: var(--primary-color); margin: 0 1rem;">SGNS</a>
+                <a href="cbow_educational.html" style="color: var(--primary-color); margin: 0 1rem;">CBOW</a>
+                <a href="glove_educational.html" style="color: var(--primary-color); margin: 0 1rem;">GloVe</a>
             </p>
         </footer>
     </main>
