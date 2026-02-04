@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}{{ plan.title }} - Classroom{% endblock %}
+
+{% block content %}
+<div id="classroom-fullscreen" class="classroom-fullscreen">
+    <!-- Slide Container -->
+    <div id="slides-container" class="slides-container">
+        <!-- Slides will be inserted here by JavaScript -->
+    </div>
+    
+    <!-- Controls -->
+    <div class="classroom-controls">
+        <button class="control-btn prev-slide" onclick="prevSlide()" title="Previous (←)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="slide-indicator">
+            <span id="current-slide">1</span> / <span id="total-slides">{{ plan.steps|length }}</span>
+        </div>
+        <button class="control-btn next-slide" onclick="nextSlide()" title="Next (→)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        <button class="control-btn fullscreen-btn" onclick="toggleFullscreen()" title="Fullscreen (f)">
+            <i class="fas fa-expand"></i>
+        </button>
+        <button class="control-btn exit-btn" onclick="exitClassroom()" title="Exit (Esc)">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="classroom-progress">
+        <div id="progress-bar" class="progress-fill"></div>
+    </div>
+</div>
+
+<script>
+// Lesson Plan Data
+const lessonPlan = {{ plan|tojson }};
+
+let currentSlide = 0;
+let totalSlides = lessonPlan.steps.length;
+
+// Initialize classroom
+document.addEventListener('DOMContentLoaded', function() {
+    renderSlides();
+    showSlide(0);
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevSlide();
+        } else if (e.key === 'f') {
+            e.preventDefault();
+            toggleFullscreen();
+        } else if (e.key === 'Escape') {
+            exitClassroom();
+        }
+    });
+});
+
+function renderSlides() {
+    const container = document.getElementById('slides-container');
+    container.innerHTML = '';
+    
+    lessonPlan.steps.forEach((step, index) => {
+        let slideHTML = '';
+        
+        if (step.type === 'title') {
+            slideHTML = `
+                <div class="slide slide-title-slide" data-slide="${index}">
+                    <div class="slide-content slide-centered">
+                        <h1 class="display-3 mb-4">${step.title}</h1>
+                        <h2 class="display-5 text-muted">${step.subtitle}</h2>
+                        <div class="mt-5 pt-5">
+                            <i class="fas fa-graduation-cap fa-4x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (step.type === 'content') {
+            const pointsHTML = step.points.map(point => 
+                `<div class="slide-point"><p class="lead">${point}</p></div>`
+            ).join('');
+            slideHTML = `
+                <div class="slide slide-content-slide" data-slide="${index}">
+                    <div class="slide-title">${step.title}</div>
+                    <div class="slide-content slide-points">
+                        ${pointsHTML}
+                    </div>
+                    <div class="slide-footer">Duration: ${step.duration} min</div>
+                </div>
+            `;
+        } else if (step.type === 'viz') {
+            slideHTML = `
+                <div class="slide slide-viz" data-slide="${index}">
+                    <div class="slide-title">${step.title}</div>
+                    <div class="slide-content">
+                        <img src="/visualization/${step.file}" 
+                             class="slide-image" alt="${step.title}">
+                    </div>
+                    <div class="slide-footer">Duration: ${step.duration} min</div>
+                </div>
+            `;
+        } else if (step.type === 'section') {
+            slideHTML = `
+                <div class="slide slide-section" data-slide="${index}">
+                    <div class="slide-large-title">${step.title}</div>
+                    <div class="slide-content slide-centered">
+                        <p class="lead">Duration: ${step.duration} minutes</p>
+                        <i class="fas fa-book fa-4x mt-4 text-primary"></i>
+                    </div>
+                </div>
+            `;
+        } else if (step.type === 'demo') {
+            const demoUrl = step.name === 'tfidf' ? '/demo/tfidf' : '/demo/sgns';
+            slideHTML = `
+                <div class="slide slide-demo" data-slide="${index}">
+                    <div class="slide-title">Interactive Demo: ${step.name.toUpperCase()}</div>
+                    <div class="slide-content slide-centered">
+                        <i class="fas fa-flask fa-4x text-success mb-3"></i>
+                        <p class="lead">Run the ${step.name === 'tfidf' ? 'TF-IDF' : 'SGNS'} demo</p>
+                        <a href="${demoUrl}" class="btn btn-lg btn-primary mt-3" target="_blank">
+                            <i class="fas fa-external-link"></i> Open in New Window
+                        </a>
+                    </div>
+                </div>
+            `;
+        } else if (step.type === 'qa') {
+            slideHTML = `
+                <div class="slide slide-qa" data-slide="${index}">
+                    <div class="slide-large-title">${step.title}</div>
+                    <div class="slide-content slide-centered">
+                        <i class="fas fa-question fa-4x mb-4 text-warning"></i>
+                        <p class="lead">Ask your students questions about what they learned</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        container.innerHTML += slideHTML;
+    });
+    
+    document.getElementById('total-slides').textContent = totalSlides;
+}
+
+function showSlide(n) {
+    const slides = document.querySelectorAll('.slide');
+    
+    if (n >= slides.length) currentSlide = 0;
+    if (n < 0) currentSlide = slides.length - 1;
+    
+    slides.forEach(slide => {
+        slide.removeAttribute('style');
+        slide.style.display = 'none';
+    });
+    
+    if (slides[currentSlide]) {
+        slides[currentSlide].style.display = 'flex';
+    }
+    
+    document.getElementById('current-slide').textContent = currentSlide + 1;
+    
+    // Update progress bar
+    const progress = ((currentSlide + 1) / totalSlides) * 100;
+    document.getElementById('progress-bar').style.width = progress + '%';
+}
+
+function nextSlide() {
+    currentSlide++;
+    showSlide(currentSlide);
+}
+
+function prevSlide() {
+    currentSlide--;
+    showSlide(currentSlide);
+}
+
+function toggleFullscreen() {
+    const elem = document.getElementById('classroom-fullscreen');
+    if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => console.log('Fullscreen error:', err));
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+function exitClassroom() {
+    if (confirm('Exit classroom mode?')) {
+        window.location.href = '{{ url_for("classroom_mode") }}';
+    }
+}
+</script>
+
+<style>
+    .classroom-fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #1a1a1a;
+        display: flex;
+        flex-direction: column;
+        z-index: 9999;
+    }
+    
+    .slides-container {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none !important;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 2rem 3rem 8rem 3rem;
+        color: white;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        overflow-y: auto;
+    }
+    
+    .slide[style*="display: flex"] {
+        display: flex !important;
+    }
+    
+    .slide-title-slide {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        justify-content: center;
+    }
+    
+    .slide-content-slide {
+        background: #1a1a1a;
+    }
+    
+    .slide-viz {
+        background: #0d0d0d;
+    }
+    
+    .slide-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        justify-content: center;
+    }
+    
+    .slide-demo {
+        background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
+        justify-content: center;
+    }
+    
+    .slide-qa {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        justify-content: center;
+    }
+    
+    .slide-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        text-align: center;
+        color: #0d6efd;
+        width: 100%;
+    }
+    
+    .slide-large-title {
+        font-size: 4rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .slide-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .slide-points {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        max-width: 900px;
+    }
+    
+    .slide-point {
+        background: rgba(255,255,255,0.1);
+        border-left: 4px solid #0d6efd;
+        padding: 1rem 1.5rem;
+        border-radius: 5px;
+        animation: slideIn 0.5s ease;
+    }
+    
+    .slide-point p {
+        margin: 0;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: white;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .slide-image {
+        max-width: 90%;
+        max-height: 70%;
+        border-radius: 8px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    
+    .slide-centered {
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .slide-footer {
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.7);
+        margin-top: 1rem;
+        width: 100%;
+        text-align: right;
+    }
+    
+    .classroom-controls {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex !important;
+        gap: 1.5rem;
+        align-items: center;
+        background: rgba(0,0,0,0.9);
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        border: 2px solid #0d6efd;
+        z-index: 10000;
+        visibility: visible;
+    }
+    
+    .control-btn {
+        background: #0d6efd !important;
+        border: none !important;
+        color: white !important;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        padding: 0 !important;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+    }
+    
+    .control-btn:hover,
+    .control-btn:active,
+    .control-btn:focus {
+        background: #0a58ca !important;
+        transform: scale(1.15);
+        box-shadow: 0 0 20px rgba(13, 110, 253, 0.8) !important;
+        border-color: #0d6efd !important;
+        color: white !important;
+    }
+    
+    .exit-btn {
+        background: #dc3545 !important;
+    }
+    
+    .exit-btn:hover,
+    .exit-btn:active,
+    .exit-btn:focus {
+        background: #bb2d3b !important;
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.8) !important;
+        color: white !important;
+    }
+    
+    .slide-indicator {
+        color: #0d6efd;
+        font-size: 1.1rem;
+        font-weight: bold;
+        min-width: 80px;
+        text-align: center;
+        border: 1px solid rgba(13, 110, 253, 0.5);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+    }
+    
+    .classroom-progress {
+        height: 5px;
+        background: rgba(0,0,0,0.2);
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9998;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #0d6efd 0%, #0a58ca 100%);
+        transition: width 0.3s ease;
+        box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+    }
+    
+    :fullscreen {
+        background: #000;
+    }
+    
+    :fullscreen .classroom-fullscreen {
+        position: fixed;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}SGNS Lesson - NLP Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item">Lessons</li>
+            <li class="breadcrumb-item active">SGNS</li>
+        </ol>
+    </nav>
+    
+    <!-- Lesson Header -->
+    <div class="text-center mb-5">
+        <span class="badge bg-primary mb-3"><i class="fas fa-star"></i> MORE COMPLEX</span>
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-project-diagram text-primary"></i> Skip-gram with Negative Sampling
+        </h1>
+        <p class="lead">Learn how neural networks learn word embeddings from context</p>
+    </div>
+    
+    <!-- Quick Summary -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-lightbulb text-warning"></i> What is SGNS?</h5>
+                    <p class="card-text">
+                        <strong>Skip-gram with Negative Sampling (SGNS)</strong> is a neural approach that learns 
+                        word embeddings by predicting context words from target words, trained efficiently using 
+                        negative sampling.
+                    </p>
+                    <div class="row text-center mt-4">
+                        <div class="col-md-4">
+                            <i class="fas fa-brain fa-3x text-primary mb-2"></i>
+                            <h6>Neural Network</h6>
+                            <small class="text-muted">Learns patterns</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-bolt fa-3x text-warning mb-2"></i>
+                            <h6>Efficient Training</h6>
+                            <small class="text-muted">Negative sampling trick</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-cubes fa-3x text-success mb-2"></i>
+                            <h6>Dense Embeddings</h6>
+                            <small class="text-muted">Semantic relationships</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Algorithm Steps -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <h2 class="mb-4"><i class="fas fa-cogs"></i> How SGNS Works</h2>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h5><span class="badge bg-primary">1</span> Context Window</h5>
+                            <p>Slide a window over the text. For each word, we want to predict the surrounding words.</p>
+                            <code>... the | cat | sat ...</code>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5><span class="badge bg-success">2</span> Positive Pairs</h5>
+                            <p>Create training pairs: (target_word, context_word). These should have HIGH similarity.</p>
+                            <code>(cat, the), (cat, sat)</code>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5><span class="badge bg-warning">3</span> Negative Sampling</h5>
+                            <p>Randomly sample words that DON'T appear in context. These should have LOW similarity.</p>
+                            <code>(cat, programming), (cat, moon)</code>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5><span class="badge bg-danger">4</span> Gradient Descent</h5>
+                            <p>Train embeddings to satisfy all pairs. This is 100x faster than full softmax!</p>
+                            <code>O(k) not O(V)</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Visualizations -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4"><i class="fas fa-images"></i> Visualizations</h2>
+            <div class="row g-4">
+                {% for viz in visualizations %}
+                <div class="col-md-4">
+                    <div class="card hover-card viz-card">
+                        <img src="{{ url_for('view_visualization', filename=viz.file) }}" 
+                             class="card-img-top viz-thumbnail" 
+                             alt="{{ viz.title }}"
+                             onclick="showVisualizationModal('{{ viz.file }}', '{{ viz.title }}')">
+                        <div class="viz-overlay">
+                            <div class="text-center">
+                                <i class="fas fa-search-plus fa-2x mb-2"></i>
+                                <p>Click to enlarge</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ viz.title }}</h5>
+                            <p class="card-text small text-muted">{{ viz.description }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Interactive Demo Link -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-flask fa-4x mb-3"></i>
+                    <h3>Try SGNS Training!</h3>
+                    <p class="lead">Train on your own text and see embeddings emerge</p>
+                    <a href="{{ url_for('demo_sgns') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-play"></i> Launch Interactive Demo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Concepts -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <h2 class="mb-4"><i class="fas fa-key"></i> Key Concepts</h2>
+            <div class="accordion" id="conceptsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#concept1">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Why is negative sampling so fast?
+                        </button>
+                    </h2>
+                    <div id="concept1" class="accordion-collapse collapse show" data-bs-parent="#conceptsAccordion">
+                        <div class="accordion-body">
+                            Instead of computing softmax over all V vocabulary words (slow!), we only compute loss for k negative samples.
+                            This reduces complexity from O(V) to O(k), making training 100x+ faster.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#concept2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            What makes a good word embedding?
+                        </button>
+                    </h2>
+                    <div id="concept2" class="accordion-collapse collapse" data-bs-parent="#conceptsAccordion">
+                        <div class="accordion-body">
+                            A word embedding captures semantic and syntactic properties. Words with similar meaning should be close in vector space.
+                            The beauty of SGNS is it learns this automatically from context!
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#concept3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Context window: What's the right size?
+                        </button>
+                    </h2>
+                    <div id="concept3" class="accordion-collapse collapse" data-bs-parent="#conceptsAccordion">
+                        <div class="accordion-body">
+                            Window size 2-5 usually works well. Larger windows capture broader topical similarity, 
+                            smaller windows capture more syntactic relationships. Experiment for your corpus!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Next Steps -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-arrow-right"></i> Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('demo_sgns') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-flask"></i> Try Interactive SGNS Demo
+                        </a>
+                        <a href="{{ url_for('lesson_comparison') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-balance-scale"></i> Compare with TF-IDF
+                        </a>
+                        <a href="{{ url_for('examples_list') }}" class="btn btn-outline-success">
+                            <i class="fas fa-code"></i> View Code Examples
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Visualization Modal -->
+<div class="modal fade" id="viz-modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-viz-title">Visualization</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modal-viz-img" src="" class="img-fluid" alt="Visualization">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

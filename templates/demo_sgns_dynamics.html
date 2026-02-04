@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block title %}SGNS Training Dynamics - NLP Classroom{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="mb-2">🎬 SGNS Training Dynamics Visualization</h1>
+            <p class="text-muted">Watch how word embeddings evolve during training</p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Input Panel -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">⚙️ Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <form id="dynamics-form">
+                        <!-- Corpus Input -->
+                        <div class="mb-3">
+                            <label for="dynamics-corpus" class="form-label">
+                                📝 Corpus (one sentence per line)
+                            </label>
+                            <textarea 
+                                id="dynamics-corpus" 
+                                class="form-control" 
+                                rows="6"
+                                placeholder="Enter sentences...&#10;Example:&#10;the cat sat on the mat&#10;the dog sat on the floor&#10;the bird flew in the sky">the cat sat on the mat
+the dog sat on the floor
+the bird flew in the sky
+the cat and dog are friends
+the dog and bird became friends</textarea>
+                        </div>
+
+                        <!-- Training Parameters -->
+                        <div class="mb-3">
+                            <label for="dynamics-epochs" class="form-label">
+                                📊 Epochs
+                            </label>
+                            <input 
+                                type="number" 
+                                id="dynamics-epochs" 
+                                class="form-control" 
+                                value="10" 
+                                min="1" 
+                                max="50">
+                            <small class="text-muted">Number of training iterations</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="dynamics-embedding" class="form-label">
+                                        🔢 Embedding Dim
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        id="dynamics-embedding" 
+                                        class="form-control" 
+                                        value="30" 
+                                        min="2" 
+                                        max="200">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="dynamics-window" class="form-label">
+                                        🪟 Window Size
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        id="dynamics-window" 
+                                        class="form-control" 
+                                        value="2" 
+                                        min="1" 
+                                        max="5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="dynamics-negative" class="form-label">
+                                        🚫 Negative Samples
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        id="dynamics-negative" 
+                                        class="form-control" 
+                                        value="5" 
+                                        min="1" 
+                                        max="20">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="dynamics-capture" class="form-label">
+                                        📹 Capture Every N Epochs
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        id="dynamics-capture" 
+                                        class="form-control" 
+                                        value="1" 
+                                        min="1" 
+                                        max="10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dimensionality Reduction Method -->
+                        <div class="mb-3">
+                            <label for="dynamics-method" class="form-label">
+                                🔍 Visualization Method
+                            </label>
+                            <select id="dynamics-method" class="form-select">
+                                <option value="pca">PCA (Fast, global structure)</option>
+                                <option value="tsne">t-SNE (Slow, local clusters)</option>
+                                <option value="umap">UMAP (Fast, balanced)</option>
+                            </select>
+                        </div>
+
+                        <!-- Visualization Type -->
+                        <div class="mb-3">
+                            <label for="dynamics-viz" class="form-label">
+                                📈 Visualization Type
+                            </label>
+                            <select id="dynamics-viz" class="form-select">
+                                <option value="animation">🎬 Vector Space Animation</option>
+                                <option value="distance">📉 Distance Evolution</option>
+                                <option value="heatmap">🔥 Similarity Heatmap</option>
+                            </select>
+                            <small class="text-muted d-block mt-2">
+                                <strong>Animation:</strong> Watch vectors move in 2D space<br>
+                                <strong>Distance:</strong> Track how word pairs get closer<br>
+                                <strong>Heatmap:</strong> See similarity matrix evolve
+                            </small>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100">
+                            ▶️ Generate Visualization
+                        </button>
+                    </form>
+
+                    <!-- Info Box -->
+                    <div class="alert alert-info mt-3" role="alert">
+                        <strong>💡 How it works:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Similar words learn to be close in vector space</li>
+                            <li>Negative samples are pushed apart</li>
+                            <li>Watch the process epoch by epoch</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization Panel -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">📊 Visualization</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Loading Indicator -->
+                    <div id="loading-spinner" class="text-center" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Generating visualization...</p>
+                    </div>
+
+                    <!-- Error Display -->
+                    <div id="error-message" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+                    <!-- Main Visualization Container -->
+                    <div id="sgns-dynamics-visualization" style="display: none; height: 600px;"></div>
+
+                    <!-- Metadata Display -->
+                    <div id="dynamics-metadata" style="display: none;" class="mt-3">
+                        <hr>
+                        <div class="row text-center">
+                            <div class="col-3">
+                                <strong>Vocabulary</strong><br>
+                                <span id="vocab-size" class="badge bg-info">-</span>
+                            </div>
+                            <div class="col-3">
+                                <strong>Epochs</strong><br>
+                                <span id="epochs-count" class="badge bg-info">-</span>
+                            </div>
+                            <div class="col-3">
+                                <strong>Embedding Dim</strong><br>
+                                <span id="embedding-dim" class="badge bg-info">-</span>
+                            </div>
+                            <div class="col-3">
+                                <strong>Method</strong><br>
+                                <span id="method-used" class="badge bg-info">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div id="instructions" class="alert alert-light" role="alert">
+                        <h6>🎬 How to Use:</h6>
+                        <ol class="mb-0">
+                            <li>Enter a corpus (or use the example)</li>
+                            <li>Adjust training parameters</li>
+                            <li>Choose visualization type</li>
+                            <li>Click "Generate Visualization"</li>
+                            <li>Play the animation to watch training</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Tips -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">💡 What to Look For</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Vector Space Animation:</strong>
+                            <ul>
+                                <li>Similar words cluster together</li>
+                                <li>Vectors converge over time</li>
+                                <li>Related words learn similar representations</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Distance Evolution:</strong>
+                            <ul>
+                                <li>Watch distances decrease</li>
+                                <li>Convergence shows learning</li>
+                                <li>Plateau indicates optimization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+document.getElementById('dynamics-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Get form values
+    const corpus = document.getElementById('dynamics-corpus').value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    
+    if (corpus.length === 0) {
+        showError('Please enter at least one sentence');
+        return;
+    }
+    
+    const params = {
+        embedding_dim: parseInt(document.getElementById('dynamics-embedding').value),
+        window_size: parseInt(document.getElementById('dynamics-window').value),
+        negative_samples: parseInt(document.getElementById('dynamics-negative').value),
+        epochs: parseInt(document.getElementById('dynamics-epochs').value),
+        capture_interval: parseInt(document.getElementById('dynamics-capture').value),
+        learning_rate: 0.025,
+        method: document.getElementById('dynamics-method').value
+    };
+    
+    const viz_type = document.getElementById('dynamics-viz').value;
+    
+    // Show loading
+    document.getElementById('loading-spinner').style.display = 'block';
+    document.getElementById('instructions').style.display = 'none';
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('sgns-dynamics-visualization').style.display = 'none';
+    document.getElementById('dynamics-metadata').style.display = 'none';
+    
+    try {
+        const response = await fetch('/demo/sgns-training-dynamics', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                corpus: corpus,
+                params: params,
+                viz_type: viz_type
+            })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            showError(error.error || 'Failed to generate visualization');
+            document.getElementById('loading-spinner').style.display = 'none';
+            return;
+        }
+        
+        const data = await response.json();
+        
+        // Display visualization
+        displayDynamicsVisualization(data);
+        
+        // Update metadata
+        document.getElementById('vocab-size').textContent = data.metadata.vocab_size;
+        document.getElementById('epochs-count').textContent = data.metadata.epochs;
+        document.getElementById('embedding-dim').textContent = data.metadata.embedding_dim;
+        document.getElementById('method-used').textContent = data.metadata.method.toUpperCase();
+        
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('sgns-dynamics-visualization').style.display = 'block';
+        document.getElementById('dynamics-metadata').style.display = 'block';
+        
+    } catch (error) {
+        showError('Error: ' + error.message);
+        document.getElementById('loading-spinner').style.display = 'none';
+    }
+});
+
+function displayDynamicsVisualization(data) {
+    const container = document.getElementById('sgns-dynamics-visualization');
+    
+    if (!data.visualization) {
+        showError('No visualization data received');
+        return;
+    }
+    
+    try {
+        Plotly.newPlot(
+            container,
+            data.visualization.data,
+            data.visualization.layout,
+            {responsive: true}
+        );
+        
+        // Add frames if present (for animation)
+        if (data.visualization.frames && data.visualization.frames.length > 0) {
+            Plotly.addFrames(container, data.visualization.frames);
+        }
+        
+    } catch (error) {
+        console.error('Plotly error:', error);
+        showError('Error rendering visualization: ' + error.message);
+    }
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+</script>
+
+{% endblock %}

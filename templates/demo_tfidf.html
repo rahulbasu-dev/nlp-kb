@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}TF-IDF Interactive Demo - NLP Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item">Interactive Demos</li>
+            <li class="breadcrumb-item active">TF-IDF</li>
+        </ol>
+    </nav>
+    
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-flask text-success"></i> TF-IDF Interactive Demo
+        </h1>
+        <p class="lead">Enter your own documents and see TF-IDF in action</p>
+    </div>
+    
+    <!-- Instructions -->
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>How to use:</strong> Enter at least 2 documents below (one per field).
+                Click "Calculate TF-IDF" to see which words are most important in each document.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Input Section -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow demo-container">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-edit"></i> Enter Documents</h5>
+                </div>
+                <div class="card-body">
+                    <form id="tfidf-form">
+                        <div id="documents-container">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Document 1</label>
+                                <textarea class="form-control document-input" rows="3" placeholder="Enter your first document here..."></textarea>
+                                <small class="text-muted">Example: "The cat sat on the mat"</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Document 2</label>
+                                <textarea class="form-control document-input" rows="3" placeholder="Enter your second document here..."></textarea>
+                                <small class="text-muted">Example: "The dog played in the park"</small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary" onclick="addDocumentInput('documents-container')">
+                                <i class="fas fa-plus"></i> Add Another Document
+                            </button>
+                            <button type="button" class="btn btn-success btn-lg ms-auto" onclick="runTFIDFDemo()">
+                                <i class="fas fa-calculator"></i> Calculate TF-IDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div class="row mb-5" id="results-section" style="display: none;">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Results</h5>
+                </div>
+                <div class="card-body">
+                    <div id="results-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualization Section -->
+    <div class="row mb-5" id="viz-section" style="display: none;">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-scatter"></i> Vector Embeddings Visualization</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted"><small>Documents projected into 2D space using PCA. Similar documents appear closer together.</small></p>
+                    <div id="tfidf-visualization" style="width: 100%; height: 600px;"></div>
+                    <div id="viz-info" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sample Documents -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Sample Documents to Try</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="samplesAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sample1">
+                                    Simple Example: Animals
+                                </button>
+                            </h2>
+                            <div id="sample1" class="accordion-collapse collapse" data-bs-parent="#samplesAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Document 1:</strong> The cat sat on the mat and the cat was happy</p>
+                                    <p><strong>Document 2:</strong> The dog played in the park with another dog</p>
+                                    <p><strong>Document 3:</strong> The bird flew over the tree and sang</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSample1()">
+                                        <i class="fas fa-copy"></i> Load This Example
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sample2">
+                                    Advanced Example: Technology Topics
+                                </button>
+                            </h2>
+                            <div id="sample2" class="accordion-collapse collapse" data-bs-parent="#samplesAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Document 1:</strong> Machine learning algorithms learn patterns from data using neural networks</p>
+                                    <p><strong>Document 2:</strong> Natural language processing helps computers understand human language</p>
+                                    <p><strong>Document 3:</strong> Computer vision enables machines to interpret and analyze visual information</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSample2()">
+                                        <i class="fas fa-copy"></i> Load This Example
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Learning Points -->
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5><i class="fas fa-graduation-cap"></i> What to Look For</h5>
+                    <ul class="mb-0">
+                        <li>Common words (like "the", "a", "is") should have <strong>low TF-IDF scores</strong></li>
+                        <li>Words unique to a document should have <strong>high TF-IDF scores</strong></li>
+                        <li>Words that repeat in one document get higher TF scores</li>
+                        <li>Words that appear in fewer documents get higher IDF scores</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Sample loading functions
+function loadSample1() {
+    const docs = [
+        "The cat sat on the mat and the cat was happy",
+        "The dog played in the park with another dog",
+        "The bird flew over the tree and sang"
+    ];
+    loadDocuments(docs);
+}
+
+function loadSample2() {
+    const docs = [
+        "Machine learning algorithms learn patterns from data using neural networks",
+        "Natural language processing helps computers understand human language",
+        "Computer vision enables machines to interpret and analyze visual information"
+    ];
+    loadDocuments(docs);
+}
+
+function loadDocuments(docs) {
+    const container = document.getElementById('documents-container');
+    container.innerHTML = '';
+    
+    docs.forEach((doc, i) => {
+        const div = document.createElement('div');
+        div.className = 'mb-3';
+        div.innerHTML = `
+            <label class="form-label fw-bold">Document ${i + 1}</label>
+            <textarea class="form-control document-input" rows="3">${doc}</textarea>
+        `;
+        container.appendChild(div);
+    });
+    
+    showAlert('success', 'Sample documents loaded! Click "Calculate TF-IDF" to see results.');
+}
+</script>
+{% endblock %}

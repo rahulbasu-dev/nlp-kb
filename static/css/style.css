@@ -1,0 +1,629 @@
+/* ============================================================================
+   NLP Classroom - Custom Styles
+   ============================================================================ */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+/* ============================================================================
+   General Styles
+   ============================================================================ */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* ============================================================================
+   Hero Section
+   ============================================================================ */
+
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 0 0 50px 50px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* ============================================================================
+   Cards
+   ============================================================================ */
+
+.hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+/* ============================================================================
+   Statistics Box
+   ============================================================================ */
+
+.stat-box {
+    padding: 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: scale(1.05);
+}
+
+/* ============================================================================
+   Navigation
+   ============================================================================ */
+
+.navbar {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+/* ============================================================================
+   Buttons
+   ============================================================================ */
+
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* ============================================================================
+   Visualizations Gallery
+   ============================================================================ */
+
+.viz-thumbnail {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+    height: auto;
+}
+
+.viz-thumbnail:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.viz-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.viz-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.viz-card:hover .viz-overlay {
+    opacity: 1;
+}
+
+/* ============================================================================
+   Interactive Demo
+   ============================================================================ */
+
+.demo-container {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.demo-input-area {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.demo-output-area {
+    background: #212529;
+    color: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    font-family: 'Courier New', monospace;
+    min-height: 200px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.demo-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* ============================================================================
+   Code Display
+   ============================================================================ */
+
+pre {
+    border-radius: 10px;
+    padding: 1.5rem;
+    background: #2d2d2d !important;
+    max-height: 600px;
+    overflow: auto;
+}
+
+code {
+    font-family: 'Courier New', 'Consolas', monospace;
+}
+
+.code-header {
+    background: #1e1e1e;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.copy-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 5px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.copy-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+}
+
+/* ============================================================================
+   Classroom Mode
+   ============================================================================ */
+
+.fullscreen-viz {
+    width: 100%;
+    height: auto;
+    max-height: 85vh;
+    object-fit: contain;
+}
+
+.classroom-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    display: flex;
+    gap: 1rem;
+    z-index: 1000;
+}
+
+.classroom-controls button {
+    background: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.classroom-controls button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(255,255,255,0.3);
+}
+
+.slide-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    z-index: 1000;
+}
+
+/* ============================================================================
+   Documentation Viewer
+   ============================================================================ */
+
+.doc-content {
+    background: white;
+    padding: 3rem;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    line-height: 1.8;
+}
+
+.doc-content h1 {
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.doc-content h2 {
+    margin-top: 2rem;
+    color: var(--primary-color);
+}
+
+.doc-content code {
+    background: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+/* ============================================================================
+   Lesson Progress
+   ============================================================================ */
+
+.lesson-progress {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+    height: 25px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+/* ============================================================================
+   Badges
+   ============================================================================ */
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 20px;
+}
+
+.difficulty-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+}
+
+.difficulty-beginner {
+    background-color: #198754;
+    color: white;
+}
+
+.difficulty-intermediate {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.difficulty-advanced {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* ============================================================================
+   Tooltips and Popovers
+   ============================================================================ */
+
+.tooltip-inner {
+    max-width: 300px;
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+/* ============================================================================
+   Loading Spinner
+   ============================================================================ */
+
+.loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0,0,0,0.1);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   Responsive Adjustments
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .hero-section {
+        border-radius: 0 0 30px 30px;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .demo-controls {
+        flex-direction: column;
+    }
+    
+    .classroom-controls {
+        flex-direction: column;
+        width: 90%;
+    }
+    
+    .doc-content {
+        padding: 1.5rem;
+    }
+}
+
+/* ============================================================================
+   Utility Classes
+   ============================================================================ */
+
+.text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-custom {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.rounded-custom {
+    border-radius: 15px;
+}
+
+.mt-custom {
+    margin-top: 4rem;
+}
+
+.mb-custom {
+    margin-bottom: 4rem;
+}
+
+/* ============================================================================
+   Slide Styling
+   ============================================================================ */
+
+.slide {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    padding: 3rem;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: white;
+}
+
+.slide-title-slide {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.slide-title-slide h1,
+.slide-title-slide h2 {
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.slide-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+    text-align: center;
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 1rem;
+    width: 90%;
+}
+
+.slide-large-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.slide-content {
+    width: 100%;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.slide-content.slide-centered {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.slide-points {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 0 3rem;
+}
+
+.slide-point {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+    border-radius: 5px;
+    animation: slideIn 0.5s ease;
+}
+
+.slide-point p {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.slide-footer {
+    font-size: 0.9rem;
+    color: #999;
+    text-align: right;
+    width: 90%;
+    margin-top: 2rem;
+}
+
+.slide-image {
+    max-width: 90%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.slide-viz {
+    background: white;
+}
+
+.slide-section {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.slide-section .slide-large-title {
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.slide-demo {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.slide-demo .slide-title {
+    color: white;
+    border-bottom-color: white;
+}
+
+.slide-qa {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: white;
+}
+
+.slide-qa .slide-large-title {
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================================================
+   Progress Bar
+   ============================================================================ */
+
+.classroom-progress {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #f0f0f0;
+    z-index: 999;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+    width: 0;
+}
+
+.classroom-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 999;
+    overflow: hidden;
+}
+
+.slides-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+

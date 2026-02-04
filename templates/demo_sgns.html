@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}SGNS Interactive Demo - NLP Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item">Interactive Demos</li>
+            <li class="breadcrumb-item active">SGNS</li>
+        </ol>
+    </nav>
+    
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-flask text-primary"></i> SGNS Interactive Demo
+        </h1>
+        <p class="lead">Train word embeddings on your own text corpus</p>
+    </div>
+    
+    <!-- Instructions -->
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>How to use:</strong> Enter sentences to create a corpus, adjust parameters,
+                and train the model to learn word embeddings. Then see which words are similar!
+            </div>
+        </div>
+    </div>
+    
+    <!-- Input Section -->
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow demo-container">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-edit"></i> Enter Corpus</h5>
+                </div>
+                <div class="card-body">
+                    <div id="corpus-container">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Sentence 1</label>
+                            <input type="text" class="form-control sentence-input" placeholder="Enter a sentence...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Sentence 2</label>
+                            <input type="text" class="form-control sentence-input" placeholder="Enter a sentence...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Sentence 3</label>
+                            <input type="text" class="form-control sentence-input" placeholder="Enter a sentence...">
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline-secondary" onclick="addSentenceInput()">
+                        <i class="fas fa-plus"></i> Add Another Sentence
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Parameters Section -->
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-sliders-h"></i> Training Parameters</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Embedding Dimension</label>
+                            <input type="number" class="form-control" id="embedding-dim" value="50" min="10" max="300">
+                            <small class="text-muted">Size of word vectors (default: 50)</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Window Size</label>
+                            <input type="number" class="form-control" id="window-size" value="2" min="1" max="10">
+                            <small class="text-muted">Context window on each side (default: 2)</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Negative Samples</label>
+                            <input type="number" class="form-control" id="negative-samples" value="5" min="1" max="20">
+                            <small class="text-muted">Number of negative samples per positive (default: 5)</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Training Epochs</label>
+                            <input type="number" class="form-control" id="epochs" value="10" min="1" max="100">
+                            <small class="text-muted">Number of training iterations (default: 10)</small>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary btn-lg w-100" onclick="runSGNSDemo()">
+                        <i class="fas fa-play"></i> Train Model
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div class="row mb-5" id="sgns-results-section" style="display: none;">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Training Results</h5>
+                </div>
+                <div class="card-body">
+                    <div id="sgns-results-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualization Section -->
+    <div class="row mb-5" id="sgns-viz-section" style="display: none;">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-scatter"></i> Word Embeddings Visualization</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted"><small>Words are projected into 2D space using PCA. Similar words appear closer together based on their learned embeddings.</small></p>
+                    <div id="sgns-visualization" style="width: 100%; height: 600px;"></div>
+                    <div id="sgns-viz-info" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sample Corpus -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Sample Corpus to Try</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="corpusAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#corpus1">
+                                    Simple Example: Daily Activities
+                                </button>
+                            </h2>
+                            <div id="corpus1" class="accordion-collapse collapse" data-bs-parent="#corpusAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Sentences:</strong></p>
+                                    <ul class="small">
+                                        <li>the cat sat on the mat</li>
+                                        <li>the dog sat on the log</li>
+                                        <li>cats and dogs are pets</li>
+                                        <li>the mat is on the floor</li>
+                                        <li>dogs play in the park</li>
+                                        <li>cats sleep on the bed</li>
+                                    </ul>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadCorpus1()">
+                                        <i class="fas fa-copy"></i> Load This Corpus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#corpus2">
+                                    Advanced Example: Tech & Science
+                                </button>
+                            </h2>
+                            <div id="corpus2" class="accordion-collapse collapse" data-bs-parent="#corpusAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Sentences:</strong></p>
+                                    <ul class="small">
+                                        <li>machine learning uses algorithms to learn from data</li>
+                                        <li>neural networks are used in deep learning</li>
+                                        <li>natural language processing analyzes text data</li>
+                                        <li>algorithms process large amounts of data efficiently</li>
+                                        <li>deep learning models require lots of training data</li>
+                                        <li>text analysis is important for language understanding</li>
+                                    </ul>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadCorpus2()">
+                                        <i class="fas fa-copy"></i> Load This Corpus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Learning Points -->
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5><i class="fas fa-graduation-cap"></i> What to Look For</h5>
+                    <ul class="mb-0">
+                        <li>Words that appear in similar contexts should have <strong>high similarity scores</strong></li>
+                        <li>Larger embedding dimensions capture more nuances but need more data</li>
+                        <li>Larger window sizes capture broader context relationships</li>
+                        <li>More epochs = better training but takes longer</li>
+                        <li>More negative samples = better discrimination but slower training</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadCorpus1() {
+    const sentences = [
+        "the cat sat on the mat",
+        "the dog sat on the log",
+        "cats and dogs are pets",
+        "the mat is on the floor",
+        "dogs play in the park",
+        "cats sleep on the bed"
+    ];
+    loadSentences(sentences);
+}
+
+function loadCorpus2() {
+    const sentences = [
+        "machine learning uses algorithms to learn from data",
+        "neural networks are used in deep learning",
+        "natural language processing analyzes text data",
+        "algorithms process large amounts of data efficiently",
+        "deep learning models require lots of training data",
+        "text analysis is important for language understanding"
+    ];
+    loadSentences(sentences);
+}
+
+function loadSentences(sentences) {
+    const container = document.getElementById('corpus-container');
+    container.innerHTML = '';
+    
+    sentences.forEach((sent, i) => {
+        const div = document.createElement('div');
+        div.className = 'mb-3';
+        div.innerHTML = `
+            <label class="form-label fw-bold">Sentence ${i + 1}</label>
+            <input type="text" class="form-control sentence-input" value="${sent}">
+        `;
+        container.appendChild(div);
+    });
+    
+    showAlert('success', 'Sample corpus loaded! Adjust parameters and click "Train Model".');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+# ⚡ SGNS Training Dynamics - 30-Second Quick Start
+
+## 🚀 Get It Running (2 steps)
+
+**Step 1:** Start the server
+```bash
+cd c:\GitHub\me\nlp\sgns
+.\.venv\Scripts\python app.py
+```
+
+**Step 2:** Open in browser
+```
+http://localhost:5000/demo/sgns-training-dynamics
+```
+
+## 🎬 Use It (3 steps)
+
+1. **Enter corpus** (or use example)
+2. **Click "Generate Visualization"**
+3. **Watch embeddings evolve!** ▶️
+
+## 📊 What You See
+
+- **Animation:** Vectors moving in 2D space
+- **Distance:** Convergence curves
+- **Heatmap:** Similarity matrix evolving
+
+## 🎯 Try This First
+
+```
+Default corpus shows:
+- cat, dog, bird clustered (animals)
+- sat, flew separate (actions)
+- Clear semantic structure emerging
+```
+
+## 💡 Key Insight
+
+**"Watch similar vectors move closer together"**
+- This is SGNS learning in real-time
+- Negative samples pushed apart
+- Learning visible epoch-by-epoch
+
+## 📁 Read First
+
+- `README_TRAINING_DYNAMICS.md` ← Full guide
+- `QUICK_REFERENCE_TRAINING_DYNAMICS.md` ← Parameters explained
+
+## ✅ Done!
+
+You're now ready to explore how SGNS training works visually! 🎬

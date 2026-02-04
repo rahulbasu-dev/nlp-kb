@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Visualizations Gallery - NLP Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item active">Visualizations</li>
+        </ol>
+    </nav>
+    
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-images text-info"></i> Visualization Gallery
+        </h1>
+        <p class="lead">All {{ tfidf_visualizations|length + sgns_visualizations|length }} professional visualizations for classroom teaching</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card text-center hover-card">
+                <div class="card-body">
+                    <i class="fas fa-chart-bar fa-3x text-success mb-3"></i>
+                    <h3>{{ tfidf_visualizations|length }}</h3>
+                    <p class="text-muted mb-0">TF-IDF Visualizations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center hover-card">
+                <div class="card-body">
+                    <i class="fas fa-project-diagram fa-3x text-primary mb-3"></i>
+                    <h3>{{ sgns_visualizations|length }}</h3>
+                    <p class="text-muted mb-0">SGNS Visualizations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center hover-card">
+                <div class="card-body">
+                    <i class="fas fa-chalkboard-teacher fa-3x text-warning mb-3"></i>
+                    <h3>Ready</h3>
+                    <p class="text-muted mb-0">For Classroom Use</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TF-IDF Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> TF-IDF Visualizations
+                        <span class="badge bg-light text-success ms-2">Step 1: Start Here</span>
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-4">Statistical approach to measuring word importance</p>
+                    <div class="row g-4">
+                        {% for viz in tfidf_visualizations %}
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card hover-card viz-card h-100">
+                                <div class="viz-wrapper">
+                                    <img src="{{ url_for('view_visualization', filename=viz.file) }}" 
+                                         class="card-img-top viz-thumbnail" 
+                                         alt="{{ viz.title }}"
+                                         onclick="showVisualizationModal('{{ viz.file }}', '{{ viz.title }}', '{{ viz.description }}')">
+                                    <div class="viz-overlay">
+                                        <div class="text-center">
+                                            <i class="fas fa-search-plus fa-2x mb-2"></i>
+                                            <p class="mb-0">Click to enlarge</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ viz.title }}</h5>
+                                    <p class="card-text small text-muted">{{ viz.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SGNS Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-project-diagram"></i> Skip-gram with Negative Sampling (SGNS)
+                        <span class="badge bg-light text-primary ms-2">Step 3: Advanced</span>
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-4">Neural approach to learning word embeddings from context</p>
+                    <div class="row g-4">
+                        {% for viz in sgns_visualizations %}
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card hover-card viz-card h-100">
+                                <div class="viz-wrapper">
+                                    <img src="{{ url_for('view_visualization', filename=viz.file) }}" 
+                                         class="card-img-top viz-thumbnail" 
+                                         alt="{{ viz.title }}"
+                                         onclick="showVisualizationModal('{{ viz.file }}', '{{ viz.title }}', '{{ viz.description }}')">
+                                    <div class="viz-overlay">
+                                        <div class="text-center">
+                                            <i class="fas fa-search-plus fa-2x mb-2"></i>
+                                            <p class="mb-0">Click to enlarge</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ viz.title }}</h5>
+                                    <p class="card-text small text-muted">{{ viz.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Download Section -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <i class="fas fa-download fa-3x text-primary mb-3"></i>
+                    <h4>Use in Your Presentations</h4>
+                    <p>Right-click on any image and select "Save Image As" to download for your slides</p>
+                    <small class="text-muted">All visualizations are high-resolution PNG files</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Visualization Modal -->
+<div class="modal fade" id="viz-modal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="modal-viz-title">Visualization</h5>
+                    <p class="text-muted small mb-0" id="modal-viz-desc"></p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center bg-dark">
+                <img id="modal-viz-img" src="" class="img-fluid" alt="Visualization" style="max-height: 80vh;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="modal-download-btn" href="" download class="btn btn-primary">
+                    <i class="fas fa-download"></i> Download
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showVisualizationModal(filename, title, description) {
+    const imgUrl = "{{ url_for('view_visualization', filename='FILENAME') }}".replace('FILENAME', filename);
+    document.getElementById('modal-viz-title').textContent = title;
+    document.getElementById('modal-viz-desc').textContent = description;
+    document.getElementById('modal-viz-img').src = imgUrl;
+    document.getElementById('modal-download-btn').href = imgUrl;
+    
+    const modal = new bootstrap.Modal(document.getElementById('viz-modal'));
+    modal.show();
+}
+</script>
+{% endblock %}

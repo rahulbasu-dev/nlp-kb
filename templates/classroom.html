@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Classroom Mode - NLP Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-3 fw-bold">
+            <i class="fas fa-chalkboard-teacher text-warning"></i> Classroom Mode
+        </h1>
+        <p class="lead">Full-screen presentation mode with pre-built lesson plans</p>
+    </div>
+    
+    <!-- Lesson Plan Selection -->
+    <div class="row g-4 mb-5">
+        <!-- Quick Lesson -->
+        <div class="col-lg-4">
+            <div class="card h-100 hover-card">
+                <div class="card-header bg-success text-white text-center">
+                    <i class="fas fa-bolt fa-2x mb-2"></i>
+                    <h4 class="mb-0">Quick Overview</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="badge bg-success" style="font-size: 1.5rem;">15 minutes</span>
+                    </div>
+                    <h5>TF-IDF Basics</h5>
+                    <p>Fast introduction covering:</p>
+                    <ul class="mb-4">
+                        <li>What is TF-IDF?</li>
+                        <li>Basic formula</li>
+                        <li>4 key visualizations</li>
+                        <li>Quick demo</li>
+                    </ul>
+                    <div class="d-grid">
+                        <a href="{{ url_for('classroom_lesson', lesson_type='quick') }}" 
+                           class="btn btn-success btn-lg">
+                            <i class="fas fa-play"></i> Start Quick Lesson
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small><i class="fas fa-users"></i> Best for: Quick introductions</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Standard Lesson -->
+        <div class="col-lg-4">
+            <div class="card h-100 hover-card border-warning" style="border-width: 3px;">
+                <div class="card-header bg-warning text-dark text-center">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h4 class="mb-0">Standard Lesson</h4>
+                    <span class="badge bg-dark">RECOMMENDED</span>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="badge bg-warning text-dark" style="font-size: 1.5rem;">30 minutes</span>
+                    </div>
+                    <h5>Complete Coverage</h5>
+                    <p>Comprehensive lesson with:</p>
+                    <ul class="mb-4">
+                        <li>TF-IDF explanation & demo</li>
+                        <li>SGNS introduction</li>
+                        <li>Side-by-side comparison</li>
+                        <li>All 11 visualizations</li>
+                        <li>Interactive examples</li>
+                    </ul>
+                    <div class="d-grid">
+                        <a href="{{ url_for('classroom_lesson', lesson_type='standard') }}" 
+                           class="btn btn-warning btn-lg text-dark">
+                            <i class="fas fa-play"></i> Start Standard Lesson
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small><i class="fas fa-users"></i> Best for: Regular lectures</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comprehensive Lesson -->
+        <div class="col-lg-4">
+            <div class="card h-100 hover-card">
+                <div class="card-header bg-primary text-white text-center">
+                    <i class="fas fa-graduation-cap fa-2x mb-2"></i>
+                    <h4 class="mb-0">Deep Dive</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="badge bg-primary" style="font-size: 1.5rem;">60 minutes</span>
+                    </div>
+                    <h5>In-Depth Analysis</h5>
+                    <p>Complete workshop with:</p>
+                    <ul class="mb-4">
+                        <li>Detailed theory & math</li>
+                        <li>Multiple demos</li>
+                        <li>Code walkthroughs</li>
+                        <li>Q&A sections</li>
+                        <li>Hands-on exercises</li>
+                    </ul>
+                    <div class="d-grid">
+                        <a href="{{ url_for('classroom_lesson', lesson_type='comprehensive') }}" 
+                           class="btn btn-primary btn-lg">
+                            <i class="fas fa-play"></i> Start Deep Dive
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small><i class="fas fa-users"></i> Best for: Workshops & seminars</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h4 class="mb-4"><i class="fas fa-magic"></i> Classroom Mode Features</h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6><i class="fas fa-expand text-primary"></i> Full-Screen Presentation</h6>
+                            <p class="small text-muted">Clean, distraction-free slides for classroom projection</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6><i class="fas fa-keyboard text-success"></i> Keyboard Navigation</h6>
+                            <p class="small text-muted">Arrow keys, spacebar, 'F' for fullscreen, Escape to exit</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6><i class="fas fa-list-ol text-warning"></i> Progress Indicators</h6>
+                            <p class="small text-muted">See current slide number and total slides</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6><i class="fas fa-clock text-info"></i> Timed Sections</h6>
+                            <p class="small text-muted">Pre-planned timing for smooth lessons</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tips -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Teaching Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Start with TF-IDF:</strong> It's simpler and builds foundation</li>
+                        <li><strong>Use visualizations:</strong> Click on any image to enlarge during presentation</li>
+                        <li><strong>Run live demos:</strong> Interactive demos engage students better than static slides</li>
+                        <li><strong>Pause for questions:</strong> Each lesson plan includes built-in Q&A points</li>
+                        <li><strong>Share code examples:</strong> All examples are copy-paste ready</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

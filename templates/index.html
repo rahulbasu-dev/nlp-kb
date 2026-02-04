@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Home - NLP Classroom{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-gradient text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-graduation-cap"></i> Welcome to NLP Classroom
+                </h1>
+                <p class="lead mb-4">
+                    An interactive web platform for teaching Natural Language Processing concepts.
+                    Learn TF-IDF and Skip-gram with Negative Sampling through visualizations,
+                    interactive demos, and hands-on examples.
+                </p>
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{{ url_for('lesson_tfidf') }}" class="btn btn-light btn-lg px-4">
+                        <i class="fas fa-play-circle"></i> Start Learning
+                    </a>
+                    <a href="{{ url_for('classroom_mode') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-chalkboard-teacher"></i> Classroom Mode
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-brain fa-10x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Learning Path Section -->
+<div class="container mb-5">
+    <h2 class="text-center mb-4"><i class="fas fa-route"></i> Recommended Learning Path</h2>
+    
+    <div class="row g-4">
+        <!-- Step 1: TF-IDF -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-play"></i> Step 1: TF-IDF</h5>
+                </div>
+                <div class="card-body">
+                    <div class="badge bg-success mb-3">START HERE - Simpler</div>
+                    <p class="card-text">
+                        Learn statistical approach to word importance. Fast, interpretable,
+                        and perfect for understanding document analysis.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Formula-based (no training)</li>
+                        <li><i class="fas fa-check text-success"></i> Easy to interpret</li>
+                        <li><i class="fas fa-check text-success"></i> Document search</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('lesson_tfidf') }}" class="btn btn-success w-100">
+                        <i class="fas fa-arrow-right"></i> Start with TF-IDF
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 2: Comparison -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-balance-scale"></i> Step 2: Comparison</h5>
+                </div>
+                <div class="card-body">
+                    <div class="badge bg-warning text-dark mb-3">BRIDGE CONCEPTS</div>
+                    <p class="card-text">
+                        Understand when to use TF-IDF vs SGNS. Compare statistical vs semantic
+                        approaches side-by-side.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-warning"></i> Method comparison</li>
+                        <li><i class="fas fa-check text-warning"></i> Use case analysis</li>
+                        <li><i class="fas fa-check text-warning"></i> Trade-offs explained</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('lesson_comparison') }}" class="btn btn-warning w-100">
+                        <i class="fas fa-arrow-right"></i> Compare Methods
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 3: SGNS -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-brain"></i> Step 3: SGNS</h5>
+                </div>
+                <div class="card-body">
+                    <div class="badge bg-primary mb-3">More Complex</div>
+                    <p class="card-text">
+                        Master semantic embeddings with Skip-gram and Negative Sampling.
+                        Learn how modern NLP models capture word meaning.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-primary"></i> Semantic understanding</li>
+                        <li><i class="fas fa-check text-primary"></i> Word analogies</li>
+                        <li><i class="fas fa-check text-primary"></i> Modern NLP foundation</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('lesson_sgns') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-arrow-right"></i> Learn SGNS
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Access Section -->
+<div class="container mb-5">
+    <h2 class="text-center mb-4"><i class="fas fa-bolt"></i> Quick Access</h2>
+    
+    <div class="row g-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-center shadow-sm hover-card">
+                <div class="card-body">
+                    <i class="fas fa-images fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Visualizations</h5>
+                    <p class="card-text small">11 professional graphics</p>
+                    <a href="{{ url_for('visualizations_gallery') }}" class="btn btn-outline-info btn-sm">
+                        View Gallery
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-center shadow-sm hover-card">
+                <div class="card-body">
+                    <i class="fas fa-flask fa-3x text-danger mb-3"></i>
+                    <h5 class="card-title">Interactive Demos</h5>
+                    <p class="card-text small">Try algorithms live</p>
+                    <a href="{{ url_for('demo_tfidf') }}" class="btn btn-outline-danger btn-sm">
+                        Run Demos
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-center shadow-sm hover-card">
+                <div class="card-body">
+                    <i class="fas fa-code fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Code Examples</h5>
+                    <p class="card-text small">9 hands-on examples</p>
+                    <a href="{{ url_for('examples_list') }}" class="btn btn-outline-success btn-sm">
+                        View Examples
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-center shadow-sm hover-card">
+                <div class="card-body">
+                    <i class="fas fa-chalkboard-teacher fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Classroom Mode</h5>
+                    <p class="card-text small">Presentation ready</p>
+                    <a href="{{ url_for('classroom_mode') }}" class="btn btn-outline-warning btn-sm">
+                        Launch
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container mb-5">
+    <h2 class="text-center mb-4"><i class="fas fa-star"></i> Features for Educators</h2>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card border-primary h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-chalkboard text-primary"></i> Classroom Ready</h5>
+                    <ul>
+                        <li>Full-screen presentation mode</li>
+                        <li>Pre-built lesson plans (15, 30, 60 minutes)</li>
+                        <li>Sequential visualization walkthroughs</li>
+                        <li>No installation needed - web-based</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-hands-helping text-success"></i> Interactive Learning</h5>
+                    <ul>
+                        <li>Live algorithm demonstrations</li>
+                        <li>Customizable parameters</li>
+                        <li>Immediate visual feedback</li>
+                        <li>9 progressive coding examples</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card border-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-chart-line text-info"></i> Professional Visualizations</h5>
+                    <ul>
+                        <li>11 high-quality PNG graphics</li>
+                        <li>Pedagogically ordered (TF-IDF → SGNS)</li>
+                        <li>Comparison charts included</li>
+                        <li>Download for presentations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card border-warning h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-book text-warning"></i> Comprehensive Documentation</h5>
+                    <ul>
+                        <li>Teaching guides and cheatsheets</li>
+                        <li>Complete API documentation</li>
+                        <li>Step-by-step tutorials</li>
+                        <li>Markdown formatted notes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="container mb-5">
+    <div class="row text-center">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-box">
+                <h2 class="display-4 text-primary"><i class="fas fa-images"></i> 11</h2>
+                <p class="text-muted">Visualizations</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-box">
+                <h2 class="display-4 text-success"><i class="fas fa-code"></i> 9</h2>
+                <p class="text-muted">Code Examples</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-box">
+                <h2 class="display-4 text-warning"><i class="fas fa-book"></i> 2</h2>
+                <p class="text-muted">Core Algorithms</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-box">
+                <h2 class="display-4 text-info"><i class="fas fa-clock"></i> 15-60</h2>
+                <p class="text-muted">Min Lessons</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}TF-IDF Lesson - NLP Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item">Lessons</li>
+            <li class="breadcrumb-item active">TF-IDF</li>
+        </ol>
+    </nav>
+    
+    <!-- Lesson Header -->
+    <div class="text-center mb-5">
+        <span class="badge bg-success mb-3"><i class="fas fa-play-circle"></i> START HERE</span>
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-chart-bar text-success"></i> TF-IDF: Statistical Word Importance
+        </h1>
+        <p class="lead">Learn how TF-IDF measures word importance using simple formulas</p>
+    </div>
+    
+    <!-- Quick Summary -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-lightbulb text-warning"></i> What is TF-IDF?</h5>
+                    <p class="card-text">
+                        <strong>TF-IDF (Term Frequency - Inverse Document Frequency)</strong> is a statistical measure
+                        that evaluates how important a word is to a document in a collection of documents.
+                    </p>
+                    <div class="row text-center mt-4">
+                        <div class="col-md-4">
+                            <i class="fas fa-tachometer-alt fa-3x text-success mb-2"></i>
+                            <h6>Very Fast</h6>
+                            <small class="text-muted">No training needed</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-eye fa-3x text-info mb-2"></i>
+                            <h6>Interpretable</h6>
+                            <small class="text-muted">Explainable results</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-search fa-3x text-primary mb-2"></i>
+                            <h6>Document Search</h6>
+                            <small class="text-muted">Perfect for retrieval</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Formula Section -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <h2 class="mb-4"><i class="fas fa-calculator"></i> The Formula</h2>
+            <div class="card">
+                <div class="card-body bg-light">
+                    <h5>TF-IDF = TF × IDF</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Term Frequency (TF)</h6>
+                            <code>TF = (word count in document) / (total words in document)</code>
+                            <p class="mt-2 small">Measures how often a word appears in a document</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-danger">Inverse Document Frequency (IDF)</h6>
+                            <code>IDF = log(total documents / documents with word)</code>
+                            <p class="mt-2 small">Gives bonus to rare words across all documents</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Visualizations -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4"><i class="fas fa-images"></i> Visualizations</h2>
+            <div class="row g-4">
+                {% for viz in visualizations %}
+                <div class="col-md-4">
+                    <div class="card hover-card viz-card">
+                        <img src="{{ url_for('view_visualization', filename=viz.file) }}" 
+                             class="card-img-top viz-thumbnail" 
+                             alt="{{ viz.title }}"
+                             onclick="showVisualizationModal('{{ viz.file }}', '{{ viz.title }}')">
+                        <div class="viz-overlay">
+                            <div class="text-center">
+                                <i class="fas fa-search-plus fa-2x mb-2"></i>
+                                <p>Click to enlarge</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ viz.title }}</h5>
+                            <p class="card-text small text-muted">{{ viz.description }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Interactive Demo Link -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-flask fa-4x mb-3"></i>
+                    <h3>Try It Yourself!</h3>
+                    <p class="lead">Run TF-IDF on your own documents</p>
+                    <a href="{{ url_for('demo_tfidf') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-play"></i> Launch Interactive Demo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Concepts -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <h2 class="mb-4"><i class="fas fa-key"></i> Key Concepts</h2>
+            <div class="accordion" id="conceptsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#concept1">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Why common words get low scores
+                        </button>
+                    </h2>
+                    <div id="concept1" class="accordion-collapse collapse show" data-bs-parent="#conceptsAccordion">
+                        <div class="accordion-body">
+                            Words like "the", "is", "a" appear in almost every document, so their IDF is very low.
+                            This is good! These words don't help distinguish documents from each other.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#concept2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Why rare words get high scores
+                        </button>
+                    </h2>
+                    <div id="concept2" class="accordion-collapse collapse" data-bs-parent="#conceptsAccordion">
+                        <div class="accordion-body">
+                            Words that appear in only a few documents get high IDF values.
+                            These are the distinctive words that help identify what a document is about.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#concept3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Perfect for document search
+                        </button>
+                    </h2>
+                    <div id="concept3" class="accordion-collapse collapse" data-bs-parent="#conceptsAccordion">
+                        <div class="accordion-body">
+                            TF-IDF is ideal for search engines and document retrieval. You can quickly find
+                            documents that are most relevant to a query by comparing TF-IDF vectors.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Next Steps -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-arrow-right"></i> Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('demo_tfidf') }}" class="btn btn-outline-success">
+                            <i class="fas fa-flask"></i> Try Interactive TF-IDF Demo
+                        </a>
+                        <a href="{{ url_for('lesson_comparison') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-balance-scale"></i> Compare TF-IDF vs SGNS
+                        </a>
+                        <a href="{{ url_for('lesson_sgns') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-right"></i> Continue to SGNS Lesson
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Visualization Modal -->
+<div class="modal fade" id="viz-modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-viz-title">Visualization</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modal-viz-img" src="" class="img-fluid" alt="Visualization">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

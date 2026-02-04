@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}TF-IDF vs SGNS Comparison - NLP Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item">Lessons</li>
+            <li class="breadcrumb-item active">Comparison</li>
+        </ol>
+    </nav>
+    
+    <!-- Lesson Header -->
+    <div class="text-center mb-5">
+        <span class="badge bg-warning mb-3"><i class="fas fa-balance-scale"></i> BRIDGE LESSON</span>
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-balance-scale text-warning"></i> TF-IDF vs SGNS
+        </h1>
+        <p class="lead">When to use each method and why they're different</p>
+    </div>
+    
+    <!-- Main Comparison Table -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-table"></i> Side-by-Side Comparison</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 20%;">Aspect</th>
+                                    <th style="width: 40%;">TF-IDF</th>
+                                    <th style="width: 40%;">SGNS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Approach</strong></td>
+                                    <td><i class="fas fa-chart-bar text-success"></i> Statistical</td>
+                                    <td><i class="fas fa-brain text-primary"></i> Neural Network</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Input</strong></td>
+                                    <td>Bag of words (ignores order)</td>
+                                    <td>Sequential context (word order matters)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Speed</strong></td>
+                                    <td><span class="badge bg-success">Very Fast</span> - Formula only</td>
+                                    <td><span class="badge bg-info">Fast</span> - With negative sampling</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Training</strong></td>
+                                    <td>No training needed</td>
+                                    <td>Requires iterations + gradient descent</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Output</strong></td>
+                                    <td>Sparse vectors (many zeros)</td>
+                                    <td>Dense vectors (all dimensions filled)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Interpretability</strong></td>
+                                    <td><span class="badge bg-success">Easy</span> - See exact TF-IDF values</td>
+                                    <td><span class="badge bg-warning">Hard</span> - Black box vectors</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Word Order</strong></td>
+                                    <td>Ignored</td>
+                                    <td>Critical</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Captures</strong></td>
+                                    <td>Word importance in documents</td>
+                                    <td>Semantic & syntactic relationships</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Memory</strong></td>
+                                    <td>Low (sparse)</td>
+                                    <td>Higher (dense)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>New Data</strong></td>
+                                    <td>Easy to update</td>
+                                    <td>Requires retraining</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Use Cases -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-check-circle"></i> Use TF-IDF When</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Speed is critical</strong> - Real-time document search</li>
+                        <li><strong>Interpretability needed</strong> - Explain to stakeholders</li>
+                        <li><strong>Limited data</strong> - Works well with small documents</li>
+                        <li><strong>Document retrieval</strong> - Finding relevant documents</li>
+                        <li><strong>Text classification</strong> - Quick baseline models</li>
+                        <li><strong>Information extraction</strong> - Find important terms</li>
+                        <li><strong>Budget-conscious</strong> - No GPU needed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-check-circle"></i> Use SGNS When</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Semantic meaning matters</strong> - Find synonyms and similar words</li>
+                        <li><strong>Large corpus available</strong> - Needs lots of text to learn</li>
+                        <li><strong>Transfer learning</strong> - Use embeddings in other tasks</li>
+                        <li><strong>Word similarities</strong> - "king - man + woman = queen"</li>
+                        <li><strong>Downstream NLP</strong> - Input for neural models</li>
+                        <li><strong>Context is important</strong> - Word meaning depends on position</li>
+                        <li><strong>Quality embeddings</strong> - Want rich semantic vectors</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Example Scenarios -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-lightbulb"></i> Real-World Scenarios</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="text-success"><strong>✓ Use TF-IDF:</strong></h6>
+                            <p><strong>Search Engine:</strong> User types "python programming"<br/>
+                            TF-IDF quickly finds documents about Python programming, ranks by relevance.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary"><strong>✓ Use SGNS:</strong></h6>
+                            <p><strong>Search Autocomplete:</strong> User types "python"<br/>
+                            Find similar words (programming languages, snake, coding) for suggestions.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success"><strong>✓ Use TF-IDF:</strong></h6>
+                            <p><strong>Email Spam Detection:</strong> Is this email important to me?<br/>
+                            High TF-IDF terms in my past emails appear = likely important.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary"><strong>✓ Use SGNS:</strong></h6>
+                            <p><strong>Sentiment Analysis:</strong> Understand "good" and "bad" mean opposite things<br/>
+                            SGNS learns embeddings where "good" and "bad" are far apart.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Visualization -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-images"></i> Visual Comparison</h4>
+                </div>
+                <div class="card-body">
+                    <img src="{{ url_for('view_visualization', filename='04_sgns_vs_tfidf_comparison.png') }}" 
+                         class="img-fluid rounded" alt="SGNS vs TF-IDF Comparison">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Decision Tree -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h4><i class="fas fa-sitemap"></i> Decision Guide</h4>
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <strong>Question 1:</strong> Do you need to understand <em>why</em> a word is important?
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="text-success"><strong>→ YES:</strong> Use <strong>TF-IDF</strong></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="text-primary"><strong>→ NO:</strong> Continue to Q2</strong></p>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <strong>Question 2:</strong> Do you have a large corpus (100k+ words)?
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="text-success"><strong>→ NO:</strong> Use <strong>TF-IDF</strong></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="text-primary"><strong>→ YES:</strong> Continue to Q3</strong></p>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <strong>Question 3:</strong> Do you need semantic word relationships?
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="text-success"><strong>→ NO:</strong> Use <strong>TF-IDF</strong></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="text-primary"><strong>→ YES:</strong> Use <strong>SGNS</strong></strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Next Steps -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-arrow-right"></i> Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('demo_tfidf') }}" class="btn btn-outline-success">
+                            <i class="fas fa-flask"></i> Try TF-IDF Demo
+                        </a>
+                        <a href="{{ url_for('demo_sgns') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-flask"></i> Try SGNS Demo
+                        </a>
+                        <a href="{{ url_for('examples_list') }}" class="btn btn-outline-info">
+                            <i class="fas fa-code"></i> See Code Examples
+                        </a>
+                        <a href="{{ url_for('classroom_mode') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-chalkboard-teacher"></i> Classroom Mode
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

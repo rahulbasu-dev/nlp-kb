@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Example {{ example_id }} - Code Examples{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('examples_list') }}">Code Examples</a></li>
+            <li class="breadcrumb-item active">Example {{ example_id }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">
+                            <i class="fas fa-code"></i> Example {{ example_id }}
+                        </h2>
+                        <span class="badge bg-light text-primary">{{ example.difficulty }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="lead">{{ example.description }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Explanation Section -->
+    {% if example.explanation %}
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Understanding This Example</h5>
+                </div>
+                <div class="card-body">
+                    {{ example.explanation|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Code Section -->
+    {% if code %}
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-code"></i> Source Code</h5>
+                </div>
+                <div class="card-body">
+                    <pre id="example-code"><code class="language-python">{{ code }}</code></pre>
+                    <button class="btn btn-sm btn-outline-info" onclick="copyCode('example-code')">
+                        <i class="fas fa-copy"></i> Copy Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Output Section -->
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-terminal"></i> Output</h5>
+                </div>
+                <div class="card-body">
+                    <pre id="example-output" style="min-height: 300px; white-space: pre-wrap; word-wrap: break-word;"><code>{{ result.output if result.output else 'No output captured' }}</code></pre>
+                    <button class="btn btn-sm btn-outline-success" onclick="copyCode('example-output')">
+                        <i class="fas fa-copy"></i> Copy Output
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="d-flex justify-content-between gap-2">
+                {% if example_id > 1 %}
+                <a href="{{ url_for('view_example', example_id=example_id-1) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Previous Example
+                </a>
+                {% endif %}
+                <a href="{{ url_for('examples_list') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-list"></i> All Examples
+                </a>
+                {% if example_id < 9 %}
+                <a href="{{ url_for('view_example', example_id=example_id+1) }}" class="btn btn-outline-primary">
+                    Next Example <i class="fas fa-arrow-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyCode(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.querySelector('code').textContent || element.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        showAlert('success', 'Copied to clipboard!');
+    });
+}
+</script>
+{% endblock %}

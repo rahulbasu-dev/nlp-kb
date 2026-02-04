@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation - NLP Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item active">Documentation</li>
+        </ol>
+    </nav>
+    
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-book text-info"></i> Documentation
+        </h1>
+        <p class="lead">Comprehensive guides and reference materials</p>
+    </div>
+    
+    <!-- Documentation Cards -->
+    <div class="row g-4 mb-5">
+        {% for doc in docs %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('view_documentation', filename=doc.file) }}" class="text-decoration-none">
+                <div class="card h-100 hover-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-{{ doc.icon }} fa-3x mb-3" style="color: {{ doc.color }};"></i>
+                        <h5 class="card-title">{{ doc.title }}</h5>
+                        <p class="card-text small text-muted">{{ doc.description }}</p>
+                    </div>
+                    <div class="card-footer bg-light text-center">
+                        <small class="text-muted">{{ doc.lines }} lines</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-link"></i> Quick Navigation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for doc in docs %}
+                        <div class="col-md-6 mb-2">
+                            <a href="{{ url_for('view_documentation', filename=doc.file) }}" class="btn btn-outline-primary btn-sm w-100">
+                                {{ doc.title }}
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
