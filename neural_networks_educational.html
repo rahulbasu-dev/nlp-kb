@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Networks - Educational Guide</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        /* CSS Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 2rem 4rem;
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 4rem;
+        }
+
+        h1, h2, h3 {
+            color: #000000;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        /* Interactive Canvas */
+        .canvas-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin: 2rem 0;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+
+        button, .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #6d28d9;
+        }
+
+        .btn-success {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Controls */
+        .control-panel {
+            background: var(--bg-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .slider-group {
+            margin: 1rem 0;
+        }
+
+        .slider-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d1d5db;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+
+        /* Value Display */
+        .value-display {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .value-display h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .value-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .value-row:last-child {
+            border-bottom: none;
+        }
+
+        /* Math */
+        .math-block {
+            background: #f1f5f9;
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+
+        .keyword { color: #ff79c6; }
+        .function { color: #50fa7b; }
+        .string { color: #f1fa8c; }
+        .number { color: #bd93f9; }
+        .comment { color: #6272a4; }
+
+        /* Callout Boxes */
+        .callout {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .callout-info {
+            background: #dbeafe;
+            border-left-color: var(--primary-color);
+        }
+
+        /* Links */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Home Button */
+        .home-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 999;
+            text-decoration: none;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Neural Networks</div>
+            <ul>
+                <li><a href="#intro">Introduction</a></li>
+                <li><a href="#xor">XOR Problem</a></li>
+                <li><a href="#forward">Forward Pass</a></li>
+                <li><a href="#training">Training</a></li>
+                <li><a href="#activation">Activations</a></li>
+                <li><a href="#playground">Playground</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Introduction -->
+        <section id="intro">
+            <h1>Neural Networks: A Visual Guide</h1>
+            <p class="subtitle" style="font-size: 1.2rem; color: var(--text-light); margin-bottom: 2rem;">
+                Understanding neural networks through interactive visualizations and step-by-step explanations.
+            </p>
+
+            <div class="card">
+                <h2>What is a Neural Network?</h2>
+                <p>
+                    A neural network is a computational model inspired by biological neural networks in the brain.
+                    It consists of interconnected nodes (neurons) organized in layers that process information through
+                    weighted connections.
+                </p>
+                <p>
+                    <strong>Key Components:</strong>
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><strong>Input Layer:</strong> Receives the input data</li>
+                    <li><strong>Hidden Layers:</strong> Process information through weighted connections</li>
+                    <li><strong>Output Layer:</strong> Produces the final prediction</li>
+                    <li><strong>Weights:</strong> Control the strength of connections between neurons</li>
+                    <li><strong>Activation Functions:</strong> Introduce non-linearity (e.g., sigmoid, ReLU)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- XOR Problem -->
+        <section id="xor">
+            <h2>1. The XOR Problem: Why We Need Hidden Layers</h2>
+
+            <div class="card">
+                <h3>Linear Separability</h3>
+                <p>
+                    Some problems can be solved with a single line (linear separator), while others cannot.
+                    The XOR problem demonstrates why we need hidden layers in neural networks.
+                </p>
+
+                <div class="canvas-container">
+                    <canvas id="xorCanvas" width="800" height="800"></canvas>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="showProblem('AND')">Show AND</button>
+                    <button class="btn-primary" onclick="showProblem('OR')">Show OR</button>
+                    <button class="btn-secondary" onclick="showProblem('XOR')">Show XOR</button>
+                </div>
+
+                <div class="callout callout-info">
+                    <strong>Key Insight:</strong> AND and OR are linearly separable (can be solved with a single line),
+                    but XOR is not. This is why we need hidden layers—they allow the network to learn non-linear
+                    decision boundaries by combining multiple linear separators.
+                </div>
+
+                <div class="math-block">
+                    <h4>Mathematical Formulation:</h4>
+                    <p><strong>XOR Truth Table:</strong></p>
+                    <table style="margin: 1rem 0; border-collapse: collapse;">
+                        <tr style="background: #e5e7eb;">
+                            <th style="padding: 0.5rem; border: 1px solid #d1d5db;">x₁</th>
+                            <th style="padding: 0.5rem; border: 1px solid #d1d5db;">x₂</th>
+                            <th style="padding: 0.5rem; border: 1px solid #d1d5db;">Output</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
+                        </tr>
+                    </table>
+                    <p>No single line \( w_1x_1 + w_2x_2 + b = 0 \) can separate the positive and negative examples.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Forward Propagation -->
+        <section id="forward">
+            <h2>2. Forward Propagation</h2>
+
+            <div class="card">
+                <h3>How Information Flows Through the Network</h3>
+                <p>
+                    Forward propagation is the process of computing the output of a neural network given an input.
+                    Information flows from the input layer through hidden layers to the output layer.
+                </p>
+
+                <div class="canvas-container">
+                    <canvas id="forwardCanvas" width="900" height="500"></canvas>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="playForwardAnimation()">▶ Play Animation</button>
+                    <button class="btn-secondary" onclick="pauseForwardAnimation()">⏸ Pause</button>
+                    <button class="btn-secondary" onclick="resetForwardAnimation()">⟲ Reset</button>
+                    <button class="btn-success" onclick="stepForwardAnimation()">Step Forward</button>
+                </div>
+
+                <div class="control-panel">
+                    <h4>Input Values:</h4>
+                    <div class="slider-group">
+                        <label>Input 1: <span id="input1Value">1.0</span></label>
+                        <input type="range" id="input1Slider" min="-2" max="2" step="0.1" value="1.0"
+                               oninput="updateForwardPass()">
+                    </div>
+                    <div class="slider-group">
+                        <label>Input 2: <span id="input2Value">0.5</span></label>
+                        <input type="range" id="input2Slider" min="-2" max="2" step="0.1" value="0.5"
+                               oninput="updateForwardPass()">
+                    </div>
+                    <div class="slider-group">
+                        <label>Animation Speed: <span id="animSpeedValue">Normal</span></label>
+                        <input type="range" id="animSpeedSlider" min="0.5" max="2" step="0.5" value="1"
+                               oninput="updateAnimationSpeed()">
+                    </div>
+                </div>
+
+                <div class="value-display" id="forwardStepDisplay" style="background: #fef3c7; border-left: 4px solid #d97706;">
+                    <h4>Current Step: <span id="currentStepName">Ready to start</span></h4>
+                    <div id="currentStepDetails" style="font-family: 'Consolas', monospace; color: #1f2937; margin-top: 0.5rem;">
+                        Click "Play Animation" to see forward propagation in action!
+                    </div>
+                </div>
+
+                <div class="value-display" id="forwardValues">
+                    <h4>Network Values</h4>
+                    <div id="forwardValuesContent"></div>
+                </div>
+
+                <div class="math-block">
+                    <h4>Forward Propagation Equations:</h4>
+                    <p><strong>Step 1: Hidden Layer</strong></p>
+                    <p>\[ z^{[1]} = W^{[1]} \cdot x + b^{[1]} \]</p>
+                    <p>\[ a^{[1]} = \sigma(z^{[1]}) = \frac{1}{1 + e^{-z^{[1]}}} \]</p>
+
+                    <p><strong>Step 2: Output Layer</strong></p>
+                    <p>\[ z^{[2]} = W^{[2]} \cdot a^{[1]} + b^{[2]} \]</p>
+                    <p>\[ \hat{y} = \sigma(z^{[2]}) = \frac{1}{1 + e^{-z^{[2]}}} \]</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Training Cycle -->
+        <section id="training">
+            <h2>3. Complete Training Cycle</h2>
+
+            <div class="card">
+                <h3>Forward Pass → Loss → Backward Pass → Update Weights</h3>
+                <p>
+                    Training a neural network involves three steps repeated over many iterations:
+                </p>
+                <ol style="margin-left: 2rem; margin-bottom: 1.5rem;">
+                    <li><strong>Forward Pass:</strong> Compute predictions</li>
+                    <li><strong>Compute Loss:</strong> Measure how wrong the predictions are</li>
+                    <li><strong>Backward Pass:</strong> Calculate gradients using backpropagation</li>
+                    <li><strong>Update Weights:</strong> Adjust weights to reduce the loss</li>
+                </ol>
+
+                <div class="canvas-container">
+                    <canvas id="trainingCanvas" width="800" height="500"></canvas>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="stepForward()">Step 1: Forward</button>
+                    <button class="btn-primary" onclick="stepBackward()">Step 2: Backward</button>
+                    <button class="btn-success" onclick="stepUpdate()">Step 3: Update</button>
+                    <button class="btn-secondary" onclick="trainEpoch()">Train 1 Epoch</button>
+                </div>
+
+                <div class="value-display" id="trainingValues">
+                    <h4>Training Metrics</h4>
+                    <div id="trainingValuesContent"></div>
+                </div>
+
+                <div class="math-block">
+                    <h4>Backpropagation (Chain Rule):</h4>
+                    <p><strong>Step 1: Loss Function (Binary Cross-Entropy)</strong></p>
+                    <p>\[ L = -[y \log(\hat{y}) + (1-y) \log(1-\hat{y})] \]</p>
+
+                    <p><strong>Step 2: Output Layer Gradient</strong></p>
+                    <p>\[ \frac{\partial L}{\partial z^{[2]}} = \hat{y} - y \]</p>
+
+                    <p><strong>Step 3: Hidden Layer Gradient</strong></p>
+                    <p>\[ \frac{\partial L}{\partial z^{[1]}} = (W^{[2]})^T \frac{\partial L}{\partial z^{[2]}} \odot \sigma'(z^{[1]}) \]</p>
+
+                    <p><strong>Step 4: Weight Update</strong></p>
+                    <p>\[ W^{[2]} := W^{[2]} - \alpha \frac{\partial L}{\partial W^{[2]}} \]</p>
+                    <p>\[ W^{[1]} := W^{[1]} - \alpha \frac{\partial L}{\partial W^{[1]}} \]</p>
+                </div>
+
+                <div class="callout">
+                    <strong>Why Binary Cross-Entropy?</strong><br>
+                    BCE provides stronger gradients for wrong predictions compared to Mean Squared Error (MSE).
+                    When the prediction is confident but wrong, BCE produces large gradients that help the network
+                    learn faster. MSE suffers from vanishing gradients when used with sigmoid activation.
+                </div>
+            </div>
+        </section>
+
+        <!-- Activation Functions -->
+        <section id="activation">
+            <h2>4. Activation Functions</h2>
+
+            <div class="card">
+                <h3>Interactive Activation Function Explorer</h3>
+                <p>
+                    Activation functions introduce non-linearity into neural networks, allowing them to learn complex patterns.
+                    Explore different activation functions and see how they transform inputs.
+                </p>
+
+                <div class="control-panel">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <div class="slider-group">
+                            <label>Activation Function:</label>
+                            <select id="activationSelect" onchange="updateActivationViz()" style="width: 100%; padding: 0.5rem; border-radius: 5px; border: 2px solid var(--border-color); font-size: 1rem;">
+                                <option value="sigmoid">Sigmoid</option>
+                                <option value="tanh">Tanh</option>
+                                <option value="relu">ReLU</option>
+                                <option value="leaky_relu">Leaky ReLU</option>
+                            </select>
+                        </div>
+                        <div class="slider-group">
+                            <label>Input Value: <span id="activationInputValue">0.0</span></label>
+                            <input type="range" id="activationInputSlider" min="-5" max="5" step="0.1" value="0"
+                                   oninput="updateActivationViz()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Output: <span id="activationOutputValue">0.500</span></label>
+                            <label>Derivative: <span id="activationDerivValue">0.250</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="activationCanvas" width="1000" height="400"></canvas>
+                </div>
+
+                <div class="math-block" id="activationFormulas">
+                    <h4>Sigmoid Function:</h4>
+                    <p><strong>Function:</strong> \( \sigma(x) = \frac{1}{1 + e^{-x}} \)</p>
+                    <p><strong>Derivative:</strong> \( \sigma'(x) = \sigma(x) \cdot (1 - \sigma(x)) \)</p>
+                    <p><strong>Range:</strong> (0, 1)</p>
+                    <p><strong>Used for:</strong> Binary classification output layer, gates in LSTM</p>
+                    <p><strong>Advantages:</strong> Smooth gradient, outputs are bounded</p>
+                    <p><strong>Disadvantages:</strong> Vanishing gradient problem for large |x|</p>
+                </div>
+
+                <div class="callout callout-info">
+                    <strong>Comparison:</strong>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li><strong>Sigmoid:</strong> Outputs between 0 and 1, suffers from vanishing gradients</li>
+                        <li><strong>Tanh:</strong> Outputs between -1 and 1, zero-centered (better than sigmoid)</li>
+                        <li><strong>ReLU:</strong> Fast computation, no vanishing gradient for positive values, but "dying ReLU" problem</li>
+                        <li><strong>Leaky ReLU:</strong> Fixes dying ReLU problem by allowing small negative values</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Playground -->
+        <section id="playground">
+            <h2>5. Neural Network Playground</h2>
+
+            <div class="card">
+                <h3>Interactive Exploration</h3>
+                <p>
+                    Experiment with different network architectures, learning rates, and watch the training process in real-time.
+                </p>
+
+                <div class="canvas-container">
+                    <canvas id="playgroundCanvas" width="1000" height="600"></canvas>
+                </div>
+
+                <div class="control-panel">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                        <div class="slider-group">
+                            <label>Activation Function:</label>
+                            <select id="playgroundActivation" onchange="updatePlaygroundParams()" style="width: 100%; padding: 0.5rem; border-radius: 5px; border: 2px solid var(--border-color); font-size: 1rem;">
+                                <option value="sigmoid">Sigmoid</option>
+                                <option value="tanh">Tanh</option>
+                                <option value="relu">ReLU</option>
+                                <option value="leaky_relu">Leaky ReLU</option>
+                            </select>
+                        </div>
+                        <div class="slider-group">
+                            <label>Learning Rate: <span id="lrValue">0.1</span></label>
+                            <input type="range" id="lrSlider" min="0.01" max="1" step="0.01" value="0.1"
+                                   oninput="updatePlaygroundParams()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Hidden Neurons: <span id="hiddenValue">4</span></label>
+                            <input type="range" id="hiddenSlider" min="2" max="8" step="1" value="4"
+                                   oninput="updatePlaygroundParams()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Epochs: <span id="epochValue">0</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="trainPlayground(1)">Train 1 Epoch</button>
+                    <button class="btn-primary" onclick="trainPlayground(10)">Train 10 Epochs</button>
+                    <button class="btn-success" onclick="trainPlayground(100)">Train 100 Epochs</button>
+                    <button class="btn-secondary" onclick="resetPlayground()">Reset Network</button>
+                </div>
+
+                <div class="value-display" id="playgroundMetrics">
+                    <h4>Performance Metrics</h4>
+                    <div id="playgroundMetricsContent"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Python Implementation -->
+        <section id="code">
+            <h2>6. Python Implementation</h2>
+
+            <div class="card">
+                <h3>Complete Neural Network from Scratch</h3>
+                <p>Here's a minimal implementation of a neural network in Python using only NumPy:</p>
+
+                <pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+<span class="keyword">class</span> <span class="function">NeuralNetwork</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, input_size, hidden_size, output_size):
+        <span class="comment"># Initialize weights randomly</span>
+        self.W1 = np.random.randn(input_size, hidden_size) * <span class="number">0.5</span>
+        self.b1 = np.zeros((<span class="number">1</span>, hidden_size))
+        self.W2 = np.random.randn(hidden_size, output_size) * <span class="number">0.5</span>
+        self.b2 = np.zeros((<span class="number">1</span>, output_size))
+
+    <span class="keyword">def</span> <span class="function">sigmoid</span>(self, z):
+        <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + np.exp(-z))
+
+    <span class="keyword">def</span> <span class="function">sigmoid_derivative</span>(self, z):
+        <span class="keyword">return</span> self.sigmoid(z) * (<span class="number">1</span> - self.sigmoid(z))
+
+    <span class="keyword">def</span> <span class="function">forward</span>(self, X):
+        <span class="comment"># Forward propagation</span>
+        self.z1 = np.dot(X, self.W1) + self.b1
+        self.a1 = self.sigmoid(self.z1)
+        self.z2 = np.dot(self.a1, self.W2) + self.b2
+        self.a2 = self.sigmoid(self.z2)
+        <span class="keyword">return</span> self.a2
+
+    <span class="keyword">def</span> <span class="function">backward</span>(self, X, y, learning_rate):
+        <span class="comment"># Backpropagation</span>
+        m = X.shape[<span class="number">0</span>]
+
+        <span class="comment"># Output layer gradients</span>
+        dz2 = self.a2 - y
+        dW2 = np.dot(self.a1.T, dz2) / m
+        db2 = np.sum(dz2, axis=<span class="number">0</span>, keepdims=<span class="keyword">True</span>) / m
+
+        <span class="comment"># Hidden layer gradients</span>
+        dz1 = np.dot(dz2, self.W2.T) * self.sigmoid_derivative(self.z1)
+        dW1 = np.dot(X.T, dz1) / m
+        db1 = np.sum(dz1, axis=<span class="number">0</span>, keepdims=<span class="keyword">True</span>) / m
+
+        <span class="comment"># Update weights</span>
+        self.W2 -= learning_rate * dW2
+        self.b2 -= learning_rate * db2
+        self.W1 -= learning_rate * dW1
+        self.b1 -= learning_rate * db1
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, X, y, epochs, learning_rate):
+        <span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):
+            <span class="comment"># Forward pass</span>
+            predictions = self.forward(X)
+
+            <span class="comment"># Compute loss (Binary Cross-Entropy)</span>
+            loss = -np.mean(y * np.log(predictions + <span class="number">1e-8</span>) +
+                           (<span class="number">1</span> - y) * np.log(<span class="number">1</span> - predictions + <span class="number">1e-8</span>))
+
+            <span class="comment"># Backward pass</span>
+            self.backward(X, y, learning_rate)
+
+            <span class="keyword">if</span> epoch % <span class="number">100</span> == <span class="number">0</span>:
+                print(<span class="string">f"Epoch {epoch}, Loss: {loss:.4f}"</span>)
+
+<span class="comment"># Example: Training on XOR problem</span>
+X = np.array([[<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">1</span>], [<span class="number">1</span>, <span class="number">0</span>], [<span class="number">1</span>, <span class="number">1</span>]])
+y = np.array([[<span class="number">0</span>], [<span class="number">1</span>], [<span class="number">1</span>], [<span class="number">0</span>]])
+
+nn = NeuralNetwork(input_size=<span class="number">2</span>, hidden_size=<span class="number">4</span>, output_size=<span class="number">1</span>)
+nn.train(X, y, epochs=<span class="number">5000</span>, learning_rate=<span class="number">0.5</span>)
+
+<span class="comment"># Test the trained network</span>
+predictions = nn.forward(X)
+print(<span class="string">"Predictions:"</span>, predictions.flatten())</code></pre>
+            </div>
+        </section>
+    </main>
+
+    <!-- Home Button -->
+    <a href="nlp_guide_index.html" class="home-btn" title="Back to Home">🏠</a>
+
+    <!-- JavaScript for Interactivity -->
+    <script>
+        // ==================== XOR Visualization ====================
+        const xorCanvas = document.getElementById('xorCanvas');
+        const xorCtx = xorCanvas.getContext('2d');
+
+        const problems = {
+            'AND': {
+                points: [[0,0,0], [0,1,0], [1,0,0], [1,1,1]],
+                line: {x1: 0.5, y1: 1, x2: 1, y2: 0.5},
+                color: '#059669'
+            },
+            'OR': {
+                points: [[0,0,0], [0,1,1], [1,0,1], [1,1,1]],
+                line: {x1: 0, y1: 0.5, x2: 0.5, y2: 0},
+                color: '#2563eb'
+            },
+            'XOR': {
+                points: [[0,0,0], [0,1,1], [1,0,1], [1,1,0]],
+                lines: [
+                    {x1: 0, y1: 0.7, x2: 1, y2: 0.3},
+                    {x1: 0, y1: 0.3, x2: 1, y2: 0.7}
+                ],
+                color: '#7c3aed'
+            }
+        };
+
+        function showProblem(type) {
+            const problem = problems[type];
+            const padding = 100;
+            const scale = 600;
+
+            xorCtx.clearRect(0, 0, xorCanvas.width, xorCanvas.height);
+
+            // Draw title
+            xorCtx.font = 'bold 24px Inter';
+            xorCtx.fillStyle = '#1f2937';
+            xorCtx.textAlign = 'center';
+            xorCtx.fillText(`${type} Problem`, xorCanvas.width / 2, 40);
+
+            // Draw axes
+            xorCtx.strokeStyle = '#d1d5db';
+            xorCtx.lineWidth = 2;
+            xorCtx.beginPath();
+            xorCtx.moveTo(padding, xorCanvas.height - padding);
+            xorCtx.lineTo(xorCanvas.width - padding, xorCanvas.height - padding);
+            xorCtx.moveTo(padding, xorCanvas.height - padding);
+            xorCtx.lineTo(padding, padding);
+            xorCtx.stroke();
+
+            // Draw labels
+            xorCtx.font = '16px Inter';
+            xorCtx.fillStyle = '#6b7280';
+            xorCtx.textAlign = 'center';
+            xorCtx.fillText('x₁', xorCanvas.width - padding / 2, xorCanvas.height - padding + 30);
+            xorCtx.save();
+            xorCtx.translate(padding - 40, xorCanvas.height / 2);
+            xorCtx.rotate(-Math.PI / 2);
+            xorCtx.fillText('x₂', 0, 0);
+            xorCtx.restore();
+
+            // Draw grid
+            xorCtx.strokeStyle = '#f3f4f6';
+            xorCtx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const x = padding + (i * scale / 4);
+                const y = xorCanvas.height - padding - (i * scale / 4);
+                xorCtx.beginPath();
+                xorCtx.moveTo(x, padding);
+                xorCtx.lineTo(x, xorCanvas.height - padding);
+                xorCtx.stroke();
+                xorCtx.beginPath();
+                xorCtx.moveTo(padding, y);
+                xorCtx.lineTo(xorCanvas.width - padding, y);
+                xorCtx.stroke();
+            }
+
+            // Draw decision boundary
+            if (type === 'XOR') {
+                xorCtx.setLineDash([5, 5]);
+                problem.lines.forEach((line, idx) => {
+                    xorCtx.strokeStyle = idx === 0 ? '#ef4444' : '#f59e0b';
+                    xorCtx.lineWidth = 3;
+                    xorCtx.beginPath();
+                    xorCtx.moveTo(
+                        padding + line.x1 * scale,
+                        xorCanvas.height - padding - line.y1 * scale
+                    );
+                    xorCtx.lineTo(
+                        padding + line.x2 * scale,
+                        xorCanvas.height - padding - line.y2 * scale
+                    );
+                    xorCtx.stroke();
+                });
+                xorCtx.setLineDash([]);
+
+                // Add "No solution" text
+                xorCtx.font = 'italic 18px Inter';
+                xorCtx.fillStyle = '#ef4444';
+                xorCtx.textAlign = 'center';
+                xorCtx.fillText('No single line works!', xorCanvas.width / 2, xorCanvas.height - 20);
+            } else {
+                xorCtx.strokeStyle = problem.color;
+                xorCtx.lineWidth = 4;
+                xorCtx.beginPath();
+                xorCtx.moveTo(
+                    padding + problem.line.x1 * scale,
+                    xorCanvas.height - padding - problem.line.y1 * scale
+                );
+                xorCtx.lineTo(
+                    padding + problem.line.x2 * scale,
+                    xorCanvas.height - padding - problem.line.y2 * scale
+                );
+                xorCtx.stroke();
+
+                // Add "Linearly separable" text
+                xorCtx.font = 'italic 18px Inter';
+                xorCtx.fillStyle = problem.color;
+                xorCtx.textAlign = 'center';
+                xorCtx.fillText('Linearly Separable ✓', xorCanvas.width / 2, xorCanvas.height - 20);
+            }
+
+            // Draw points
+            problem.points.forEach(([x, y, label]) => {
+                xorCtx.beginPath();
+                xorCtx.arc(
+                    padding + x * scale,
+                    xorCanvas.height - padding - y * scale,
+                    15,
+                    0,
+                    Math.PI * 2
+                );
+                xorCtx.fillStyle = label === 1 ? '#10b981' : '#ef4444';
+                xorCtx.fill();
+                xorCtx.strokeStyle = '#1f2937';
+                xorCtx.lineWidth = 3;
+                xorCtx.stroke();
+
+                // Add labels
+                xorCtx.font = 'bold 14px Inter';
+                xorCtx.fillStyle = 'white';
+                xorCtx.textAlign = 'center';
+                xorCtx.fillText(label, padding + x * scale, xorCanvas.height - padding - y * scale + 5);
+            });
+        }
+
+        // Initialize with XOR
+        showProblem('XOR');
+
+        // ==================== Forward Propagation ====================
+        const forwardCanvas = document.getElementById('forwardCanvas');
+        const forwardCtx = forwardCanvas.getContext('2d');
+
+        let forwardNet = {
+            W1: [[0.5, 0.2, -0.3, 0.4], [0.3, -0.1, 0.6, 0.2]],
+            b1: [0.1, -0.1, 0.2, 0.0],
+            W2: [[0.6], [-0.2], [0.3], [-0.1]],
+            b2: [0.1]
+        };
+
+        // Animation state
+        let forwardAnim = {
+            isPlaying: false,
+            step: 0,
+            progress: 0,
+            speed: 1,
+            particles: [],
+            currentCalc: null
+        };
+
+        function sigmoid(x) {
+            return 1 / (1 + Math.exp(-x));
+        }
+
+        function updateForwardPass() {
+            const input1 = parseFloat(document.getElementById('input1Slider').value);
+            const input2 = parseFloat(document.getElementById('input2Slider').value);
+
+            document.getElementById('input1Value').textContent = input1.toFixed(1);
+            document.getElementById('input2Value').textContent = input2.toFixed(1);
+
+            const input = [input1, input2];
+
+            // Compute hidden layer
+            const hidden = forwardNet.b1.map((b, i) => {
+                const z = input[0] * forwardNet.W1[0][i] + input[1] * forwardNet.W1[1][i] + b;
+                return sigmoid(z);
+            });
+
+            // Compute output
+            const z_out = hidden.reduce((sum, h, i) => sum + h * forwardNet.W2[i][0], 0) + forwardNet.b2[0];
+            const output = sigmoid(z_out);
+
+            // Draw network
+            drawForwardNetwork(input, hidden, output);
+
+            // Display values
+            let html = '';
+            html += `<div class="value-row"><span>Input:</span><span>[${input1.toFixed(2)}, ${input2.toFixed(2)}]</span></div>`;
+            html += `<div class="value-row"><span>Hidden:</span><span>[${hidden.map(h => h.toFixed(3)).join(', ')}]</span></div>`;
+            html += `<div class="value-row"><span>Output:</span><span>${output.toFixed(3)}</span></div>`;
+            document.getElementById('forwardValuesContent').innerHTML = html;
+        }
+
+        function drawForwardNetwork(input, hidden, output) {
+            forwardCtx.clearRect(0, 0, forwardCanvas.width, forwardCanvas.height);
+
+            const layers = [
+                {neurons: input.length, x: 100, values: input},
+                {neurons: hidden.length, x: 400, values: hidden},
+                {neurons: 1, x: 700, values: [output]}
+            ];
+
+            // Draw connections
+            forwardCtx.lineWidth = 2;
+            for (let l = 0; l < layers.length - 1; l++) {
+                const layer1 = layers[l];
+                const layer2 = layers[l + 1];
+
+                for (let i = 0; i < layer1.neurons; i++) {
+                    for (let j = 0; j < layer2.neurons; j++) {
+                        const y1 = 200 - (layer1.neurons - 1) * 30 + i * 60;
+                        const y2 = 200 - (layer2.neurons - 1) * 30 + j * 60;
+
+                        // Get weight value
+                        let weight;
+                        if (l === 0) {
+                            weight = forwardNet.W1[i][j];
+                        } else {
+                            weight = forwardNet.W2[i][0];
+                        }
+
+                        forwardCtx.strokeStyle = weight > 0 ? '#10b98160' : '#ef444460';
+                        forwardCtx.lineWidth = Math.abs(weight) * 3;
+
+                        forwardCtx.beginPath();
+                        forwardCtx.moveTo(layer1.x, y1);
+                        forwardCtx.lineTo(layer2.x, y2);
+                        forwardCtx.stroke();
+                    }
+                }
+            }
+
+            // Draw neurons
+            layers.forEach((layer, layerIdx) => {
+                for (let i = 0; i < layer.neurons; i++) {
+                    const y = 200 - (layer.neurons - 1) * 30 + i * 60;
+                    const value = layer.values[i];
+
+                    forwardCtx.beginPath();
+                    forwardCtx.arc(layer.x, y, 25, 0, Math.PI * 2);
+                    forwardCtx.fillStyle = `hsl(${120 * value}, 70%, 60%)`;
+                    forwardCtx.fill();
+                    forwardCtx.strokeStyle = '#1f2937';
+                    forwardCtx.lineWidth = 2;
+                    forwardCtx.stroke();
+
+                    forwardCtx.font = 'bold 14px Inter';
+                    forwardCtx.fillStyle = '#1f2937';
+                    forwardCtx.textAlign = 'center';
+                    forwardCtx.fillText(value.toFixed(2), layer.x, y + 5);
+                }
+
+                // Layer labels
+                forwardCtx.font = '16px Inter';
+                forwardCtx.fillStyle = '#6b7280';
+                forwardCtx.textAlign = 'center';
+                const labels = ['Input', 'Hidden', 'Output'];
+                forwardCtx.fillText(labels[layerIdx], layer.x, 350);
+            });
+        }
+
+        // ==================== Forward Propagation Animation ====================
+
+        function playForwardAnimation() {
+            forwardAnim.isPlaying = true;
+            forwardAnim.step = 0;
+            forwardAnim.progress = 0;
+            animateForwardPropagation();
+        }
+
+        function pauseForwardAnimation() {
+            forwardAnim.isPlaying = false;
+        }
+
+        function resetForwardAnimation() {
+            forwardAnim.isPlaying = false;
+            forwardAnim.step = 0;
+            forwardAnim.progress = 0;
+            forwardAnim.particles = [];
+            updateForwardPass();
+            document.getElementById('currentStepName').textContent = 'Ready to start';
+            document.getElementById('currentStepDetails').textContent = 'Click "Play Animation" to see forward propagation in action!';
+        }
+
+        function stepForwardAnimation() {
+            if (forwardAnim.step < 5) {
+                forwardAnim.step++;
+                forwardAnim.progress = 0;
+                drawAnimatedForwardPass();
+            }
+        }
+
+        function updateAnimationSpeed() {
+            const speed = parseFloat(document.getElementById('animSpeedSlider').value);
+            forwardAnim.speed = speed;
+            const speedNames = {0.5: 'Slow', 1: 'Normal', 1.5: 'Fast', 2: 'Very Fast'};
+            document.getElementById('animSpeedValue').textContent = speedNames[speed] || 'Normal';
+        }
+
+        function animateForwardPropagation() {
+            if (!forwardAnim.isPlaying) return;
+
+            forwardAnim.progress += 0.02 * forwardAnim.speed;
+
+            if (forwardAnim.progress >= 1) {
+                forwardAnim.progress = 0;
+                forwardAnim.step++;
+
+                if (forwardAnim.step > 5) {
+                    forwardAnim.step = 0;
+                }
+            }
+
+            drawAnimatedForwardPass();
+            requestAnimationFrame(animateForwardPropagation);
+        }
+
+        function drawAnimatedForwardPass() {
+            const input1 = parseFloat(document.getElementById('input1Slider').value);
+            const input2 = parseFloat(document.getElementById('input2Slider').value);
+            const input = [input1, input2];
+
+            // Compute all values
+            const z_hidden = forwardNet.b1.map((b, i) =>
+                input[0] * forwardNet.W1[0][i] + input[1] * forwardNet.W1[1][i] + b
+            );
+            const hidden = z_hidden.map(z => sigmoid(z));
+            const z_out = hidden.reduce((sum, h, i) => sum + h * forwardNet.W2[i][0], 0) + forwardNet.b2[0];
+            const output = sigmoid(z_out);
+
+            forwardCtx.clearRect(0, 0, forwardCanvas.width, forwardCanvas.height);
+
+            const layers = [
+                {neurons: 2, x: 120, values: input, label: 'Input Layer'},
+                {neurons: 4, x: 450, values: hidden, label: 'Hidden Layer'},
+                {neurons: 1, x: 780, values: [output], label: 'Output Layer'}
+            ];
+
+            // Update step display
+            const stepInfo = [
+                {name: 'Step 0: Input Ready', details: `Input values: [${input[0].toFixed(2)}, ${input[1].toFixed(2)}]`},
+                {name: 'Step 1: Multiply Weights', details: `Computing: z₁ = W₁·x + b₁\nExample: z₁[0] = (${forwardNet.W1[0][0].toFixed(2)}×${input[0].toFixed(2)}) + (${forwardNet.W1[1][0].toFixed(2)}×${input[1].toFixed(2)}) + ${forwardNet.b1[0].toFixed(2)} = ${z_hidden[0].toFixed(3)}`},
+                {name: 'Step 2: Apply Activation', details: `Computing: a₁ = σ(z₁)\nExample: a₁[0] = σ(${z_hidden[0].toFixed(3)}) = ${hidden[0].toFixed(3)}`},
+                {name: 'Step 3: Hidden to Output', details: `Computing: z₂ = W₂·a₁ + b₂\nz₂ = ${hidden.map((h, i) => `(${forwardNet.W2[i][0].toFixed(2)}×${h.toFixed(2)})`).join(' + ')} + ${forwardNet.b2[0].toFixed(2)}\nz₂ = ${z_out.toFixed(3)}`},
+                {name: 'Step 4: Output Activation', details: `Computing: ŷ = σ(z₂)\nŷ = σ(${z_out.toFixed(3)}) = ${output.toFixed(3)}`},
+                {name: 'Step 5: Complete!', details: `Final output: ${output.toFixed(3)}\n\nForward propagation complete! Data has flowed through all layers.`}
+            ];
+
+            if (forwardAnim.step < stepInfo.length) {
+                document.getElementById('currentStepName').textContent = stepInfo[forwardAnim.step].name;
+                document.getElementById('currentStepDetails').textContent = stepInfo[forwardAnim.step].details;
+            }
+
+            // Draw connections with animation
+            for (let l = 0; l < layers.length - 1; l++) {
+                const layer1 = layers[l];
+                const layer2 = layers[l + 1];
+
+                for (let i = 0; i < layer1.neurons; i++) {
+                    for (let j = 0; j < layer2.neurons; j++) {
+                        const y1 = 250 - (layer1.neurons - 1) * 30 + i * 60;
+                        const y2 = 250 - (layer2.neurons - 1) * 30 + j * 60;
+
+                        let weight;
+                        if (l === 0) weight = forwardNet.W1[i][j];
+                        else weight = forwardNet.W2[i][0];
+
+                        // Determine if this connection should be highlighted
+                        let highlight = false;
+                        if (l === 0 && forwardAnim.step >= 1 && forwardAnim.step <= 2) {
+                            highlight = true;
+                        } else if (l === 1 && forwardAnim.step >= 3 && forwardAnim.step <= 4) {
+                            highlight = true;
+                        }
+
+                        forwardCtx.strokeStyle = highlight ? '#f59e0b' : (weight > 0 ? '#10b98160' : '#ef444460');
+                        forwardCtx.lineWidth = highlight ? 4 : Math.abs(weight) * 3;
+
+                        forwardCtx.beginPath();
+                        forwardCtx.moveTo(layer1.x, y1);
+                        forwardCtx.lineTo(layer2.x, y2);
+                        forwardCtx.stroke();
+
+                        // Draw animated particles
+                        if (highlight && forwardAnim.progress > 0) {
+                            const px = layer1.x + (layer2.x - layer1.x) * forwardAnim.progress;
+                            const py = y1 + (y2 - y1) * forwardAnim.progress;
+
+                            forwardCtx.beginPath();
+                            forwardCtx.arc(px, py, 5, 0, Math.PI * 2);
+                            forwardCtx.fillStyle = '#f59e0b';
+                            forwardCtx.fill();
+                        }
+                    }
+                }
+            }
+
+            // Draw neurons
+            layers.forEach((layer, layerIdx) => {
+                for (let i = 0; i < layer.neurons; i++) {
+                    const y = 250 - (layer.neurons - 1) * 30 + i * 60;
+                    const value = layer.values[i];
+
+                    // Determine if this neuron should be highlighted
+                    let highlight = false;
+                    if (layerIdx === 0 && forwardAnim.step === 0) highlight = true;
+                    if (layerIdx === 1 && forwardAnim.step >= 1 && forwardAnim.step <= 2) highlight = true;
+                    if (layerIdx === 2 && forwardAnim.step >= 3) highlight = true;
+
+                    forwardCtx.beginPath();
+                    forwardCtx.arc(layer.x, y, 28, 0, Math.PI * 2);
+
+                    if (highlight) {
+                        forwardCtx.fillStyle = '#fbbf24';
+                        forwardCtx.shadowColor = '#f59e0b';
+                        forwardCtx.shadowBlur = 15;
+                    } else {
+                        forwardCtx.fillStyle = `hsl(${120 * value}, 70%, 60%)`;
+                        forwardCtx.shadowBlur = 0;
+                    }
+
+                    forwardCtx.fill();
+                    forwardCtx.shadowBlur = 0;
+                    forwardCtx.strokeStyle = '#1f2937';
+                    forwardCtx.lineWidth = 2;
+                    forwardCtx.stroke();
+
+                    forwardCtx.font = 'bold 14px Inter';
+                    forwardCtx.fillStyle = '#1f2937';
+                    forwardCtx.textAlign = 'center';
+                    forwardCtx.fillText(value.toFixed(2), layer.x, y + 5);
+                }
+
+                // Layer labels
+                forwardCtx.font = 'bold 16px Inter';
+                forwardCtx.fillStyle = '#1f2937';
+                forwardCtx.textAlign = 'center';
+                forwardCtx.fillText(layer.label, layer.x, 430);
+            });
+
+            // Draw step indicator at top
+            forwardCtx.font = 'bold 20px Inter';
+            forwardCtx.fillStyle = '#2563eb';
+            forwardCtx.textAlign = 'center';
+            forwardCtx.fillText('Forward Propagation Animation', forwardCanvas.width / 2, 30);
+        }
+
+        // Initialize forward pass
+        updateForwardPass();
+
+        // ==================== Training Cycle ====================
+        const trainingCanvas = document.getElementById('trainingCanvas');
+        const trainingCtx = trainingCanvas.getContext('2d');
+
+        let trainingData = {
+            input: [1.0, 0.5],
+            target: 1.0,
+            W1: [[0.5, 0.2, -0.3, 0.4], [0.3, -0.1, 0.6, 0.2]],
+            b1: [0.1, -0.1, 0.2, 0.0],
+            W2: [[0.6], [-0.2], [0.3], [-0.1]],
+            b2: [0.1],
+            hidden: [],
+            output: 0,
+            loss: 0,
+            gradients: {},
+            step: 0,
+            epoch: 0
+        };
+
+        function stepForward() {
+            trainingData.step = 1;
+            const input = trainingData.input;
+
+            // Compute hidden layer
+            trainingData.hidden = trainingData.b1.map((b, i) => {
+                const z = input[0] * trainingData.W1[0][i] + input[1] * trainingData.W1[1][i] + b;
+                return sigmoid(z);
+            });
+
+            // Compute output
+            const z_out = trainingData.hidden.reduce((sum, h, i) =>
+                sum + h * trainingData.W2[i][0], 0) + trainingData.b2[0];
+            trainingData.output = sigmoid(z_out);
+
+            // Compute loss
+            const y = trainingData.target;
+            const yhat = trainingData.output;
+            trainingData.loss = -(y * Math.log(yhat + 1e-8) + (1 - y) * Math.log(1 - yhat + 1e-8));
+
+            drawTrainingNetwork();
+            updateTrainingDisplay();
+        }
+
+        function stepBackward() {
+            if (trainingData.step < 1) {
+                stepForward();
+            }
+            trainingData.step = 2;
+
+            // Compute gradients
+            const y = trainingData.target;
+            const yhat = trainingData.output;
+            const dz2 = yhat - y;
+
+            trainingData.gradients = {
+                dW2: trainingData.hidden.map(h => h * dz2),
+                db2: dz2,
+                dW1: [],
+                db1: []
+            };
+
+            // Backprop to hidden layer
+            for (let i = 0; i < trainingData.hidden.length; i++) {
+                const dz1 = dz2 * trainingData.W2[i][0] * trainingData.hidden[i] * (1 - trainingData.hidden[i]);
+                trainingData.gradients.dW1.push([
+                    trainingData.input[0] * dz1,
+                    trainingData.input[1] * dz1
+                ]);
+                trainingData.gradients.db1.push(dz1);
+            }
+
+            drawTrainingNetwork();
+            updateTrainingDisplay();
+        }
+
+        function stepUpdate() {
+            if (trainingData.step < 2) {
+                stepBackward();
+            }
+            trainingData.step = 3;
+
+            const lr = 0.1;
+
+            // Update W2 and b2
+            for (let i = 0; i < trainingData.W2.length; i++) {
+                trainingData.W2[i][0] -= lr * trainingData.gradients.dW2[i];
+            }
+            trainingData.b2[0] -= lr * trainingData.gradients.db2;
+
+            // Update W1 and b1
+            for (let i = 0; i < trainingData.hidden.length; i++) {
+                trainingData.W1[0][i] -= lr * trainingData.gradients.dW1[i][0];
+                trainingData.W1[1][i] -= lr * trainingData.gradients.dW1[i][1];
+                trainingData.b1[i] -= lr * trainingData.gradients.db1[i];
+            }
+
+            trainingData.epoch++;
+            trainingData.step = 0;
+
+            drawTrainingNetwork();
+            updateTrainingDisplay();
+        }
+
+        function trainEpoch() {
+            for (let i = 0; i < 4; i++) {
+                stepForward();
+                stepBackward();
+                stepUpdate();
+            }
+        }
+
+        function drawTrainingNetwork() {
+            trainingCtx.clearRect(0, 0, trainingCanvas.width, trainingCanvas.height);
+
+            // Draw title based on step
+            trainingCtx.font = 'bold 20px Inter';
+            trainingCtx.fillStyle = '#1f2937';
+            trainingCtx.textAlign = 'center';
+            const titles = ['Click Step 1', 'Forward Pass Complete', 'Backward Pass (Gradients)', 'Weights Updated'];
+            trainingCtx.fillText(titles[trainingData.step], trainingCanvas.width / 2, 30);
+
+            const layers = [
+                {neurons: 2, x: 100, values: trainingData.input},
+                {neurons: 4, x: 400, values: trainingData.hidden.length ? trainingData.hidden : [0,0,0,0]},
+                {neurons: 1, x: 700, values: [trainingData.output]}
+            ];
+
+            // Draw connections with gradients if step 2
+            for (let l = 0; l < layers.length - 1; l++) {
+                const layer1 = layers[l];
+                const layer2 = layers[l + 1];
+
+                for (let i = 0; i < layer1.neurons; i++) {
+                    for (let j = 0; j < layer2.neurons; j++) {
+                        const y1 = 250 - (layer1.neurons - 1) * 30 + i * 60;
+                        const y2 = 250 - (layer2.neurons - 1) * 30 + j * 60;
+
+                        let weight;
+                        if (l === 0) {
+                            weight = trainingData.W1[i][j];
+                        } else {
+                            weight = trainingData.W2[i][0];
+                        }
+
+                        if (trainingData.step === 2) {
+                            // Show gradients
+                            trainingCtx.strokeStyle = '#ef4444';
+                            trainingCtx.lineWidth = 3;
+                            trainingCtx.setLineDash([5, 5]);
+                        } else {
+                            trainingCtx.strokeStyle = weight > 0 ? '#10b98160' : '#ef444460';
+                            trainingCtx.lineWidth = Math.abs(weight) * 3;
+                            trainingCtx.setLineDash([]);
+                        }
+
+                        trainingCtx.beginPath();
+                        trainingCtx.moveTo(layer1.x, y1);
+                        trainingCtx.lineTo(layer2.x, y2);
+                        trainingCtx.stroke();
+                        trainingCtx.setLineDash([]);
+                    }
+                }
+            }
+
+            // Draw neurons
+            layers.forEach((layer, layerIdx) => {
+                for (let i = 0; i < layer.neurons; i++) {
+                    const y = 250 - (layer.neurons - 1) * 30 + i * 60;
+                    const value = layer.values[i] || 0;
+
+                    trainingCtx.beginPath();
+                    trainingCtx.arc(layer.x, y, 25, 0, Math.PI * 2);
+
+                    if (trainingData.step === 1 || trainingData.step === 3) {
+                        trainingCtx.fillStyle = `hsl(${120 * value}, 70%, 60%)`;
+                    } else if (trainingData.step === 2) {
+                        trainingCtx.fillStyle = '#fecaca';
+                    } else {
+                        trainingCtx.fillStyle = '#e5e7eb';
+                    }
+
+                    trainingCtx.fill();
+                    trainingCtx.strokeStyle = '#1f2937';
+                    trainingCtx.lineWidth = 2;
+                    trainingCtx.stroke();
+
+                    if (value !== 0) {
+                        trainingCtx.font = 'bold 12px Inter';
+                        trainingCtx.fillStyle = '#1f2937';
+                        trainingCtx.textAlign = 'center';
+                        trainingCtx.fillText(value.toFixed(2), layer.x, y + 4);
+                    }
+                }
+
+                const labels = ['Input', 'Hidden', 'Output'];
+                trainingCtx.font = '16px Inter';
+                trainingCtx.fillStyle = '#6b7280';
+                trainingCtx.textAlign = 'center';
+                trainingCtx.fillText(labels[layerIdx], layer.x, 450);
+            });
+        }
+
+        function updateTrainingDisplay() {
+            let html = '';
+            html += `<div class="value-row"><span>Epoch:</span><span>${trainingData.epoch}</span></div>`;
+            html += `<div class="value-row"><span>Loss:</span><span>${trainingData.loss.toFixed(4)}</span></div>`;
+            html += `<div class="value-row"><span>Output:</span><span>${trainingData.output.toFixed(3)}</span></div>`;
+            html += `<div class="value-row"><span>Target:</span><span>${trainingData.target}</span></div>`;
+            document.getElementById('trainingValuesContent').innerHTML = html;
+        }
+
+        // Initialize training
+        drawTrainingNetwork();
+        updateTrainingDisplay();
+
+        // ==================== Playground ====================
+        const playgroundCanvas = document.getElementById('playgroundCanvas');
+        const playgroundCtx = playgroundCanvas.getContext('2d');
+
+        let playground = {
+            lr: 0.1,
+            hiddenSize: 4,
+            epoch: 0,
+            loss: 1.0,
+            accuracy: 0.25,
+            W1: null,
+            b1: null,
+            W2: null,
+            b2: null
+        };
+
+        function initPlayground() {
+            const h = playground.hiddenSize;
+            playground.W1 = Array(2).fill().map(() => Array(h).fill().map(() => Math.random() - 0.5));
+            playground.b1 = Array(h).fill(0);
+            playground.W2 = Array(h).fill().map(() => [Math.random() - 0.5]);
+            playground.b2 = [0];
+            playground.epoch = 0;
+            playground.loss = 1.0;
+            playground.accuracy = 0.25;
+            drawPlayground();
+        }
+
+        function updatePlaygroundParams() {
+            playground.lr = parseFloat(document.getElementById('lrSlider').value);
+            playground.hiddenSize = parseInt(document.getElementById('hiddenSlider').value);
+            playground.activation = document.getElementById('playgroundActivation').value;
+            document.getElementById('lrValue').textContent = playground.lr.toFixed(2);
+            document.getElementById('hiddenValue').textContent = playground.hiddenSize;
+        }
+
+        function trainPlayground(epochs) {
+            const X = [[0,0], [0,1], [1,0], [1,1]];
+            const y = [0, 1, 1, 0];
+
+            if (!playground.W1) {
+                initPlayground();
+            }
+
+            for (let ep = 0; ep < epochs; ep++) {
+                let totalLoss = 0;
+                let correct = 0;
+
+                for (let i = 0; i < 4; i++) {
+                    const input = X[i];
+                    const target = y[i];
+
+                    // Forward
+                    const z_hidden = playground.b1.map((b, j) => {
+                        return input[0] * playground.W1[0][j] + input[1] * playground.W1[1][j] + b;
+                    });
+                    const hidden = z_hidden.map(z => applyActivation(z, playground.activation));
+
+                    const z_out = hidden.reduce((sum, h, j) =>
+                        sum + h * playground.W2[j][0], 0) + playground.b2[0];
+                    const output = sigmoid(z_out);
+
+                    // Loss
+                    const loss = -(target * Math.log(output + 1e-8) + (1 - target) * Math.log(1 - output + 1e-8));
+                    totalLoss += loss;
+
+                    // Accuracy
+                    if ((output > 0.5 && target === 1) || (output <= 0.5 && target === 0)) {
+                        correct++;
+                    }
+
+                    // Backward
+                    const dz2 = output - target;
+
+                    // Update W2
+                    for (let j = 0; j < hidden.length; j++) {
+                        playground.W2[j][0] -= playground.lr * hidden[j] * dz2;
+                    }
+                    playground.b2[0] -= playground.lr * dz2;
+
+                    // Update W1
+                    for (let j = 0; j < hidden.length; j++) {
+                        let dh_dz;
+                        if (playground.activation === 'sigmoid') {
+                            dh_dz = hidden[j] * (1 - hidden[j]);
+                        } else if (playground.activation === 'tanh') {
+                            dh_dz = 1 - hidden[j] * hidden[j];
+                        } else if (playground.activation === 'relu') {
+                            dh_dz = z_hidden[j] > 0 ? 1 : 0;
+                        } else if (playground.activation === 'leaky_relu') {
+                            dh_dz = z_hidden[j] > 0 ? 1 : 0.01;
+                        } else {
+                            dh_dz = hidden[j] * (1 - hidden[j]); // default to sigmoid
+                        }
+                        const dz1 = dz2 * playground.W2[j][0] * dh_dz;
+                        playground.W1[0][j] -= playground.lr * input[0] * dz1;
+                        playground.W1[1][j] -= playground.lr * input[1] * dz1;
+                        playground.b1[j] -= playground.lr * dz1;
+                    }
+                }
+
+                playground.loss = totalLoss / 4;
+                playground.accuracy = correct / 4;
+                playground.epoch++;
+            }
+
+            document.getElementById('epochValue').textContent = playground.epoch;
+            drawPlayground();
+            updatePlaygroundMetrics();
+        }
+
+        function resetPlayground() {
+            initPlayground();
+            document.getElementById('epochValue').textContent = '0';
+            updatePlaygroundMetrics();
+        }
+
+        function drawPlayground() {
+            playgroundCtx.clearRect(0, 0, playgroundCanvas.width, playgroundCanvas.height);
+
+            if (!playground.W1) {
+                playgroundCtx.font = '20px Inter';
+                playgroundCtx.fillStyle = '#6b7280';
+                playgroundCtx.textAlign = 'center';
+                playgroundCtx.fillText('Click "Reset Network" or "Train" to begin', playgroundCanvas.width / 2, playgroundCanvas.height / 2);
+                return;
+            }
+
+            // Draw decision boundary
+            const resolution = 50;
+            const scale = 400;
+            const offsetX = 100;
+            const offsetY = 100;
+
+            for (let i = 0; i < resolution; i++) {
+                for (let j = 0; j < resolution; j++) {
+                    const x = i / resolution;
+                    const y = j / resolution;
+
+                    // Forward pass
+                    const hidden = playground.b1.map((b, k) => {
+                        const z = x * playground.W1[0][k] + y * playground.W1[1][k] + b;
+                        return applyActivation(z, playground.activation);
+                    });
+
+                    const z_out = hidden.reduce((sum, h, k) =>
+                        sum + h * playground.W2[k][0], 0) + playground.b2[0];
+                    const output = sigmoid(z_out);
+
+                    const hue = output > 0.5 ? 120 : 0;
+                    const alpha = 0.2 + Math.abs(output - 0.5) * 0.8;
+                    playgroundCtx.fillStyle = `hsla(${hue}, 70%, 60%, ${alpha})`;
+                    playgroundCtx.fillRect(
+                        offsetX + i * scale / resolution,
+                        offsetY + j * scale / resolution,
+                        scale / resolution,
+                        scale / resolution
+                    );
+                }
+            }
+
+            // Draw XOR points
+            const points = [[0,0,0], [0,1,1], [1,0,1], [1,1,0]];
+            points.forEach(([x, y, label]) => {
+                playgroundCtx.beginPath();
+                playgroundCtx.arc(
+                    offsetX + x * scale,
+                    offsetY + y * scale,
+                    15,
+                    0,
+                    Math.PI * 2
+                );
+                playgroundCtx.fillStyle = label === 1 ? '#10b981' : '#ef4444';
+                playgroundCtx.fill();
+                playgroundCtx.strokeStyle = '#1f2937';
+                playgroundCtx.lineWidth = 3;
+                playgroundCtx.stroke();
+            });
+
+            // Draw network architecture
+            const netOffsetX = 600;
+            const netOffsetY = 150;
+            const layers = [
+                {neurons: 2, x: netOffsetX, label: 'Input'},
+                {neurons: playground.hiddenSize, x: netOffsetX + 150, label: 'Hidden'},
+                {neurons: 1, x: netOffsetX + 300, label: 'Output'}
+            ];
+
+            // Draw connections
+            for (let l = 0; l < layers.length - 1; l++) {
+                const layer1 = layers[l];
+                const layer2 = layers[l + 1];
+
+                for (let i = 0; i < layer1.neurons; i++) {
+                    for (let j = 0; j < layer2.neurons; j++) {
+                        const y1 = netOffsetY + i * (200 / layer1.neurons);
+                        const y2 = netOffsetY + j * (200 / layer2.neurons);
+
+                        let weight;
+                        if (l === 0) {
+                            weight = playground.W1[i][j];
+                        } else {
+                            weight = playground.W2[i][0];
+                        }
+
+                        playgroundCtx.strokeStyle = weight > 0 ? '#10b98140' : '#ef444440';
+                        playgroundCtx.lineWidth = Math.min(Math.abs(weight) * 2, 5);
+                        playgroundCtx.beginPath();
+                        playgroundCtx.moveTo(layer1.x, y1);
+                        playgroundCtx.lineTo(layer2.x, y2);
+                        playgroundCtx.stroke();
+                    }
+                }
+            }
+
+            // Draw neurons
+            layers.forEach(layer => {
+                for (let i = 0; i < layer.neurons; i++) {
+                    const y = netOffsetY + i * (200 / layer.neurons);
+
+                    playgroundCtx.beginPath();
+                    playgroundCtx.arc(layer.x, y, 12, 0, Math.PI * 2);
+                    playgroundCtx.fillStyle = '#2563eb';
+                    playgroundCtx.fill();
+                    playgroundCtx.strokeStyle = '#1f2937';
+                    playgroundCtx.lineWidth = 2;
+                    playgroundCtx.stroke();
+                }
+
+                playgroundCtx.font = '14px Inter';
+                playgroundCtx.fillStyle = '#1f2937';
+                playgroundCtx.textAlign = 'center';
+                playgroundCtx.fillText(layer.label, layer.x, netOffsetY + 230);
+            });
+        }
+
+        function updatePlaygroundMetrics() {
+            let html = '';
+            html += `<div class="value-row"><span>Epochs:</span><span>${playground.epoch}</span></div>`;
+            html += `<div class="value-row"><span>Loss:</span><span>${playground.loss.toFixed(4)}</span></div>`;
+            html += `<div class="value-row"><span>Accuracy:</span><span>${(playground.accuracy * 100).toFixed(1)}%</span></div>`;
+            html += `<div class="value-row"><span>Learning Rate:</span><span>${playground.lr.toFixed(2)}</span></div>`;
+            html += `<div class="value-row"><span>Hidden Neurons:</span><span>${playground.hiddenSize}</span></div>`;
+            document.getElementById('playgroundMetricsContent').innerHTML = html;
+        }
+
+        // ==================== Activation Functions ====================
+        const activationCanvas = document.getElementById('activationCanvas');
+        const activationCtx = activationCanvas.getContext('2d');
+
+        // Define activation functions and their derivatives
+        const activationFunctions = {
+            sigmoid: {
+                fn: (x) => 1 / (1 + Math.exp(-x)),
+                deriv: (x) => {
+                    const s = 1 / (1 + Math.exp(-x));
+                    return s * (1 - s);
+                },
+                name: 'Sigmoid',
+                formula: '\\( \\sigma(x) = \\frac{1}{1 + e^{-x}} \\)',
+                derivFormula: '\\( \\sigma\'(x) = \\sigma(x) \\cdot (1 - \\sigma(x)) \\)',
+                range: '(0, 1)',
+                usedFor: 'Binary classification output layer, gates in LSTM',
+                advantages: 'Smooth gradient, outputs are bounded',
+                disadvantages: 'Vanishing gradient problem for large |x|'
+            },
+            tanh: {
+                fn: (x) => Math.tanh(x),
+                deriv: (x) => 1 - Math.pow(Math.tanh(x), 2),
+                name: 'Tanh',
+                formula: '\\( \\tanh(x) = \\frac{e^x - e^{-x}}{e^x + e^{-x}} \\)',
+                derivFormula: '\\( \\tanh\'(x) = 1 - \\tanh^2(x) \\)',
+                range: '(-1, 1)',
+                usedFor: 'Hidden layers in RNNs, when zero-centered outputs are preferred',
+                advantages: 'Zero-centered, stronger gradients than sigmoid',
+                disadvantages: 'Still suffers from vanishing gradient problem'
+            },
+            relu: {
+                fn: (x) => Math.max(0, x),
+                deriv: (x) => x > 0 ? 1 : 0,
+                name: 'ReLU (Rectified Linear Unit)',
+                formula: '\\( \\text{ReLU}(x) = \\max(0, x) \\)',
+                derivFormula: '\\( \\text{ReLU}\'(x) = \\begin{cases} 1 & \\text{if } x > 0 \\\\ 0 & \\text{if } x \\leq 0 \\end{cases} \\)',
+                range: '[0, ∞)',
+                usedFor: 'Hidden layers in deep networks (most common)',
+                advantages: 'Fast computation, no vanishing gradient for positive values, sparse activation',
+                disadvantages: 'Dying ReLU problem (neurons can stop learning if they output 0)'
+            },
+            leaky_relu: {
+                fn: (x) => x > 0 ? x : 0.01 * x,
+                deriv: (x) => x > 0 ? 1 : 0.01,
+                name: 'Leaky ReLU',
+                formula: '\\( \\text{Leaky ReLU}(x) = \\begin{cases} x & \\text{if } x > 0 \\\\ 0.01x & \\text{if } x \\leq 0 \\end{cases} \\)',
+                derivFormula: '\\( \\text{Leaky ReLU}\'(x) = \\begin{cases} 1 & \\text{if } x > 0 \\\\ 0.01 & \\text{if } x \\leq 0 \\end{cases} \\)',
+                range: '(-∞, ∞)',
+                usedFor: 'Hidden layers, alternative to ReLU',
+                advantages: 'Fixes dying ReLU problem, allows small negative values',
+                disadvantages: 'Hyperparameter (0.01) needs tuning'
+            }
+        };
+
+        function updateActivationViz() {
+            const selectedFunc = document.getElementById('activationSelect').value;
+            const inputVal = parseFloat(document.getElementById('activationInputSlider').value);
+            const func = activationFunctions[selectedFunc];
+
+            // Update display values
+            document.getElementById('activationInputValue').textContent = inputVal.toFixed(1);
+            const output = func.fn(inputVal);
+            const deriv = func.deriv(inputVal);
+            document.getElementById('activationOutputValue').textContent = output.toFixed(3);
+            document.getElementById('activationDerivValue').textContent = deriv.toFixed(3);
+
+            // Update formulas
+            const formulaDiv = document.getElementById('activationFormulas');
+            formulaDiv.innerHTML = `
+                <h4>${func.name}:</h4>
+                <p><strong>Function:</strong> ${func.formula}</p>
+                <p><strong>Derivative:</strong> ${func.derivFormula}</p>
+                <p><strong>Range:</strong> ${func.range}</p>
+                <p><strong>Used for:</strong> ${func.usedFor}</p>
+                <p><strong>Advantages:</strong> ${func.advantages}</p>
+                <p><strong>Disadvantages:</strong> ${func.disadvantages}</p>
+            `;
+
+            // Trigger MathJax to re-render
+            if (window.MathJax) {
+                MathJax.typesetPromise([formulaDiv]).catch((err) => console.log(err));
+            }
+
+            // Draw visualization
+            drawActivationGraph(func, inputVal);
+        }
+
+        function drawActivationGraph(func, inputVal) {
+            activationCtx.clearRect(0, 0, activationCanvas.width, activationCanvas.height);
+
+            const width = activationCanvas.width;
+            const height = activationCanvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const scaleX = 60;
+            const scaleY = 80;
+
+            // Draw axes
+            activationCtx.strokeStyle = '#d1d5db';
+            activationCtx.lineWidth = 2;
+            activationCtx.beginPath();
+            activationCtx.moveTo(0, centerY);
+            activationCtx.lineTo(width, centerY);
+            activationCtx.moveTo(centerX, 0);
+            activationCtx.lineTo(centerX, height);
+            activationCtx.stroke();
+
+            // Draw grid
+            activationCtx.strokeStyle = '#f3f4f6';
+            activationCtx.lineWidth = 1;
+            for (let i = -5; i <= 5; i++) {
+                if (i !== 0) {
+                    activationCtx.beginPath();
+                    activationCtx.moveTo(centerX + i * scaleX, 0);
+                    activationCtx.lineTo(centerX + i * scaleX, height);
+                    activationCtx.stroke();
+                }
+            }
+
+            // Draw labels
+            activationCtx.fillStyle = '#6b7280';
+            activationCtx.font = '14px Inter';
+            activationCtx.textAlign = 'center';
+            activationCtx.fillText('x', width - 20, centerY - 10);
+            activationCtx.fillText('f(x)', centerX + 20, 20);
+
+            // Draw activation function
+            activationCtx.strokeStyle = '#2563eb';
+            activationCtx.lineWidth = 3;
+            activationCtx.beginPath();
+            let firstPoint = true;
+            for (let x = -5; x <= 5; x += 0.05) {
+                const y = func.fn(x);
+                const canvasX = centerX + x * scaleX;
+                const canvasY = centerY - y * scaleY;
+
+                if (firstPoint) {
+                    activationCtx.moveTo(canvasX, canvasY);
+                    firstPoint = false;
+                } else {
+                    activationCtx.lineTo(canvasX, canvasY);
+                }
+            }
+            activationCtx.stroke();
+
+            // Draw derivative function
+            activationCtx.strokeStyle = '#10b981';
+            activationCtx.lineWidth = 2;
+            activationCtx.setLineDash([5, 5]);
+            activationCtx.beginPath();
+            firstPoint = true;
+            for (let x = -5; x <= 5; x += 0.05) {
+                const y = func.deriv(x);
+                const canvasX = centerX + x * scaleX;
+                const canvasY = centerY - y * scaleY;
+
+                if (firstPoint) {
+                    activationCtx.moveTo(canvasX, canvasY);
+                    firstPoint = false;
+                } else {
+                    activationCtx.lineTo(canvasX, canvasY);
+                }
+            }
+            activationCtx.stroke();
+            activationCtx.setLineDash([]);
+
+            // Draw current point
+            const outputVal = func.fn(inputVal);
+            const pointX = centerX + inputVal * scaleX;
+            const pointY = centerY - outputVal * scaleY;
+
+            activationCtx.beginPath();
+            activationCtx.arc(pointX, pointY, 8, 0, Math.PI * 2);
+            activationCtx.fillStyle = '#ef4444';
+            activationCtx.fill();
+            activationCtx.strokeStyle = '#1f2937';
+            activationCtx.lineWidth = 2;
+            activationCtx.stroke();
+
+            // Draw vertical line from point to x-axis
+            activationCtx.strokeStyle = '#ef444460';
+            activationCtx.lineWidth = 1;
+            activationCtx.setLineDash([3, 3]);
+            activationCtx.beginPath();
+            activationCtx.moveTo(pointX, pointY);
+            activationCtx.lineTo(pointX, centerY);
+            activationCtx.stroke();
+            activationCtx.setLineDash([]);
+
+            // Legend
+            activationCtx.font = '14px Inter';
+            activationCtx.textAlign = 'left';
+
+            activationCtx.strokeStyle = '#2563eb';
+            activationCtx.lineWidth = 3;
+            activationCtx.beginPath();
+            activationCtx.moveTo(20, 30);
+            activationCtx.lineTo(60, 30);
+            activationCtx.stroke();
+            activationCtx.fillStyle = '#1f2937';
+            activationCtx.fillText('f(x)', 70, 35);
+
+            activationCtx.strokeStyle = '#10b981';
+            activationCtx.lineWidth = 2;
+            activationCtx.setLineDash([5, 5]);
+            activationCtx.beginPath();
+            activationCtx.moveTo(20, 50);
+            activationCtx.lineTo(60, 50);
+            activationCtx.stroke();
+            activationCtx.setLineDash([]);
+            activationCtx.fillStyle = '#1f2937';
+            activationCtx.fillText("f'(x)", 70, 55);
+        }
+
+        // Update playground to use selected activation
+        function applyActivation(x, activationType) {
+            const func = activationFunctions[activationType];
+            return func ? func.fn(x) : sigmoid(x);
+        }
+
+        function applyActivationDerivative(x, activationType) {
+            const func = activationFunctions[activationType];
+            if (!func) return x * (1 - x); // sigmoid derivative
+
+            // For ReLU-type functions, we need to compute derivative differently
+            if (activationType === 'relu' || activationType === 'leaky_relu') {
+                return func.deriv(x);
+            }
+            // For sigmoid/tanh, derivative uses the output value
+            return func.deriv(x);
+        }
+
+        // Initialize activation visualization
+        updateActivationViz();
+
+        // Update playground initialization to include activation
+        playground.activation = 'sigmoid';
+
+        // Initialize playground
+        initPlayground();
+        updatePlaygroundMetrics();
+    </script>
+</body>
+</html>

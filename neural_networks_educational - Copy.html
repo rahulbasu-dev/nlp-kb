@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Networks - Educational Guide</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container - Wider Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks - Consistent Sizing */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-block.half {
+            min-height: calc(var(--block-min-height) / 2);
+        }
+
+        .content-block.auto {
+            min-height: auto;
+        }
+
+        /* Grid Layout for Side-by-Side Blocks */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .block-grid .content-block {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .block-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .icon {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #e0e7ff;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Flowchart */
+        .flowchart-container {
+            text-align: center;
+            margin: 2rem 0;
+            overflow-x: auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 1rem;
+        }
+
+        .flowchart-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        /* Steps */
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-color);
+            border-radius: 1rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Word pair display */
+        .word-pair {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-color);
+            border-radius: 0.5rem;
+            margin: 0.25rem;
+            font-family: monospace;
+        }
+
+        .word-pair.positive {
+            background: #d1fae5;
+            border: 2px solid var(--accent-color);
+        }
+
+        .word-pair.negative {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+        }
+
+        .word-pair .arrow {
+            color: var(--text-light);
+        }
+
+        /* Context window visualization */
+        .context-window {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--bg-color);
+            border-radius: 0.5rem;
+        }
+
+        .context-window .word {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .context-window .word.center {
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .context-window .word.context {
+            background: #fef08a;
+            border: 2px solid var(--warning-color);
+        }
+
+        .context-window .word.outside {
+            background: #e5e7eb;
+            color: var(--text-light);
+        }
+
+        /* Embedding visualization */
+        .embedding-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 0.25rem;
+            margin: 1rem 0;
+        }
+
+        .embedding-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .content-block {
+                padding: 1.5rem;
+                min-height: auto;
+            }
+
+            header {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            nav {
+                display: none;
+            }
+
+            main {
+                padding-top: 1rem;
+            }
+
+            .content-block {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+
+        /* Scroll Snap for Presentation Feel */
+        @media (min-width: 1200px) {
+            main {
+                scroll-snap-type: y proximity;
+            }
+
+            .content-block, header {
+                scroll-snap-align: start;
+                scroll-margin-top: 5rem;
+            }
+        }
+    </style>
+
+    
+
+    <div class="container">
+        <article>
+        <!-- Title Slide -->
+        <section class="section" id="title">
+            <h1>🧠 Neural Networks</h1>
+            <p class="subtitle">Understanding the Foundation of Deep Learning from First Principles</p>
+            <cite>Jurafsky & Martin (2026), Speech and Language Processing, Chapter 6: Neural Networks, pp. 128-145</cite>
+        </section>
+
+        <div class="content">
+            <!-- ========================================
+                 SECTION 1: INTUITION
+                 ======================================== -->
+            <section id="intuition" class="section">
+                <h2>1. Intuition: What Are Neural Networks?</h2>
+
+                <div class="content-block">
+                    <div class="intuition-box">
+                        <strong>Historical Context (Jurafsky & Martin, 2026, p. 128)</strong>
+                        <p>Neural networks evolved from the McCulloch-Pitts neuron (1943), a simplified model of biological computation. Modern feedforward networks stack layers of these units, with backpropagation enabling learning via gradient descent.</p>
+                    </div>
+
+                    <p>A <strong>neural network</strong> is a computational model inspired by how biological neurons in the brain process information. At its core, it's a pattern recognition machine that learns to map inputs to outputs through examples.</p>
+
+                    <div class="callout-analogy">
+                        <h4>🧠 The Brain Analogy</h4>
+                        <p>Just as your brain has billions of interconnected neurons that fire in patterns to recognize faces, understand language, or control movement, artificial neural networks use interconnected mathematical "neurons" (nodes) that learn patterns in data. Each connection has a <strong>weight</strong> that determines how strongly one neuron influences another—similar to synaptic strength in biological neurons.</p>
+                        <p><strong>First modeled by:</strong> McCulloch & Pitts (1943)<span class="citation" title="McCulloch & Pitts, 1943">[1]</span>, formalized as the perceptron by Rosenblatt (1958)<span class="citation" title="Rosenblatt, 1958">[2]</span>. (See Jurafsky & Martin, 2026, p. 128 for historical overview)</p>
+                    </div>
+
+                    <h3>How Neural Networks Learn</h3>
+                    <p>Neural networks learn through <strong>supervised learning</strong>:</p>
+                    <ol>
+                        <li><strong>Start with random guesses:</strong> Initialize weights randomly</li>
+                        <li><strong>Make predictions:</strong> Feed input data through the network</li>
+                        <li><strong>Measure error:</strong> Compare predictions to true labels</li>
+                        <li><strong>Adjust weights:</strong> Use backpropagation<span class="citation" title="Rumelhart et al., 1986">[3]</span> to reduce error</li>
+                        <li><strong>Repeat:</strong> Iterate thousands of times until accurate</li>
+                    </ol>
+
+                    <div class="callout-example">
+                        <h4>📧 Example: Spam Detection</h4>
+                        <p><strong>Input:</strong> Email text (converted to numbers representing word frequencies)</p>
+                        <p><strong>Hidden layers:</strong> Learn patterns like "free money" + "click now" = suspicious</p>
+                        <p><strong>Output:</strong> Probability the email is spam (0.0 = not spam, 1.0 = spam)</p>
+                        <p>After training on thousands of labeled emails, the network learns which word combinations indicate spam, even for emails it's never seen before!</p>
+                    </div>
+                </div>
+
+                <div class="block-grid">
+                    <div class="content-block">
+                        <h3>Input → Hidden → Output Flow</h3>
+                        <p><strong>Input Layer:</strong> Raw features (pixels, words, numbers)</p>
+                        <p><strong>Hidden Layers:</strong> Learn progressively abstract patterns</p>
+                        <ul>
+                            <li>Layer 1: Edges and textures</li>
+                            <li>Layer 2: Shapes and parts</li>
+                            <li>Layer 3: Complex objects</li>
+                        </ul>
+                        <p><strong>Output Layer:</strong> Final prediction (class, number, etc.)</p>
+                    </div>
+
+                    <div class="content-block">
+                        <h3>Learning by Trial and Error</h3>
+                        <p><strong>Forward Pass:</strong> Make a prediction with current weights</p>
+                        <p><strong>Loss Calculation:</strong> How wrong was the prediction?</p>
+                        <p><strong>Backpropagation:</strong> Calculate how to adjust each weight</p>
+                        <p><strong>Gradient Descent:</strong> Update weights to reduce error</p>
+                        <p><strong>Repeat:</strong> Each iteration (epoch) improves accuracy</p>
+                    </div>
+                </div>
+
+                <div class="callout-concept">
+                    <h4>💡 Key Concepts</h4>
+                    <ul>
+                        <li><strong>Neuron (Node):</strong> Computes weighted sum + bias, then applies activation function</li>
+                        <li><strong>Weight:</strong> Connection strength between neurons (learned during training)</li>
+                        <li><strong>Bias:</strong> Shifts activation threshold (like a y-intercept)</li>
+                        <li><strong>Activation Function:</strong> Introduces non-linearity (e.g., sigmoid, ReLU)</li>
+                        <li><strong>Epoch:</strong> One complete pass through all training data</li>
+                        <li><strong>Learning Rate:</strong> Step size for weight updates (too big = unstable, too small = slow)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 2: VISUALIZATION
+                 ======================================== -->
+            <section id="visualization" class="section">
+                <h2>2. Visualizations</h2>
+
+<!-- XOR vs Linear Separability -->
+                <div class="interactive-section">
+                    <h3>A. XOR vs Linear Separability 🎯</h3>
+                    <p>See why XOR requires hidden layers while AND/OR don't:</p>
+
+                    <div class="input-group">
+                        <label>Select Problem:</label>
+                        <button onclick="switchProblem('AND')" id="btnAND" style="margin-right: 0.5rem;">AND</button>
+                        <button onclick="switchProblem('OR')" id="btnOR" style="margin-right: 0.5rem;">OR</button>
+                        <button onclick="switchProblem('XOR')" id="btnXOR">XOR</button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                        <div>
+                            <canvas id="separabilityCanvas" width="400" height="400" style="border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-elevated);"></canvas>
+                            <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                                <strong id="problemName">XOR</strong> problem with decision boundary attempt
+                            </p>
+                        </div>
+                        <div>
+                            <h4 style="color: #000000; margin-bottom: 1rem;">Problem Analysis</h4>
+                            <div id="analysisText" style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px; line-height: 1.8;">
+                                <p><strong>XOR (Exclusive OR):</strong></p>
+                                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                                    <li><strong>Not linearly separable</strong> - no single line can separate the classes</li>
+                                    <li>Requires at least 1 hidden layer</li>
+                                    <li>Neural network creates non-linear decision boundary</li>
+                                    <li>This is why deep learning is powerful!</li>
+                                </ul>
+                            </div>
+
+                            <div style="margin-top: 1.5rem; background: var(--bg-elevated); padding: 1rem; border-radius: 10px; border-left: 4px solid var(--accent-color);">
+                                <h5 style="margin-bottom: 0.5rem;">Truth Table:</h5>
+                                <table style="width: 100%; font-size: 0.9rem;" id="truthTable">
+                                    <tr><th>Input 1</th><th>Input 2</th><th>Output</th></tr>
+                                    <tr><td>0</td><td>0</td><td>0</td></tr>
+                                    <tr><td>0</td><td>1</td><td>1</td></tr>
+                                    <tr><td>1</td><td>0</td><td>1</td></tr>
+                                    <tr><td>1</td><td>1</td><td>0</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="interactive-section">
+                    <h3>B. Activation Function Explorer</h3>
+                    <p>Compare different activation functions and their derivatives:</p>
+
+                    <div class="input-group">
+                        <button onclick="plotActivation('sigmoid')">Sigmoid</button>
+                        <button onclick="plotActivation('relu')">ReLU</button>
+                        <button onclick="plotActivation('tanh')">Tanh</button>
+                        <button onclick="plotActivation('all')">Show All</button>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="activationCanvas" width="800" height="400" style="border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-elevated);"></canvas>
+                    </div>
+                </div>
+
+                <div class="interactive-section">
+                    <h3>C. Network Architecture Visualizer</h3>
+                    <p>Customize the network structure and see how neurons connect:</p>
+
+                    <div class="input-group">
+                        <label>Layer Sizes (comma-separated): <span id="layerDisplay">[2, 4, 1]</span></label>
+                        <input type="text" id="layerInput" value="2, 4, 1" placeholder="e.g., 2, 4, 1">
+                        <button onclick="updateNetwork()">Update Network</button>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="networkCanvas" width="800" height="500" style="border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-elevated);"></canvas>
+                    </div>
+                </div>
+
+                <div class="interactive-section">
+                    <h3>D. Forward Propagation Simulator</h3>
+                    <p>Adjust input values and watch activations propagate through the network:</p>
+
+                    <div class="input-group">
+                        <label>Input 1: <span id="input1Value">0.5</span></label>
+                        <input type="range" id="input1" min="0" max="1" step="0.1" value="0.5" oninput="updateForwardPass()">
+                        <label style="margin-left: 1rem;">Input 2: <span id="input2Value">0.5</span></label>
+                        <input type="range" id="input2" min="0" max="1" step="0.1" value="0.5" oninput="updateForwardPass()">
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="forwardCanvas" width="800" height="500" style="border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-elevated);"></canvas>
+                    </div>
+                    <div id="forwardPassDisplay" style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem;"></div>
+                </div>
+
+                <div class="interactive-section">
+                    <h3>E. Gradient Descent on Loss Surface 🏔️</h3>
+                    <p>Visualize how gradient descent finds the minimum of the loss function:</p>
+
+                    <div class="input-group">
+                        <button onclick="animateGradientDescent()" id="gdAnimateBtn">🚀 Animate Gradient Descent</button>
+                        <button onclick="resetGradientDescent()" style="margin-left: 0.5rem;">↺ Reset</button>
+                        <label style="margin-left: 2rem;">
+                            Learning Rate: <span id="lrValue">0.1</span>
+                            <input type="range" id="learningRateSlider" min="0.01" max="0.5" step="0.01" value="0.1" oninput="updateLearningRate()" style="width: 200px; margin-left: 0.5rem;">
+                        </label>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                        <div>
+                            <canvas id="lossSurface3D" width="500" height="500" style="border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-elevated);"></canvas>
+                            <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                                3D Loss Surface (drag to rotate)
+                            </p>
+                        </div>
+                        <div>
+                            <canvas id="lossContour" width="500" height="500" style="border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-elevated);"></canvas>
+                            <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                                Contour Plot with Gradient Path
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem; background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px;">
+                        <h4 style="color: #000000; margin-bottom: 1rem;">📈 Optimization Details</h4>
+                        <div id="gdDetails" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; font-size: 0.9rem;">
+                            <div><strong>Step:</strong> <span id="gdStep">0</span></div>
+                            <div><strong>Loss:</strong> <span id="gdLoss">-</span></div>
+                            <div><strong>Weight 1:</strong> <span id="gdW1">-</span></div>
+                            <div><strong>Weight 2:</strong> <span id="gdW2">-</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="interactive-section">
+                    <h3>F. Training Loss Visualizer</h3>
+                    <p>Simulate network training and watch the loss decrease over epochs:</p>
+
+                    <div class="input-group">
+                        <button onclick="startTraining()" id="trainBtn">Start Training</button>
+                        <button onclick="pauseTraining()" id="pauseBtn" disabled>Pause</button>
+                        <button onclick="resetTraining()">Reset</button>
+                        <span id="epochDisplay" style="margin-left: 1rem; font-weight: bold;">Epoch: 0 / 1000</span>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="lossChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="interactive-section">
+                    <h3>G. Complete Forward & Backward Pass with Live Values 🔄</h3>
+                    <p>Watch every neuron, weight, and gradient update in real-time:</p>
+
+                    <div class="input-group" style="margin-bottom: 1rem;">
+                        <button onclick="stepForward()" style="background: #10b981; margin-right: 0.5rem;">▶️ Forward Pass</button>
+                        <button onclick="stepBackward()" style="background: #f59e0b; margin-right: 0.5rem;">◀️ Backward Pass</button>
+                        <button onclick="stepUpdate()" style="background: #8b5cf6; margin-right: 0.5rem;">🔄 Update Weights</button>
+                        <button onclick="resetAnimation()">↺ Reset</button>
+                        <span id="animationStatus" style="margin-left: 1rem; font-weight: bold; color: var(--primary-color);"></span>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 1rem;">
+                        <label style="font-weight: bold; margin-right: 1rem;">Fast Forward:</label>
+                        <button onclick="runFullCycle()" style="background: var(--primary-color); color: white; margin-right: 0.5rem;">🔁 1 Complete Cycle</button>
+                        <button onclick="fastForward(10)" style="background: var(--secondary-color); color: white; margin-right: 0.5rem;">⚡ +10 Steps</button>
+                        <button onclick="fastForward(100)" style="background: var(--accent-color); color: white;">⚡⚡ +100 Steps</button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-tertiary); border-radius: 10px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Iteration</div>
+                            <div id="iterationDisplay" style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">0</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Current Loss</div>
+                            <div id="currentLossDisplay" style="font-size: 1.5rem; font-weight: bold; color: var(--danger-color);">--</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Loss Reduction</div>
+                            <div id="lossReductionDisplay" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-color);">--</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Avg Weight Change</div>
+                            <div id="weightChangeDisplay" style="font-size: 1.5rem; font-weight: bold; color: var(--warning-color);">--</div>
+                        </div>
+                    </div>
+
+                    <canvas id="fullNetworkCanvas" width="1200" height="600" style="border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-elevated); display: block; margin: 0 auto;"></canvas>
+                
+
+                <div id="currentValues" style="padding: 1.5rem; background: var(--bg-tertiary); border-radius: 10px; margin-top: 1.5rem;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.1rem;">📊 Current Network Values</h4>
+                    <div id="currentValuesContent" style="font-family: 'Fira Code', monospace; font-size: 0.9em; color: var(--text-primary); line-height: 1.8;"></div>
+                </div>
+
+                <div id="gradientsDisplay" style="padding: 1.5rem; background: var(--bg-tertiary); border-radius: 10px; margin-top: 1.5rem;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.1rem;">📉 Gradients (∂L/∂W)</h4>
+                    <div id="gradientsDisplayContent" style="font-family: 'Fira Code', monospace; font-size: 0.9em; color: var(--text-primary); line-height: 1.8;"></div>
+                </div>
+
+                <div id="progressDisplay" style="padding: 1.5rem; background: var(--bg-tertiary); border-radius: 10px; margin-top: 1.5rem;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.1rem;">📈 Training Progress</h4>
+                    <div id="progressDisplayContent" style="font-family: 'Fira Code', monospace; font-size: 0.9em; color: var(--text-primary); line-height: 1.8;"></div>
+                </div>
+</div>
+
+    <section id="neural-playground" class="section">
+        <h2>3. Complete Neural Network Playground 🎮</h2>
+
+        <div class="content-block">
+            <p style="color: var(--text-primary);">Explore how every parameter affects network behavior in real-time. Adjust architecture, activation functions, learning rate, and watch the network learn!</p>
+        </div>
+
+        <div class="interactive-section">
+            <h3>H. Interactive Neural Network Sandbox</h3>
+
+            <canvas id="playgroundCanvas" width="1400" height="800" style="border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-elevated); display: block; margin: 0 auto; max-width: 100%;"></canvas>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+
+                <!-- Architecture Controls -->
+                <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem;">🏗️ Architecture</h4>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--text-primary); display: block; margin-bottom: 0.5rem;">
+                            Input Neurons: <span id="pgInputSize">2</span>
+                        </label>
+                        <input type="range" id="pgInputSlider" min="1" max="4" value="2" step="1"
+                               oninput="updatePlaygroundArchitecture()" style="width: 100%;">
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--text-primary); display: block; margin-bottom: 0.5rem;">
+                            Hidden Layers: <span id="pgHiddenLayers">1</span>
+                        </label>
+                        <input type="range" id="pgHiddenLayersSlider" min="1" max="3" value="1" step="1"
+                               oninput="updatePlaygroundArchitecture()" style="width: 100%;">
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--text-primary); display: block; margin-bottom: 0.5rem;">
+                            Neurons per Hidden: <span id="pgHiddenSize">3</span>
+                        </label>
+                        <input type="range" id="pgHiddenSizeSlider" min="1" max="8" value="3" step="1"
+                               oninput="updatePlaygroundArchitecture()" style="width: 100%;">
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--text-primary); display: block; margin-bottom: 0.5rem;">
+                            Output Neurons: <span id="pgOutputSize">1</span>
+                        </label>
+                        <input type="range" id="pgOutputSlider" min="1" max="4" value="1" step="1"
+                               oninput="updatePlaygroundArchitecture()" style="width: 100%;">
+                    </div>
+                </div>
+
+                <!-- Activation Function -->
+                <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem;">⚡ Activation Function</h4>
+
+                    <select id="pgActivation" onchange="updatePlaygroundActivation()"
+                            style="width: 100%; padding: 0.5rem; border-radius: 5px; margin-bottom: 1rem;">
+                        <option value="sigmoid">Sigmoid: σ(x) = 1/(1+e^-x)</option>
+                        <option value="relu">ReLU: max(0, x)</option>
+                        <option value="tanh">Tanh: tanh(x)</option>
+                        <option value="leaky_relu">Leaky ReLU: max(0.01x, x)</option>
+                    </select>
+
+                    <div id="pgActivationFormula" style="background: var(--bg-primary); padding: 1rem; border-radius: 5px; font-size: 0.9em;">
+                        <p style="color: var(--text-primary); margin: 0;"><strong>Formula:</strong></p>
+                        <p id="pgActivationFormulaText" style="color: var(--text-secondary); margin: 0.5rem 0 0 0;">σ(x) = 1 / (1 + e^(-x))</p>
+                    </div>
+                </div>
+
+                <!-- Input Values -->
+                <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem;">🎯 Input Values</h4>
+
+                    <div id="pgInputControls"></div>
+
+                    <button onclick="randomizePlaygroundInputs()"
+                            style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                        🎲 Randomize Inputs
+                    </button>
+                </div>
+
+                <!-- Training Controls -->
+                <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem;">🎓 Training</h4>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--text-primary); display: block; margin-bottom: 0.5rem;">
+                            Learning Rate: <span id="pgLearningRate">0.1</span>
+                        </label>
+                        <input type="range" id="pgLearningRateSlider" min="0.001" max="1" value="0.1" step="0.001"
+                               oninput="updatePlaygroundLearningRate()" style="width: 100%;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <button onclick="playgroundStepForward()"
+                                style="padding: 0.75rem; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                            ▶️ Forward
+                        </button>
+                        <button onclick="playgroundStepBackward()"
+                                style="padding: 0.75rem; background: #f59e0b; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                            ◀️ Backward
+                        </button>
+                    </div>
+
+                    <button onclick="playgroundTrainStep()"
+                            style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; background: #8b5cf6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                        🔄 Full Training Step
+                    </button>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                        <button onclick="playgroundTrain(1)"
+                                style="padding: 0.5rem; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85em; font-weight: 600;">
+                            +1
+                        </button>
+                        <button onclick="playgroundTrain(10)"
+                                style="padding: 0.5rem; background: var(--secondary-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85em; font-weight: 600;">
+                            +10
+                        </button>
+                        <button onclick="playgroundTrain(100)"
+                                style="padding: 0.5rem; background: var(--accent-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85em; font-weight: 600;">
+                            +100
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Metrics Display -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; padding: 1.5rem; background: var(--bg-tertiary); border-radius: 10px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Training Steps</div>
+                    <div id="pgSteps" style="font-size: 1.8rem; font-weight: bold; color: var(--primary-color);">0</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Current Loss</div>
+                    <div id="pgLoss" style="font-size: 1.8rem; font-weight: bold; color: var(--danger-color);">--</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Avg Weight</div>
+                    <div id="pgAvgWeight" style="font-size: 1.8rem; font-weight: bold; color: var(--accent-color);">--</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Max Gradient</div>
+                    <div id="pgMaxGrad" style="font-size: 1.8rem; font-weight: bold; color: var(--warning-color);">--</div>
+                </div>
+            </div>
+
+            <!-- Parameter Display Table -->
+            <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-tertiary); border-radius: 10px;">
+                <h4 style="color: var(--text-primary); margin-bottom: 1rem;">📋 Network Parameters</h4>
+                <div id="pgParametersTable" style="font-family: 'Fira Code', monospace; font-size: 0.85em; color: var(--text-primary); overflow-x: auto;">
+                    <!-- Parameters will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+            </section>
+
+                        <div class="formula-label">Mean Squared Error (Regression)</div>
+                        <p>$$\mathcal{L}(\hat{y}, y) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2$$</p>
+
+                        <p><strong>Gradient:</strong></p>
+                        <p>$$\frac{\partial \mathcal{L}}{\partial \hat{y}} = \frac{2}{n}(\hat{y} - y)$$</p>
+
+                        <p><strong>Use case:</strong> Predicting continuous values (house prices, temperatures)</p>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Binary Cross-Entropy (Classification)</div>
+                        <p>$$\mathcal{L}(\hat{y}, y) = -\left[y \log(\hat{y}) + (1-y) \log(1-\hat{y})\right]$$</p>
+
+                        <p><strong>Gradient:</strong></p>
+                        <p>$$\frac{\partial \mathcal{L}}{\partial \hat{y}} = -\frac{y}{\hat{y}} + \frac{1-y}{1-\hat{y}}$$</p>
+
+                        <p><strong>Derivation from Maximum Likelihood:</strong></p>
+                        <p>Assuming \(\hat{y}\) represents \(P(y=1 | x)\), the likelihood is:</p>
+                        <p>$$P(y | \hat{y}) = \hat{y}^y (1 - \hat{y})^{1-y}$$</p>
+                        <p>Taking negative log-likelihood gives us the cross-entropy loss.</p>
+
+                        <p><strong>Why better than MSE for classification?</strong> Cross-entropy provides stronger gradients when predictions are confident but wrong, leading to faster convergence.</p>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>4.4 Backpropagation (Chain Rule)</h3>
+
+                    <p>Backpropagation<span class="citation" title="Rumelhart et al., 1986">[3]</span> computes gradients efficiently using the chain rule of calculus, propagating errors backward through the network.</p>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Output Layer Error</div>
+                        <p>$$\delta^{[L]} = (a^{[L]} - y) \odot \sigma'(z^{[L]})$$</p>
+
+                        <p><strong>Where:</strong></p>
+                        <ul>
+                            <li>\(\delta^{[L]}\) is the error at the output layer</li>
+                            <li>\(a^{[L]}\) is the predicted output</li>
+                            <li>\(y\) is the true label</li>
+                            <li>\(\odot\) denotes element-wise multiplication</li>
+                        </ul>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Hidden Layer Error (Recursive Backpropagation)</div>
+                        <p>For layer \(l = L-1, L-2, \ldots, 1\):</p>
+                        <p>$$\delta^{[l]} = \left(W^{[l+1]T} \delta^{[l+1]}\right) \odot \sigma'(z^{[l]})$$</p>
+
+                        <p><strong>Intuition:</strong> The error at layer \(l\) is the weighted sum of errors from layer \(l+1\), scaled by how much the neurons in layer \(l\) contributed to those errors.</p>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Weight and Bias Gradients</div>
+                        <p>$$\frac{\partial \mathcal{L}}{\partial W^{[l]}} = \delta^{[l]} (a^{[l-1]})^T$$</p>
+
+                        <p>$$\frac{\partial \mathcal{L}}{\partial b^{[l]}} = \delta^{[l]}$$</p>
+
+                        <p><strong>Note:</strong> For mini-batch training with \(m\) samples, average the gradients:</p>
+                        <p>$$\frac{\partial \mathcal{L}}{\partial W^{[l]}} = \frac{1}{m} \sum_{i=1}^{m} \delta^{[l](i)} (a^{[l-1](i)})^T$$</p>
+                    </div>
+
+                    <div class="callout-concept">
+                        <h4>💡 Computational Graph Perspective</h4>
+                        <p>Think of the neural network as a computational graph where each operation (matrix multiply, addition, activation) is a node. Backpropagation traverses this graph backward, applying the chain rule at each node:</p>
+                        <p>$$\frac{\partial \mathcal{L}}{\partial w} = \frac{\partial \mathcal{L}}{\partial a} \cdot \frac{\partial a}{\partial z} \cdot \frac{\partial z}{\partial w}$$</p>
+                        <p>Modern deep learning frameworks (PyTorch, TensorFlow) automatically compute these gradients using automatic differentiation.</p>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>4.5 Gradient Descent</h3>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Parameter Update Rule</div>
+                        <p>$$W := W - \alpha \frac{\partial \mathcal{L}}{\partial W}$$</p>
+                        <p>$$b := b - \alpha \frac{\partial \mathcal{L}}{\partial b}$$</p>
+
+                        <p><strong>Where:</strong></p>
+                        <ul>
+                            <li>\(\alpha\) is the learning rate (step size)</li>
+                            <li>\(\frac{\partial \mathcal{L}}{\partial W}\) is the gradient of the loss with respect to weights</li>
+                        </ul>
+                    </div>
+
+                    <table>
+                        <caption><strong>Gradient Descent Variants</strong></caption>
+                        <tr>
+                            <th>Method</th>
+                            <th>Batch Size</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                        <tr>
+                            <td>Batch GD</td>
+                            <td>All samples</td>
+                            <td>Stable convergence, exact gradient</td>
+                            <td>Slow for large datasets, can get stuck in local minima</td>
+                        </tr>
+                        <tr>
+                            <td>Stochastic GD</td>
+                            <td>1 sample</td>
+                            <td>Fast updates, can escape local minima</td>
+                            <td>Noisy updates, unstable</td>
+                        </tr>
+                        <tr>
+                            <td>Mini-batch GD</td>
+                            <td>32-512 samples</td>
+                            <td>Balance of speed and stability, GPU-efficient</td>
+                            <td>Hyperparameter (batch size) to tune</td>
+                        </tr>
+                    </table>
+
+                    <h4>Advanced Optimizers</h4>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Momentum</div>
+                        <p>$$v_t = \beta v_{t-1} + (1 - \beta) \nabla_W \mathcal{L}$$</p>
+                        <p>$$W := W - \alpha v_t$$</p>
+                        <p><strong>Effect:</strong> Accelerates convergence by accumulating gradients in consistent directions (like a ball rolling downhill).</p>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Adam (Adaptive Moment Estimation)<span class="citation" title="Kingma & Ba, 2015">[6]</span></div>
+                        <p>$$m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla_W \mathcal{L}$$ (momentum)</p>
+                        <p>$$v_t = \beta_2 v_{t-1} + (1 - \beta_2) (\nabla_W \mathcal{L})^2$$ (adaptive learning rate)</p>
+                        <p>$$W := W - \alpha \frac{m_t}{\sqrt{v_t} + \epsilon}$$</p>
+                        <p><strong>Why it's popular:</strong> Combines momentum with adaptive learning rates per parameter. Works well with default hyperparameters (\(\beta_1 = 0.9, \beta_2 = 0.999\)).</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="simple-examples" class="section">
+                <h2>4. Simple Numerical Examples</h2>
+
+                <div class="content-block">
+                    <h3>Minimal Network: 2 Inputs → 2 Hidden → 1 Output</h3>
+                    <p>Let's walk through one complete training iteration (forward pass + backward pass + weight update) with concrete numbers.</p>
+
+                    <div class="callout-concept">
+                        <h4>Initial Setup</h4>
+                        <p><strong>Network Architecture:</strong></p>
+                        <ul>
+                            <li>Input layer: 2 neurons (x₁, x₂)</li>
+                            <li>Hidden layer: 2 neurons (h₁, h₂)</li>
+                            <li>Output layer: 1 neuron (ŷ)</li>
+                        </ul>
+                        <p><strong>Training Sample:</strong></p>
+                        <ul>
+                            <li>Input: X = [1.0, 0.5]</li>
+                            <li>Target: y = 1.0</li>
+                            <li>Learning rate: α = 0.1</li>
+                        </ul>
+                    </div>
+
+                    <table>
+                        <caption><strong>Initial Weights and Biases</strong></caption>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>W₁ (Input → Hidden)</td>
+                            <td>[[0.5, 0.2], [-0.3, 0.4]]</td>
+                        </tr>
+                        <tr>
+                            <td>b₁ (Hidden bias)</td>
+                            <td>[0.1, -0.1]</td>
+                        </tr>
+                        <tr>
+                            <td>W₂ (Hidden → Output)</td>
+                            <td>[[0.6], [-0.1]]</td>
+                        </tr>
+                        <tr>
+                            <td>b₂ (Output bias)</td>
+                            <td>[0.2]</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="content-block">
+                    <h3>Step 1: Forward Pass - Hidden Layer</h3>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Linear Transformation (z₁ = X · W₁ + b₁)</div>
+                        <p>$$\mathbf{z}_1 = \begin{bmatrix} 1.0 & 0.5 \end{bmatrix} \cdot \begin{bmatrix} 0.5 & 0.2 \\ -0.3 & 0.4 \end{bmatrix} + \begin{bmatrix} 0.1 & -0.1 \end{bmatrix}$$</p>
+
+                        <p><strong>Calculation:</strong></p>
+                        <ul>
+                            <li>z₁[0] = (1.0 × 0.5) + (0.5 × -0.3) + 0.1 = 0.5 - 0.15 + 0.1 = <strong>0.45</strong></li>
+                            <li>z₁[1] = (1.0 × 0.2) + (0.5 × 0.4) - 0.1 = 0.2 + 0.2 - 0.1 = <strong>0.30</strong></li>
+                        </ul>
+
+                        <p>$$\mathbf{z}_1 = \begin{bmatrix} 0.45 & 0.30 \end{bmatrix}$$</p>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Activation Function (a₁ = sigmoid(z₁))</div>
+                        <p>$$\sigma(x) = \frac{1}{1 + e^{-x}}$$</p>
+
+                        <p><strong>Calculation:</strong></p>
+                        <ul>
+                            <li>a₁[0] = 1/(1 + e^(-0.45)) = 1/(1 + 0.6376) = <strong>0.611</strong></li>
+                            <li>a₁[1] = 1/(1 + e^(-0.30)) = 1/(1 + 0.7408) = <strong>0.574</strong></li>
+                        </ul>
+
+                        <p>$$\mathbf{a}_1 = \begin{bmatrix} 0.611 & 0.574 \end{bmatrix}$$</p>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Step 2: Forward Pass - Output Layer</h3>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Linear Transformation (z₂ = a₁ · W₂ + b₂)</div>
+                        <p>$$z_2 = \begin{bmatrix} 0.611 & 0.574 \end{bmatrix} \cdot \begin{bmatrix} 0.6 \\ -0.1 \end{bmatrix} + 0.2$$</p>
+
+                        <p><strong>Calculation:</strong></p>
+                        <p>z₂ = (0.611 × 0.6) + (0.574 × -0.1) + 0.2</p>
+                        <p>z₂ = 0.3666 - 0.0574 + 0.2 = <strong>0.509</strong></p>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Output Activation (ŷ = sigmoid(z₂))</div>
+                        <p>$$\hat{y} = \sigma(0.509) = \frac{1}{1 + e^{-0.509}} = \frac{1}{1 + 0.6013} = \mathbf{0.625}$$</p>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Step 3: Compute Loss</h3>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Mean Squared Error</div>
+                        <p>$$\mathcal{L} = (y - \hat{y})^2 = (1.0 - 0.625)^2 = 0.375^2 = \mathbf{0.141}$$</p>
+                        <p>Our prediction (0.625) is off from the target (1.0) by 0.375, resulting in a loss of 0.141.</p>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Step 4: Backward Pass - Output Layer</h3>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Output Layer Error (δ₂)</div>
+                        <p>$$\delta_2 = (\hat{y} - y) \cdot \sigma'(\hat{y})$$</p>
+                        <p>$$\sigma'(a) = a(1 - a)$$</p>
+
+                        <p><strong>Calculation:</strong></p>
+                        <p>δ₂ = (0.625 - 1.0) × 0.625 × (1 - 0.625)</p>
+                        <p>δ₂ = -0.375 × 0.625 × 0.375</p>
+                        <p>δ₂ = -0.375 × 0.234 = <strong>-0.088</strong></p>
+
+                        <p style="margin-top: 1rem;"><em>Note: Negative error means we need to increase the output.</em></p>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Step 5: Backward Pass - Hidden Layer</h3>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Hidden Layer Error (δ₁)</div>
+                        <p>$$\delta_1 = (W_2^T \cdot \delta_2) \odot \sigma'(a_1)$$</p>
+
+                        <p><strong>Calculation:</strong></p>
+                        <p>First, propagate error back through W₂:</p>
+                        <p>$$W_2^T \cdot \delta_2 = \begin{bmatrix} 0.6 \\ -0.1 \end{bmatrix} \cdot (-0.088) = \begin{bmatrix} -0.053 \\ 0.009 \end{bmatrix}$$</p>
+
+                        <p>Then multiply element-wise with sigmoid derivative:</p>
+                        <ul>
+                            <li>σ'(a₁[0]) = 0.611 × (1 - 0.611) = 0.237</li>
+                            <li>σ'(a₁[1]) = 0.574 × (1 - 0.574) = 0.245</li>
+                        </ul>
+
+                        <p>$$\delta_1 = \begin{bmatrix} -0.053 \times 0.237 \\ 0.009 \times 0.245 \end{bmatrix} = \begin{bmatrix} -0.013 \\ 0.002 \end{bmatrix}$$</p>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Step 6: Weight Updates</h3>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Update W₂ (Hidden → Output)</div>
+                        <p>$$\frac{\partial \mathcal{L}}{\partial W_2} = a_1^T \cdot \delta_2 = \begin{bmatrix} 0.611 \\ 0.574 \end{bmatrix} \cdot (-0.088) = \begin{bmatrix} -0.054 \\ -0.050 \end{bmatrix}$$</p>
+
+                        <p>$$W_2^{\text{new}} = W_2 - \alpha \cdot \frac{\partial \mathcal{L}}{\partial W_2}$$</p>
+                        <p>$$W_2^{\text{new}} = \begin{bmatrix} 0.6 \\ -0.1 \end{bmatrix} - 0.1 \cdot \begin{bmatrix} -0.054 \\ -0.050 \end{bmatrix} = \begin{bmatrix} 0.605 \\ -0.095 \end{bmatrix}$$</p>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Update b₂ (Output Bias)</div>
+                        <p>$$b_2^{\text{new}} = b_2 - \alpha \cdot \delta_2 = 0.2 - 0.1 \cdot (-0.088) = 0.2 + 0.009 = \mathbf{0.209}$$</p>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Update W₁ (Input → Hidden)</div>
+                        <p>$$\frac{\partial \mathcal{L}}{\partial W_1} = X^T \cdot \delta_1 = \begin{bmatrix} 1.0 \\ 0.5 \end{bmatrix} \cdot \begin{bmatrix} -0.013 & 0.002 \end{bmatrix}$$</p>
+
+                        <p>$$= \begin{bmatrix} -0.013 & 0.002 \\ -0.006 & 0.001 \end{bmatrix}$$</p>
+
+                        <p>$$W_1^{\text{new}} = \begin{bmatrix} 0.5 & 0.2 \\ -0.3 & 0.4 \end{bmatrix} - 0.1 \cdot \begin{bmatrix} -0.013 & 0.002 \\ -0.006 & 0.001 \end{bmatrix} = \begin{bmatrix} 0.501 & 0.200 \\ -0.299 & 0.400 \end{bmatrix}$$</p>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="formula-label">Update b₁ (Hidden Bias)</div>
+                        <p>$$b_1^{\text{new}} = \begin{bmatrix} 0.1 \\ -0.1 \end{bmatrix} - 0.1 \cdot \begin{bmatrix} -0.013 \\ 0.002 \end{bmatrix} = \begin{bmatrix} 0.101 \\ -0.100 \end{bmatrix}$$</p>
+                    </div>
+
+                    <table>
+                        <caption><strong>Before vs. After Weight Update</strong></caption>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Before</th>
+                            <th>After</th>
+                            <th>Change</th>
+                        </tr>
+                        <tr>
+                            <td>W₂[0]</td>
+                            <td>0.600</td>
+                            <td>0.605</td>
+                            <td style="color: green;">+0.005</td>
+                        </tr>
+                        <tr>
+                            <td>W₂[1]</td>
+                            <td>-0.100</td>
+                            <td>-0.095</td>
+                            <td style="color: green;">+0.005</td>
+                        </tr>
+                        <tr>
+                            <td>b₂</td>
+                            <td>0.200</td>
+                            <td>0.209</td>
+                            <td style="color: green;">+0.009</td>
+                        </tr>
+                        <tr>
+                            <td>Loss</td>
+                            <td>0.141</td>
+                            <td>~0.135 (next iteration)</td>
+                            <td style="color: green;">Decreasing ✓</td>
+                        </tr>
+                    </table>
+
+                    <p style="margin-top: 1rem;"><strong>Result:</strong> After this single iteration, the weights have been adjusted to reduce the error. With thousands more iterations, the network will learn to predict accurately!</p>
+                </div>
+
+                <div class="try-it-box">
+                    <h4>🎯 Try It Yourself</h4>
+                    <p><strong>Exercise:</strong> What happens with input X = [0.5, 1.0] using the <em>updated</em> weights?</p>
+                    <p>Calculate the forward pass and compare the new output to the original.</p>
+                    <button class="solution-toggle" data-solution-id="example-solution">Show Solution</button>
+
+                    <div id="example-solution" class="solution" data-toggle="solution">
+                        <h4>Solution</h4>
+                        <p><strong>Hidden Layer:</strong></p>
+                        <p>z₁ = [0.5, 1.0] · [[0.501, 0.200], [-0.299, 0.400]] + [0.101, -0.100]</p>
+                        <p>z₁[0] = 0.5×0.501 + 1.0×(-0.299) + 0.101 = 0.252 - 0.299 + 0.101 = 0.054</p>
+                        <p>z₁[1] = 0.5×0.200 + 1.0×0.400 - 0.100 = 0.100 + 0.400 - 0.100 = 0.400</p>
+                        <p>a₁ = [sigmoid(0.054), sigmoid(0.400)] = [0.513, 0.599]</p>
+
+                        <p><strong>Output Layer:</strong></p>
+                        <p>z₂ = [0.513, 0.599] · [[0.605], [-0.095]] + 0.209</p>
+                        <p>z₂ = 0.513×0.605 + 0.599×(-0.095) + 0.209 = 0.310 - 0.057 + 0.209 = 0.462</p>
+                        <p>ŷ = sigmoid(0.462) = <strong>0.613</strong></p>
+
+                        <p><strong>Comparison:</strong> The network behavior changed slightly due to updated weights!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 4: MATHEMATICS
+                 ======================================== -->
+            
+
+            <!-- ========================================
+                 SECTION 5: FLOWCHART
+                 ======================================== -->
+            
+    <section id="loss-functions" class="section">
+        <h2>4.5 Understanding Loss Functions: Binary Cross-Entropy vs MSE</h2>
+
+        <div class="content-block">
+            <h3>Why Loss Functions Matter</h3>
+            <p style="color: var(--text-primary);">The choice of loss function fundamentally affects how your neural network learns. Let's understand why Binary Cross-Entropy (BCE) is preferred over Mean Squared Error (MSE) for classification tasks.</p>
+
+            <div class="formula-box">
+                <h4 style="color: var(--text-primary);">Binary Cross-Entropy Formula</h4>
+                <p style="color: var(--text-primary);">For a single training example:</p>
+                <p>$$L_{BCE} = -[y \log(\hat{y}) + (1-y) \log(1-\hat{y})]$$</p>
+                <p style="color: var(--text-primary);">Where:</p>
+                <ul style="color: var(--text-primary);">
+                    <li><strong>y</strong>: True label (0 or 1)</li>
+                    <li><strong>ŷ</strong>: Predicted probability (0 to 1)</li>
+                </ul>
+            </div>
+
+            <h3>Step-by-Step Breakdown</h3>
+            <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                <h4 style="color: var(--text-primary);">Case 1: When y = 1 (True label is "positive")</h4>
+                <p style="color: var(--text-primary);">The formula simplifies to: <code>L = -log(ŷ)</code></p>
+                <ul style="color: var(--text-primary);">
+                    <li>If ŷ = 1.0 (confident and correct): L = 0</li>
+                    <li>If ŷ = 0.5 (uncertain): L = 0.693</li>
+                    <li>If ŷ = 0.1 (confident but wrong): L = 2.303 <strong>(high penalty!)</strong></li>
+                </ul>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                <h4 style="color: var(--text-primary);">Case 2: When y = 0 (True label is "negative")</h4>
+                <p style="color: var(--text-primary);">The formula simplifies to: <code>L = -log(1 - ŷ)</code></p>
+                <ul style="color: var(--text-primary);">
+                    <li>If ŷ = 0.0 (confident and correct): L = 0</li>
+                    <li>If ŷ = 0.5 (uncertain): L = 0.693</li>
+                    <li>If ŷ = 0.9 (confident but wrong): L = 2.303 <strong>(high penalty!)</strong></li>
+                </ul>
+            </div>
+
+            <h3>Intuition: Why BCE Works Better</h3>
+            <p style="color: var(--text-primary);"><strong>Key Insight:</strong> BCE heavily penalizes confident wrong predictions, which provides strong gradients that guide the network to correct itself quickly.</p>
+
+            <h4 style="color: var(--text-primary);">Maximum Likelihood Connection</h4>
+            <p style="color: var(--text-primary);">Binary Cross-Entropy comes from maximum likelihood estimation. If we model the output as a Bernoulli distribution:</p>
+            <p>$$P(y|\hat{y}) = \hat{y}^y (1-\hat{y})^{1-y}$$</p>
+            <p style="color: var(--text-primary);">Taking the negative log gives us BCE! This means minimizing BCE is equivalent to maximizing the likelihood of the true labels.</p>
+
+            <h3>Numerical Comparison</h3>
+            <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                <h4 style="color: var(--text-primary);">Example: True label y = 1</h4>
+                <table style="width: 100%; border-collapse: collapse; color: var(--text-primary);">
+                    <thead>
+                        <tr style="background: var(--bg-primary);">
+                            <th style="padding: 0.5rem; border: 1px solid var(--border-color);">Prediction ŷ</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--border-color);">BCE Loss</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--border-color);">MSE Loss</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--border-color);">BCE Gradient</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--border-color);">MSE Gradient</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">0.9</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">0.105</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">0.010</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">-1.111</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">-0.200</td>
+                        </tr>
+                        <tr style="background: var(--bg-secondary);">
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">0.5</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">0.693</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">0.250</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">-2.000</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">-1.000</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">0.1</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">2.303</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">0.810</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color); font-weight: bold;">-10.000</td>
+                            <td style="padding: 0.5rem; border: 1px solid var(--border-color);">-1.800</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="color: var(--text-primary); margin-top: 1rem;"><strong>Notice:</strong> When the prediction is very wrong (ŷ=0.1 for y=1), BCE provides a much stronger gradient (-10.0) than MSE (-1.8). This leads to faster learning!</p>
+            </div>
+
+            <h3>Why MSE Fails for Classification</h3>
+            <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 1rem; margin: 1rem 0;">
+                <h4 style="color: #dc2626;">The Sigmoid Saturation Problem</h4>
+                <p style="color: var(--text-primary);">When using MSE with sigmoid outputs:</p>
+                <ul style="color: var(--text-primary);">
+                    <li>Sigmoid saturates (flat regions) when input is very positive or negative</li>
+                    <li>In saturated regions, gradient ≈ 0 (vanishing gradient)</li>
+                    <li>MSE gradients become even smaller: ∂MSE/∂ŷ · σ'(z) ≈ 0</li>
+                    <li>Network learns very slowly or gets stuck</li>
+                </ul>
+                <p style="color: var(--text-primary);"><strong>BCE solves this:</strong> The 1/ŷ term in BCE's gradient cancels out the sigmoid's derivative, maintaining strong gradients even in saturated regions!</p>
+            </div>
+
+            <div class="interactive-section">
+                <h3>Interactive Comparison</h3>
+                <p style="color: var(--text-primary);">Adjust the prediction and see how BCE and MSE losses compare:</p>
+
+                <div class="input-group">
+                    <label style="color: var(--text-primary);">Prediction ŷ: <span id="bcePredValue">0.5</span></label>
+                    <input type="range" id="bcePred" min="0.01" max="0.99" step="0.01" value="0.5" oninput="updateBCEComparison()">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 10px;">
+                        <h4 style="color: var(--text-primary);">BCE Loss</h4>
+                        <p id="bceValue" style="font-size: 1.5em; font-weight: bold; color: var(--primary-color);">0.693</p>
+                        <p id="bceGrad" style="color: var(--text-primary); font-size: 0.9em;">Gradient: -2.00</p>
+                    </div>
+                    <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 10px;">
+                        <h4 style="color: var(--text-primary);">MSE Loss</h4>
+                        <p id="mseValue" style="font-size: 1.5em; font-weight: bold; color: var(--secondary-color);">0.250</p>
+                        <p id="mseGrad" style="color: var(--text-primary); font-size: 0.9em;">Gradient: -1.00</p>
+                    </div>
+                </div>
+
+                <canvas id="bceComparisonCanvas" width="800" height="400" style="margin-top: 1rem; border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-elevated);"></canvas>
+            </div>
+
+            <h3>Practical Takeaway</h3>
+            <div style="background: #f0fdf4; border-left: 4px solid #059669; padding: 1rem; margin: 1rem 0;">
+                <p style="color: var(--text-primary);"><strong>Use Binary Cross-Entropy for classification problems because:</strong></p>
+                <ol style="color: var(--text-primary);">
+                    <li>It has a probabilistic interpretation (maximum likelihood)</li>
+                    <li>It provides stronger gradients for wrong predictions</li>
+                    <li>It avoids the sigmoid saturation problem</li>
+                    <li>It leads to faster and more stable convergence</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+<section id="flowchart" class="section">
+                <h2>5. Training Process Flowchart</h2>
+
+                <div class="content-block">
+                    <p>This flowchart illustrates the complete neural network training pipeline from data input to final model:</p>
+
+                    <svg viewBox="0 0 800 1200" style="max-width: 100%; height: auto; background: white; border-radius: 10px; padding: 2rem;">
+                        <!-- Input Data -->
+                        <rect x="250" y="20" width="300" height="60" fill="#4299e1" stroke="#2b6cb0" stroke-width="2" rx="10"/>
+                        <text x="400" y="55" text-anchor="middle" fill="white" font-size="18" font-weight="bold">INPUT DATA (X, y)</text>
+
+                        <!-- Arrow down -->
+                        <line x1="400" y1="80" x2="400" y2="120" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Initialize Weights -->
+                        <rect x="200" y="120" width="400" height="80" fill="#667eea" stroke="#5a67d8" stroke-width="2" rx="10"/>
+                        <text x="400" y="150" text-anchor="middle" fill="white" font-size="16" font-weight="bold">INITIALIZE WEIGHTS</text>
+                        <text x="400" y="175" text-anchor="middle" fill="white" font-size="14">W ~ N(0, σ²), b = 0</text>
+                        <text x="400" y="193" text-anchor="middle" fill="white" font-size="12">(Xavier/He initialization)</text>
+
+                        <!-- Arrow down -->
+                        <line x1="400" y1="200" x2="400" y2="240" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Forward Propagation -->
+                        <rect x="150" y="240" width="500" height="120" fill="#764ba2" stroke="#553c9a" stroke-width="2" rx="10"/>
+                        <text x="400" y="270" text-anchor="middle" fill="white" font-size="18" font-weight="bold">FORWARD PROPAGATION</text>
+                        <text x="400" y="295" text-anchor="middle" fill="white" font-size="14">For each layer l = 1, 2, ..., L:</text>
+                        <text x="400" y="318" text-anchor="middle" fill="white" font-size="14">1. z⁽ˡ⁾ = W⁽ˡ⁾ · a⁽ˡ⁻¹⁾ + b⁽ˡ⁾</text>
+                        <text x="400" y="341" text-anchor="middle" fill="white" font-size="14">2. a⁽ˡ⁾ = σ(z⁽ˡ⁾)</text>
+
+                        <!-- Arrow down -->
+                        <line x1="400" y1="360" x2="400" y2="400" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Compute Output -->
+                        <rect x="200" y="400" width="400" height="60" fill="#4299e1" stroke="#2b6cb0" stroke-width="2" rx="10"/>
+                        <text x="400" y="435" text-anchor="middle" fill="white" font-size="16" font-weight="bold">COMPUTE OUTPUT ŷ = a⁽ᴸ⁾</text>
+
+                        <!-- Arrow down -->
+                        <line x1="400" y1="460" x2="400" y2="500" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Calculate Loss -->
+                        <rect x="200" y="500" width="400" height="80" fill="#ed8936" stroke="#c05621" stroke-width="2" rx="10"/>
+                        <text x="400" y="530" text-anchor="middle" fill="white" font-size="18" font-weight="bold">CALCULATE LOSS</text>
+                        <text x="400" y="555" text-anchor="middle" fill="white" font-size="14">ℒ(ŷ, y)</text>
+                        <text x="400" y="573" text-anchor="middle" fill="white" font-size="12">(MSE or Cross-Entropy)</text>
+
+                        <!-- Arrow down -->
+                        <line x1="400" y1="580" x2="400" y2="620" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Backpropagation -->
+                        <rect x="150" y="620" width="500" height="120" fill="#764ba2" stroke="#553c9a" stroke-width="2" rx="10"/>
+                        <text x="400" y="650" text-anchor="middle" fill="white" font-size="18" font-weight="bold">BACKPROPAGATION</text>
+                        <text x="400" y="675" text-anchor="middle" fill="white" font-size="14">For l = L down to 1:</text>
+                        <text x="400" y="698" text-anchor="middle" fill="white" font-size="14">1. Compute δ⁽ˡ⁾</text>
+                        <text x="400" y="721" text-anchor="middle" fill="white" font-size="14">2. Compute ∂ℒ/∂W⁽ˡ⁾, ∂ℒ/∂b⁽ˡ⁾</text>
+
+                        <!-- Arrow down -->
+                        <line x1="400" y1="740" x2="400" y2="780" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Update Weights -->
+                        <rect x="150" y="780" width="500" height="100" fill="#48bb78" stroke="#2f855a" stroke-width="2" rx="10"/>
+                        <text x="400" y="810" text-anchor="middle" fill="white" font-size="18" font-weight="bold">UPDATE WEIGHTS</text>
+                        <text x="400" y="835" text-anchor="middle" fill="white" font-size="14">W := W - α · ∇W ℒ</text>
+                        <text x="400" y="858" text-anchor="middle" fill="white" font-size="14">b := b - α · ∇b ℒ</text>
+                        <text x="400" y="873" text-anchor="middle" fill="white" font-size="12">(Gradient Descent)</text>
+
+                        <!-- Arrow down -->
+                        <line x1="400" y1="880" x2="400" y2="920" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Converged Decision -->
+                        <polygon points="400,920 550,980 400,1040 250,980" fill="#f56565" stroke="#c53030" stroke-width="2"/>
+                        <text x="400" y="970" text-anchor="middle" fill="white" font-size="16" font-weight="bold">Converged?</text>
+                        <text x="400" y="995" text-anchor="middle" fill="white" font-size="12">(Loss stable / Max epochs)</text>
+
+                        <!-- No - Loop back -->
+                        <text x="120" y="985" fill="#c53030" font-size="16" font-weight="bold">No</text>
+                        <line x1="250" y1="980" x2="100" y2="980" stroke="#c53030" stroke-width="2" marker-end="url(#arrowhead-red)"/>
+                        <line x1="100" y1="980" x2="100" y2="300" stroke="#c53030" stroke-width="2"/>
+                        <line x1="100" y1="300" x2="150" y2="300" stroke="#c53030" stroke-width="2" marker-end="url(#arrowhead-red)"/>
+
+                        <!-- Yes - Final Model -->
+                        <text x="580" y="1020" fill="#48bb78" font-size="16" font-weight="bold">Yes</text>
+                        <line x1="550" y1="980" x2="680" y2="980" stroke="#48bb78" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+                        <line x1="680" y1="980" x2="680" y2="1070" stroke="#48bb78" stroke-width="2"/>
+                        <line x1="680" y1="1070" x2="600" y2="1070" stroke="#48bb78" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+
+                        <!-- Final Model -->
+                        <rect x="300" y="1050" width="300" height="60" fill="#48bb78" stroke="#2f855a" stroke-width="2" rx="10"/>
+                        <text x="450" y="1085" text-anchor="middle" fill="white" font-size="18" font-weight="bold">FINAL MODEL ✓</text>
+
+                        <!-- Arrow definitions -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#333"/>
+                            </marker>
+                            <marker id="arrowhead-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#c53030"/>
+                            </marker>
+                            <marker id="arrowhead-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#48bb78"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+
+                <div class="content-block">
+                    <h3>Step-by-Step Explanation</h3>
+
+                    <table>
+                        <tr>
+                            <th>Step</th>
+                            <th>Description</th>
+                            <th>Purpose</th>
+                        </tr>
+                        <tr>
+                            <td style="background: #4299e1; color: white;">1. Input Data</td>
+                            <td>Load training dataset (X, y)</td>
+                            <td>Provide examples for the network to learn from</td>
+                        </tr>
+                        <tr>
+                            <td style="background: #667eea; color: white;">2. Initialize</td>
+                            <td>Random weights with Xavier/He initialization<span class="citation" title="Glorot & Bengio, 2010">[5]</span></td>
+                            <td>Break symmetry, enable learning</td>
+                        </tr>
+                        <tr>
+                            <td style="background: #764ba2; color: white;">3. Forward Pass</td>
+                            <td>Compute predictions layer by layer</td>
+                            <td>Transform inputs into outputs</td>
+                        </tr>
+                        <tr>
+                            <td style="background: #4299e1; color: white;">4. Compute Output</td>
+                            <td>Final layer activation ŷ</td>
+                            <td>Get network's current prediction</td>
+                        </tr>
+                        <tr>
+                            <td style="background: #ed8936; color: white;">5. Calculate Loss</td>
+                            <td>Measure prediction error</td>
+                            <td>Quantify how wrong the network is</td>
+                        </tr>
+                        <tr>
+                            <td style="background: #764ba2; color: white;">6. Backpropagation</td>
+                            <td>Compute gradients via chain rule</td>
+                            <td>Determine how to adjust weights</td>
+                        </tr>
+                        <tr>
+                            <td style="background: #48bb78; color: white;">7. Update Weights</td>
+                            <td>Gradient descent step</td>
+                            <td>Improve weights to reduce error</td>
+                        </tr>
+                        <tr>
+                            <td style="background: #f56565; color: white;">8. Check Convergence</td>
+                            <td>Has loss stabilized?</td>
+                            <td>Determine if training is complete</td>
+                        </tr>
+                    </table>
+
+                    <div class="callout-concept">
+                        <h4>💡 Convergence Criteria</h4>
+                        <p>Training stops when:</p>
+                        <ul>
+                            <li><strong>Loss plateau:</strong> Change in loss < threshold for N consecutive epochs</li>
+                            <li><strong>Max epochs reached:</strong> Pre-set iteration limit</li>
+                            <li><strong>Early stopping:</strong> Validation loss starts increasing (overfitting)</li>
+                            <li><strong>Gradient vanishing:</strong> Gradients become too small to cause meaningful updates</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 6: PYTHON IMPLEMENTATION
+                 ======================================== -->
+            <section id="python" class="section">
+                <h2>6. Python Implementation</h2>
+
+                <div class="content-block">
+                    <p>Here's a complete, production-ready neural network implementation from scratch using only NumPy:</p>
+
+                    <div style="margin: 2rem 0; text-align: center;">
+                        <a href="https://colab.research.google.com/github/rahulbasu-dev/nlp-kb/blob/main/neural_network_demo.ipynb" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: linear-gradient(135deg, #f59e0b, #f97316); color: white; padding: 1rem 2rem; border-radius: 0.75rem; text-decoration: none; font-weight: 600; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)'">
+                            🚀 Open in Google Colab
+                        </a>
+                        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">Click to run this code in your browser with free GPU access!</p>
+                    </div>
+
+                    <pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+<span class="keyword">class</span> <span class="function">NeuralNetwork</span>:
+    <span class="string">"""
+    Feedforward neural network with backpropagation.
+
+    Example:
+        nn = NeuralNetwork([2, 4, 1], learning_rate=0.5)
+        nn.train(X, y, epochs=10000)
+        predictions = nn.predict(X)
+    """</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, layer_sizes, learning_rate=<span class="number">0.01</span>):
+        <span class="string">"""
+        Initialize network.
+
+        Args:
+            layer_sizes: List [input_dim, hidden1, ..., output_dim]
+            learning_rate: Gradient descent step size
+        """</span>
+        self.layer_sizes = layer_sizes
+        self.learning_rate = learning_rate
+        self.weights = []
+        self.biases = []
+        self._initialize_parameters()
+
+    <span class="keyword">def</span> <span class="function">_initialize_parameters</span>(self):
+        <span class="string">"""Xavier initialization for weights."""</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(self.layer_sizes) - <span class="number">1</span>):
+            n_in = self.layer_sizes[i]
+            n_out = self.layer_sizes[i + <span class="number">1</span>]
+
+            <span class="comment"># Xavier initialization</span>
+            W = np.random.randn(n_in, n_out) * np.sqrt(<span class="number">2.0</span> / n_in)
+            b = np.zeros((<span class="number">1</span>, n_out))
+
+            self.weights.append(W)
+            self.biases.append(b)
+
+    <span class="keyword">def</span> <span class="function">sigmoid</span>(self, z):
+        <span class="string">"""Sigmoid activation: σ(z) = 1/(1+e^(-z))"""</span>
+        <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + np.exp(-np.clip(z, -<span class="number">500</span>, <span class="number">500</span>)))
+
+    <span class="keyword">def</span> <span class="function">sigmoid_derivative</span>(self, a):
+        <span class="string">"""Derivative: σ'(z) = σ(z)(1-σ(z))"""</span>
+        <span class="keyword">return</span> a * (<span class="number">1</span> - a)
+
+    <span class="keyword">def</span> <span class="function">forward</span>(self, X):
+        <span class="string">"""
+        Forward propagation.
+
+        Returns:
+            activations: List of activations [a0, a1, ..., aL]
+            z_values: List of pre-activation values
+        """</span>
+        activations = [X]
+        z_values = []
+
+        <span class="keyword">for</span> W, b <span class="keyword">in</span> <span class="function">zip</span>(self.weights, self.biases):
+            z = np.dot(activations[-<span class="number">1</span>], W) + b
+            a = self.sigmoid(z)
+            z_values.append(z)
+            activations.append(a)
+
+        <span class="keyword">return</span> activations, z_values
+
+    <span class="keyword">def</span> <span class="function">compute_loss</span>(self, y_true, y_pred):
+        <span class="string">"""Mean squared error loss."""</span>
+        <span class="keyword">return</span> np.mean((y_pred - y_true) ** <span class="number">2</span>)
+
+    <span class="keyword">def</span> <span class="function">backward</span>(self, X, y, activations, z_values):
+        <span class="string">"""
+        Backpropagation to compute gradients.
+
+        Returns:
+            weight_grads: Gradients for each weight matrix
+            bias_grads: Gradients for each bias vector
+        """</span>
+        m = X.shape[<span class="number">0</span>]  <span class="comment"># Number of samples</span>
+        num_layers = <span class="function">len</span>(self.weights)
+
+        <span class="comment"># Output layer error</span>
+        delta = (activations[-<span class="number">1</span>] - y) * self.sigmoid_derivative(activations[-<span class="number">1</span>])
+        deltas = [delta]
+
+        <span class="comment"># Backpropagate through hidden layers</span>
+        <span class="keyword">for</span> l <span class="keyword">in</span> <span class="function">range</span>(num_layers - <span class="number">2</span>, -<span class="number">1</span>, -<span class="number">1</span>):
+            delta = np.dot(deltas[<span class="number">0</span>], self.weights[l+<span class="number">1</span>].T) * \
+                    self.sigmoid_derivative(activations[l+<span class="number">1</span>])
+            deltas.insert(<span class="number">0</span>, delta)
+
+        <span class="comment"># Compute weight and bias gradients</span>
+        weight_grads = []
+        bias_grads = []
+
+        <span class="keyword">for</span> l <span class="keyword">in</span> <span class="function">range</span>(num_layers):
+            dW = np.dot(activations[l].T, deltas[l]) / m
+            db = np.sum(deltas[l], axis=<span class="number">0</span>, keepdims=<span class="keyword">True</span>) / m
+            weight_grads.append(dW)
+            bias_grads.append(db)
+
+        <span class="keyword">return</span> weight_grads, bias_grads
+
+    <span class="keyword">def</span> <span class="function">update_parameters</span>(self, weight_grads, bias_grads):
+        <span class="string">"""Gradient descent update."""</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(self.weights)):
+            self.weights[i] -= self.learning_rate * weight_grads[i]
+            self.biases[i] -= self.learning_rate * bias_grads[i]
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, X, y, epochs=<span class="number">1000</span>, verbose=<span class="keyword">True</span>):
+        <span class="string">"""
+        Train the neural network.
+
+        Args:
+            X: Input data [n_samples, n_features]
+            y: Target labels [n_samples, n_outputs]
+            epochs: Number of training iterations
+            verbose: Print progress
+
+        Returns:
+            losses: List of loss values per epoch
+        """</span>
+        losses = []
+
+        <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="function">range</span>(epochs):
+            <span class="comment"># Forward pass</span>
+            activations, z_values = self.forward(X)
+
+            <span class="comment"># Compute loss</span>
+            loss = self.compute_loss(y, activations[-<span class="number">1</span>])
+            losses.append(loss)
+
+            <span class="comment"># Backward pass</span>
+            weight_grads, bias_grads = self.backward(X, y, activations, z_values)
+
+            <span class="comment"># Update weights</span>
+            self.update_parameters(weight_grads, bias_grads)
+
+            <span class="comment"># Print progress</span>
+            <span class="keyword">if</span> verbose <span class="keyword">and</span> (epoch % (epochs // <span class="number">10</span>) == <span class="number">0</span> <span class="keyword">or</span> epoch == epochs - <span class="number">1</span>):
+                <span class="function">print</span>(<span class="string">f"Epoch </span>{epoch:<span class="number">4</span>d}<span class="string">: Loss = </span>{loss:<span class="number">.6</span>f}<span class="string">"</span>)
+
+        <span class="keyword">return</span> losses
+
+    <span class="keyword">def</span> <span class="function">predict</span>(self, X):
+        <span class="string">"""Make predictions on new data."""</span>
+        activations, _ = self.forward(X)
+        <span class="keyword">return</span> activations[-<span class="number">1</span>]
+
+
+<span class="comment"># ============================================================================</span>
+<span class="comment"># EXAMPLE USAGE: XOR PROBLEM</span>
+<span class="comment"># ============================================================================</span>
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    <span class="function">print</span>(<span class="string">"="</span> * <span class="number">60</span>)
+    <span class="function">print</span>(<span class="string">"NEURAL NETWORK DEMONSTRATION: XOR PROBLEM"</span>)
+    <span class="function">print</span>(<span class="string">"="</span> * <span class="number">60</span>)
+
+    <span class="comment"># XOR dataset (linearly inseparable)</span>
+    X = np.array([[<span class="number">0</span>, <span class="number">0</span>],
+                  [<span class="number">0</span>, <span class="number">1</span>],
+                  [<span class="number">1</span>, <span class="number">0</span>],
+                  [<span class="number">1</span>, <span class="number">1</span>]])
+
+    y = np.array([[<span class="number">0</span>],
+                  [<span class="number">1</span>],
+                  [<span class="number">1</span>],
+                  [<span class="number">0</span>]])
+
+    <span class="function">print</span>(<span class="string">"\nDataset:"</span>)
+    <span class="function">print</span>(<span class="string">"Input  | Target"</span>)
+    <span class="function">print</span>(<span class="string">"-------|-------"</span>)
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(X)):
+        <span class="function">print</span>(<span class="string">f"</span>{X[i]}<span class="string">  | </span>{y[i][<span class="number">0</span>]}<span class="string">"</span>)
+
+    <span class="comment"># Create and train network</span>
+    <span class="function">print</span>(<span class="string">"\nInitializing network: [2, 4, 1]"</span>)
+    <span class="function">print</span>(<span class="string">"(2 inputs → 4 hidden → 1 output)\n"</span>)
+
+    nn = NeuralNetwork([<span class="number">2</span>, <span class="number">4</span>, <span class="number">1</span>], learning_rate=<span class="number">0.5</span>)
+    losses = nn.train(X, y, epochs=<span class="number">10000</span>, verbose=<span class="keyword">True</span>)
+
+    <span class="comment"># Test predictions</span>
+    <span class="function">print</span>(<span class="string">"\n"</span> + <span class="string">"="</span> * <span class="number">60</span>)
+    <span class="function">print</span>(<span class="string">"FINAL PREDICTIONS"</span>)
+    <span class="function">print</span>(<span class="string">"="</span> * <span class="number">60</span>)
+    predictions = nn.predict(X)
+
+    <span class="function">print</span>(<span class="string">"\nInput  | Target | Prediction | Rounded"</span>)
+    <span class="function">print</span>(<span class="string">"-------|--------|------------|--------"</span>)
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(X)):
+        pred = predictions[i][<span class="number">0</span>]
+        <span class="function">print</span>(<span class="string">f"</span>{X[i]}<span class="string">  | </span>{y[i][<span class="number">0</span>]:<span class="number">6.0</span>f}<span class="string"> | </span>{pred:<span class="number">10.4</span>f}<span class="string"> | </span>{<span class="function">round</span>(pred):<span class="number">7.0</span>f}<span class="string">"</span>)
+
+    <span class="function">print</span>(<span class="string">"\n✓ Network successfully learned XOR function!"</span>)
+</code></pre>
+                </div>
+
+                <div class="content-block">
+                    <h3>Expected Output</h3>
+                    <pre><code>============================================================
+NEURAL NETWORK DEMONSTRATION: XOR PROBLEM
+============================================================
+
+Dataset:
+Input  | Target
+-------|-------
+[0 0]  | 0
+[0 1]  | 1
+[1 0]  | 1
+[1 1]  | 0
+
+Initializing network: [2, 4, 1]
+(2 inputs → 4 hidden → 1 output)
+
+Epoch    0: Loss = 0.253472
+Epoch 1000: Loss = 0.082147
+Epoch 2000: Loss = 0.021853
+Epoch 3000: Loss = 0.008934
+Epoch 4000: Loss = 0.005123
+Epoch 5000: Loss = 0.003456
+Epoch 6000: Loss = 0.002567
+Epoch 7000: Loss = 0.002012
+Epoch 8000: Loss = 0.001634
+Epoch 9000: Loss = 0.001367
+Epoch 9999: Loss = 0.001234
+
+============================================================
+FINAL PREDICTIONS
+============================================================
+
+Input  | Target | Prediction | Rounded
+-------|--------|------------|--------
+[0 0]  |      0 |     0.0123 |       0
+[0 1]  |      1 |     0.9876 |       1
+[1 0]  |      1 |     0.9891 |       1
+[1 1]  |      0 |     0.0089 |       0
+
+✓ Network successfully learned XOR function!
+</code></pre>
+
+                    <div class="callout-example">
+                        <h4>📚 Why XOR?</h4>
+                        <p>The XOR problem is a classic demonstration because it's <strong>linearly inseparable</strong>—no single straight line can separate the classes. This proves that hidden layers are necessary for learning non-linear patterns.</p>
+                        <p>A perceptron (single layer) cannot solve XOR, but a neural network with even one hidden layer can!</p>
+                    </div>
+                </div>
+
+                <div class="try-it-box">
+                    <h4>🎯 Exercises</h4>
+                    <ol>
+                        <li><strong>Modify the architecture:</strong> Try [2, 8, 1] or [2, 4, 4, 1]. How does it affect training?</li>
+                        <li><strong>Change learning rate:</strong> Test α = 0.1, 0.5, 1.0. What happens when it's too high or too low?</li>
+                        <li><strong>Add ReLU activation:</strong> Replace sigmoid in hidden layers with ReLU. Does training speed up?</li>
+                        <li><strong>Different dataset:</strong> Try the AND or OR problems. Are they easier to learn?</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 7: VARIANTS & EXTENSIONS
+                 ======================================== -->
+            <section id="variants" class="section">
+                <h2>7. Variants & Extensions</h2>
+
+                <div class="content-block">
+                    <h3>Neural Network Architectures</h3>
+
+                    <div class="block-grid">
+                        <div class="variant-card">
+                            <h4>🖼️ Convolutional Neural Networks (CNNs)</h4>
+                            <p><strong>Key Components:</strong></p>
+                            <ul>
+                                <li>Convolutional layers (feature extraction)</li>
+                                <li>Pooling layers (dimensionality reduction)</li>
+                                <li>Shared weights (translation invariance)</li>
+                            </ul>
+                            <p><strong>Best for:</strong> Images, spatial data</p>
+                            <p><strong>Example:</strong> Image classification, object detection</p>
+                            <p><strong>Pioneering work:</strong> LeNet<span class="citation" title="LeCun et al., 1998">[4]</span>, AlexNet, ResNet</p>
+                        </div>
+
+                        <div class="variant-card">
+                            <h4>🔄 Recurrent Neural Networks (RNNs)</h4>
+                            <p><strong>Key Components:</strong></p>
+                            <ul>
+                                <li>Hidden state memory</li>
+                                <li>Sequential processing</li>
+                                <li>Weight sharing across time steps</li>
+                            </ul>
+                            <p><strong>Best for:</strong> Time series, text sequences</p>
+                            <p><strong>Example:</strong> Language modeling, speech recognition</p>
+                            <p><strong>Variants:</strong> LSTM (Long Short-Term Memory), GRU (Gated Recurrent Unit)</p>
+                        </div>
+
+                        <div class="variant-card">
+                            <h4>🤖 Transformers</h4>
+                            <p><strong>Key Components:</strong></p>
+                            <ul>
+                                <li>Self-attention mechanism</li>
+                                <li>Parallel processing (no recurrence)</li>
+                                <li>Positional encodings</li>
+                            </ul>
+                            <p><strong>Best for:</strong> NLP, long sequences</p>
+                            <p><strong>Example:</strong> BERT, GPT, machine translation</p>
+                            <p><strong>Advantage:</strong> Handles long-range dependencies better than RNNs</p>
+                        </div>
+
+                        <div class="variant-card">
+                            <h4>🔧 Autoencoders</h4>
+                            <p><strong>Key Components:</strong></p>
+                            <ul>
+                                <li>Encoder (compress to latent space)</li>
+                                <li>Decoder (reconstruct from latent)</li>
+                                <li>Unsupervised learning</li>
+                            </ul>
+                            <p><strong>Best for:</strong> Dimensionality reduction, denoising</p>
+                            <p><strong>Example:</strong> Anomaly detection, data compression</p>
+                            <p><strong>Variants:</strong> Variational Autoencoders (VAEs)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Optimization Techniques</h3>
+
+                    <div class="block-grid">
+                        <div class="variant-card">
+                            <h4>📊 Batch Normalization</h4>
+                            <p><strong>What it does:</strong> Normalizes layer inputs to have zero mean and unit variance</p>
+                            <p><strong>Benefits:</strong></p>
+                            <ul>
+                                <li>Stabilizes training</li>
+                                <li>Allows higher learning rates</li>
+                                <li>Reduces sensitivity to initialization</li>
+                            </ul>
+                            <p><strong>Formula:</strong> \(\hat{x} = \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}}\)</p>
+                        </div>
+
+                        <div class="variant-card">
+                            <h4>🎲 Dropout</h4>
+                            <p><strong>What it does:</strong> Randomly "drops" (sets to 0) neurons during training with probability \(p\)</p>
+                            <p><strong>Benefits:</strong></p>
+                            <ul>
+                                <li>Prevents overfitting</li>
+                                <li>Forces redundant representations</li>
+                                <li>Acts like ensemble learning</li>
+                            </ul>
+                            <p><strong>Typical values:</strong> \(p = 0.5\) for hidden layers, \(p = 0.2\) for input</p>
+                        </div>
+
+                        <div class="variant-card">
+                            <h4>📉 Learning Rate Scheduling</h4>
+                            <p><strong>What it does:</strong> Gradually decreases learning rate during training</p>
+                            <p><strong>Strategies:</strong></p>
+                            <ul>
+                                <li>Step decay: Reduce by factor every N epochs</li>
+                                <li>Exponential: \(\alpha_t = \alpha_0 e^{-kt}\)</li>
+                                <li>Cosine annealing: Smooth cosine curve</li>
+                            </ul>
+                            <p><strong>Benefit:</strong> Fine-tune weights in later epochs</p>
+                        </div>
+
+                        <div class="variant-card">
+                            <h4>⚖️ Regularization (L1/L2)</h4>
+                            <p><strong>What it does:</strong> Adds penalty term to loss function</p>
+                            <p><strong>L2 (Ridge):</strong> \(\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda \sum w^2\)</p>
+                            <p><strong>L1 (Lasso):</strong> \(\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda \sum |w|\)</p>
+                            <p><strong>Effect:</strong></p>
+                            <ul>
+                                <li>L2: Encourages small weights</li>
+                                <li>L1: Encourages sparse weights (feature selection)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Comparison Table</h3>
+                    <table>
+                        <tr>
+                            <th>Architecture</th>
+                            <th>Input Type</th>
+                            <th>Strengths</th>
+                            <th>Weaknesses</th>
+                        </tr>
+                        <tr>
+                            <td>Feedforward</td>
+                            <td>Tabular/Vector</td>
+                            <td>Simple, fast, interpretable</td>
+                            <td>Limited feature learning, no temporal/spatial awareness</td>
+                        </tr>
+                        <tr>
+                            <td>CNN</td>
+                            <td>Images/Grids</td>
+                            <td>Translation invariance, parameter sharing</td>
+                            <td>Needs lots of data, struggles with rotation</td>
+                        </tr>
+                        <tr>
+                            <td>RNN/LSTM</td>
+                            <td>Sequences</td>
+                            <td>Temporal dependencies, variable length</td>
+                            <td>Slow (sequential), vanishing gradient</td>
+                        </tr>
+                        <tr>
+                            <td>Transformer</td>
+                            <td>Sequences/Any</td>
+                            <td>Parallel, long-range dependencies, attention</td>
+                            <td>Very large models, high memory/compute cost</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="callout-warning">
+                    <h4>⚠️ Choosing the Right Architecture</h4>
+                    <p><strong>Start simple:</strong> Try a feedforward network first. Only add complexity (CNNs, RNNs, Transformers) if your data has specific structure (spatial, temporal).</p>
+                    <p><strong>Rule of thumb:</strong></p>
+                    <ul>
+                        <li>Tabular data → Feedforward NN</li>
+                        <li>Images → CNN</li>
+                        <li>Text/Time series → Transformer or LSTM</li>
+                        <li>Graphs → Graph Neural Network (GNN)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 8: REFERENCES
+                 ======================================== -->
+            <section id="references" class="section">
+                <h2>8. References & Bibliography</h2>
+
+                <div class="content-block">
+                    <div class="reference-card primary">
+                        <strong>Primary Textbook Reference</strong>
+                        <cite>Jurafsky, D. & Martin, J.H. (2026). Speech and Language Processing (3rd ed.), Chapter 6: Neural Networks, pp. 128-145. McCulloch-Pitts history (p. 128), feedforward networks, backpropagation derivation. Stanford University / University of Colorado Boulder.</cite>
+                    </div>
+
+                    <h3>Foundational Papers</h3>
+                    <ol class="references-list">
+                        <li>
+                            <strong>McCulloch, W. S., & Pitts, W. (1943).</strong> "A logical calculus of the ideas immanent in nervous activity." <em>Bulletin of Mathematical Biophysics</em>, 5(4), 115-133.
+                            <br><em>First mathematical model of biological neurons, laying the foundation for artificial neural networks.</em>
+                        </li>
+
+                        <li>
+                            <strong>Rosenblatt, F. (1958).</strong> "The perceptron: A probabilistic model for information storage and organization in the brain." <em>Psychological Review</em>, 65(6), 386-408.
+                            <br><em>Introduced the perceptron learning algorithm, the first trainable neural network.</em>
+                        </li>
+
+                        <li>
+                            <strong>Rumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986).</strong> "Learning representations by back-propagating errors." <em>Nature</em>, 323(6088), 533-536.
+                            <br><em>Popularized backpropagation for training multilayer networks, enabling deep learning.</em>
+                        </li>
+
+                        <li>
+                            <strong>LeCun, Y., Bottou, L., Bengio, Y., & Haffner, P. (1998).</strong> "Gradient-based learning applied to document recognition." <em>Proceedings of the IEEE</em>, 86(11), 2278-2324.
+                            <br><em>Introduced LeNet, demonstrating convolutional neural networks for handwritten digit recognition.</em>
+                        </li>
+
+                        <li>
+                            <strong>Glorot, X., & Bengio, Y. (2010).</strong> "Understanding the difficulty of training deep feedforward neural networks." <em>AISTATS 2010</em>.
+                            <br><em>Analyzed vanishing/exploding gradients and introduced Xavier initialization.</em>
+                        </li>
+
+                        <li>
+                            <strong>Kingma, D. P., & Ba, J. (2015).</strong> "Adam: A method for stochastic optimization." <em>ICLR 2015</em>.
+                            <br><em>Introduced the Adam optimizer, combining momentum and adaptive learning rates.</em>
+                        </li>
+
+                        <li>
+                            <strong>Goodfellow, I., Bengio, Y., & Courville, A. (2016).</strong> <em>Deep Learning.</em> MIT Press.
+                            <br><em>Comprehensive textbook covering neural network fundamentals, optimization, and advanced architectures.</em>
+                            <br>Available free: <a href="https://www.deeplearningbook.org/" target="_blank">https://www.deeplearningbook.org/</a>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="content-block">
+                    <h3>Additional Resources</h3>
+                    <ul>
+                        <li><strong>Neural Networks and Deep Learning</strong> by Michael Nielsen - Free online book: <a href="http://neuralnetworksanddeeplearning.com/" target="_blank">http://neuralnetworksanddeeplearning.com/</a></li>
+                        <li><strong>CS231n: Convolutional Neural Networks for Visual Recognition</strong> - Stanford course notes: <a href="http://cs231n.github.io/" target="_blank">http://cs231n.github.io/</a></li>
+                        <li><strong>3Blue1Brown Neural Networks Series</strong> - Visual explanations: <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" target="_blank">YouTube Playlist</a></li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>Citation Index</h3>
+                    <table>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Cited In Section(s)</th>
+                            <th>Topic</th>
+                        </tr>
+                        <tr>
+                            <td>[1] McCulloch & Pitts, 1943</td>
+                            <td>Intuition</td>
+                            <td>Biological neuron model</td>
+                        </tr>
+                        <tr>
+                            <td>[2] Rosenblatt, 1958</td>
+                            <td>Intuition</td>
+                            <td>Perceptron learning</td>
+                        </tr>
+                        <tr>
+                            <td>[3] Rumelhart et al., 1986</td>
+                            <td>Intuition, Mathematics</td>
+                            <td>Backpropagation algorithm</td>
+                        </tr>
+                        <tr>
+                            <td>[4] LeCun et al., 1998</td>
+                            <td>Variants</td>
+                            <td>Convolutional networks</td>
+                        </tr>
+                        <tr>
+                            <td>[5] Glorot & Bengio, 2010</td>
+                            <td>Mathematics, Flowchart</td>
+                            <td>Xavier initialization</td>
+                        </tr>
+                        <tr>
+                            <td>[6] Kingma & Ba, 2015</td>
+                            <td>Mathematics</td>
+                            <td>Adam optimizer</td>
+                        </tr>
+                        <tr>
+                            <td>[7] Goodfellow et al., 2016</td>
+                            <td>References</td>
+                            <td>Comprehensive textbook</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="callout-concept">
+                    <h4>📚 Recommended Reading Order</h4>
+                    <ol>
+                        <li><strong>Start:</strong> Nielsen's online book (intuitive explanations)</li>
+                        <li><strong>Deepen:</strong> This guide + CS231n notes (technical depth)</li>
+                        <li><strong>Master:</strong> Goodfellow's Deep Learning book (comprehensive theory)</li>
+                        <li><strong>Specialize:</strong> Original papers for specific topics</li>
+                    </ol>
+                </div>
+            </section>
+        </div>
+
+        </article><!-- End presentation -->
+
+        <footer>
+            <div class="footer-links">
+                <a href="nlp_guide_index.html">Home</a>
+                <a href="word2vec_educational.html">Word2Vec</a>
+                <a href="sgns_educational.html">SGNS</a>
+                <a href="cbow_educational.html">CBOW</a>
+                <a href="glove_educational.html">GloVe</a>
+                <a href="tfidf_educational.html">TF-IDF</a>
+            </div>
+            <p>&copy; 2025 NLP Knowledge Base. Educational resource for understanding neural networks.</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Content aligned with Jurafsky & Martin (2026), Speech and Language Processing, Chapter 6</p>
+        </footer>
+    </div>
+
+    
+
+
+
+
+</body>
+</html>

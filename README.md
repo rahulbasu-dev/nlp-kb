@@ -1,6 +1,42 @@
-# Skip-gram with Negative Sampling - Complete Classroom Package
+# 📚 Interactive NLP Educational Tool
 
-A comprehensive teaching resource for Skip-gram with Negative Sampling (SGNS) and TF-IDF, including working code, visualizations, and interactive examples.
+A comprehensive teaching resource for Natural Language Processing, featuring **interactive web-based visualizations**, Python implementations, and educational materials for Skip-gram with Negative Sampling (SGNS), TF-IDF, and Neural Networks.
+
+## 🌟 **[View Live Interactive Tool](https://rahulbasu-dev.github.io/nlp-kb/nlp_guide_index.html)**
+
+Perfect for students learning NLP concepts through hands-on visualization!
+
+---
+
+## 🌐 Interactive Web Tool (NEW!)
+
+### Features:
+- **Neural Networks Visual Guide**
+  - Animated forward/backward propagation
+  - Interactive XOR problem solver
+  - Activation functions explorer (Sigmoid, Tanh, ReLU, Leaky ReLU)
+  - Real-time training playground
+
+- **Word Embeddings Comparison**
+  - Side-by-side comparison of TF-IDF, Word2Vec, CBOW, GloVe
+  - Interactive visualizations and examples
+  - Same dataset across all methods for direct comparison
+
+- **Educational Pages**
+  - Complete guides for each NLP method
+  - Mathematical formulas with MathJax
+  - Python code examples
+  - Step-by-step calculations
+
+### Access:
+- **Live Site**: [https://rahulbasu-dev.github.io/nlp-kb/nlp_guide_index.html](https://rahulbasu-dev.github.io/nlp-kb/nlp_guide_index.html)
+- **No installation needed** - runs entirely in browser
+- **Works on mobile** and desktop
+
+### Sharing with Students:
+See **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** for detailed instructions on sharing this tool.
+
+---
 
 ## 📦 Package Contents
 

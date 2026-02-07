@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLP Methods Comparison - Single Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        /* CSS Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #000000;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #000000;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        cite {
+            display: block;
+            font-style: italic;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .content-block {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .corpus-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            color: white;
+        }
+
+        .document {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1rem;
+            margin: 0.75rem 0;
+            border-radius: 8px;
+            border-left: 4px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .vocab-card {
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .vocab-word {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .vocab-count {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .relevance-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .connection-box {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .gain-box {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .method-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .visualization {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .math-block {
+            background: #f1f5f9;
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin: 2rem 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .highlight-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid var(--accent-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        ul {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .home-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 999;
+            text-decoration: none;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .comparison-item {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .comparison-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .comparison-item ul {
+            margin-left: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Vector Display */
+        .vector-display {
+            background: #1e293b;
+            color: #e2e8f0;
+            font-family: 'Consolas', monospace;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        /* Callout Concept */
+        .callout-concept {
+            background: #dbeafe;
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .callout-concept h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-top: 2px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .footer-links a:hover {
+            background: #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .vocab-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <article>
+        <!-- Title Slide -->
+        <section class="section" id="title">
+            <h1>🔬 NLP Methods: Side-by-Side Comparison</h1>
+            <p class="subtitle">One Dataset, Five Methods, Different Insights</p>
+            <cite>Jurafsky & Martin (2026), Speech and Language Processing, Chapters 5 (Embeddings) & 11 (Information Retrieval)</cite>
+        </section>
+
+        <div class="content">
+            <!-- ========================================
+                 SECTION 1: DATASET
+                 ======================================== -->
+            <section id="dataset" class="section">
+                <h2>1. The Dataset</h2>
+
+                <div class="content-block">
+                    <p>We'll use a small corpus about <strong>animals</strong> that satisfies all method requirements:</p>
+                    <ul>
+                        <li>✓ Multiple documents (for TF-IDF)</li>
+                        <li>✓ Repeated words in context (for Word2Vec, SGNS, CBOW)</li>
+                        <li>✓ Co-occurrence patterns (for GloVe)</li>
+                        <li>✓ Semantic relationships (for evaluation)</li>
+                    </ul>
+                </div>
+
+                <div class="corpus-box">
+                    <h3 style="margin-top: 0; color: #667eea;">Corpus: 8 Documents</h3>
+
+                    <div class="document">
+                        <strong>D1:</strong> The cat sat on the mat. The cat was happy.
+                    </div>
+                    <div class="document">
+                        <strong>D2:</strong> The dog ran in the park. The dog was excited.
+                    </div>
+                    <div class="document">
+                        <strong>D3:</strong> A cat and a dog played together. They were happy.
+                    </div>
+                    <div class="document">
+                        <strong>D4:</strong> The bird flew over the tree. The bird sang beautifully.
+                    </div>
+                    <div class="document">
+                        <strong>D5:</strong> Birds and cats are animals. Dogs are animals too.
+                    </div>
+                    <div class="document">
+                        <strong>D6:</strong> The mat was soft. The cat loved the mat.
+                    </div>
+                    <div class="document">
+                        <strong>D7:</strong> The park was beautiful. The dog ran in the park again.
+                    </div>
+                    <div class="document">
+                        <strong>D8:</strong> Animals need food and water. Cats and dogs need care.
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Vocabulary Statistics</h3>
+                    <table>
+                        <tr>
+                            <th>Statistic</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>Total documents</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>Total words (tokens)</td>
+                            <td>89</td>
+                        </tr>
+                        <tr>
+                            <td>Unique words (vocabulary)</td>
+                            <td>36</td>
+                        </tr>
+                        <tr>
+                            <td>Most frequent word</td>
+                            <td>"the" (19 times)</td>
+                        </tr>
+                        <tr>
+                            <td>Key target words</td>
+                            <td>cat (6), dog (5), bird (3), animals (3)</td>
+                        </tr>
+                    </table>
+
+                    <div class="callout-concept">
+                        <h4>💡 Why This Dataset Works</h4>
+                        <ul>
+                            <li><strong>TF-IDF:</strong> Multiple documents with varying word frequencies</li>
+                            <li><strong>Word2Vec/SGNS/CBOW:</strong> Words appear in multiple contexts (e.g., "cat" with "sat", "happy", "played")</li>
+                            <li><strong>GloVe:</strong> Clear co-occurrence patterns (e.g., "cat"-"mat", "dog"-"park")</li>
+                            <li><strong>Semantic relationships:</strong> "cat", "dog", "bird" are similar (animals); "mat", "park" are contexts</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 2: WHY LEARN THIS IN 2025?
+                 ======================================== -->
+            <section id="relevance" class="section">
+                <h2>💡 Why Learn These in the Age of ChatGPT?</h2>
+
+                <div class="content-block">
+                    <p style="font-size: 1.1rem; margin-bottom: 2rem;">In 2025, we have powerful models like GPT-4, Claude, and Gemini. So why study TF-IDF and Word2Vec from the 2010s?</p>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-item" style="border-color: #667eea;">
+                            <h4 style="color: #667eea;">🏗️ Foundational Knowledge</h4>
+                            <p><strong>Modern transformers build on these ideas:</strong></p>
+                            <ul style="margin-left: 1.5rem; color: #666;">
+                                <li>Embeddings → Transformer embeddings</li>
+                                <li>Context windows → Attention mechanisms</li>
+                                <li>Similarity metrics → Dot-product attention</li>
+                            </ul>
+                            <p style="margin-top: 1rem; font-style: italic; color: #666;">You can't understand BERT without understanding Word2Vec first.</p>
+                        </div>
+
+                        <div class="comparison-item" style="border-color: #48bb78;">
+                            <h4 style="color: #48bb78;">⚡ Practical Applications</h4>
+                            <p><strong>These methods are still used when:</strong></p>
+                            <ul style="margin-left: 1.5rem; color: #666;">
+                                <li>You need fast, lightweight solutions</li>
+                                <li>Working with limited compute (edge devices)</li>
+                                <li>Building search/retrieval systems</li>
+                                <li>Analyzing specific domains efficiently</li>
+                            </ul>
+                            <p style="margin-top: 1rem; font-style: italic; color: #666;">TF-IDF powers search in millions of applications today.</p>
+                        </div>
+
+                        <div class="comparison-item" style="border-color: #ed8936;">
+                            <h4 style="color: #ed8936;">🧪 Understanding Tradeoffs</h4>
+                            <p><strong>Learn what modern models sacrifice:</strong></p>
+                            <ul style="margin-left: 1.5rem; color: #666;">
+                                <li>Cost: GPT-4 API vs. local Word2Vec</li>
+                                <li>Interpretability: Sparse TF-IDF vs. black box</li>
+                                <li>Latency: Milliseconds vs. seconds</li>
+                                <li>Privacy: On-device vs. cloud-based</li>
+                            </ul>
+                            <p style="margin-top: 1rem; font-style: italic; color: #666;">Not every problem needs a $200M model.</p>
+                        </div>
+
+                        <div class="comparison-item" style="border-color: #9f7aea;">
+                            <h4 style="color: #9f7aea;">🎓 Interview & Research</h4>
+                            <p><strong>Still tested extensively:</strong></p>
+                            <ul style="margin-left: 1.5rem; color: #666;">
+                                <li>ML/NLP interviews ask Word2Vec details</li>
+                                <li>Research papers build on these foundations</li>
+                                <li>Understanding evolution of the field</li>
+                                <li>Debugging modern embedding issues</li>
+                            </ul>
+                            <p style="margin-top: 1rem; font-style: italic; color: #666;">Top companies still ask "Explain skip-gram vs. CBOW".</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-block" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2.5rem; border-radius: 15px;">
+                    <h3 style="color: white; font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center;">🔗 The Connection to Modern AI</h3>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">2013</div>
+                            <div style="font-size: 1.1rem; opacity: 0.9;">Word2Vec</div>
+                            <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">Static embeddings<br/>Context windows</div>
+                        </div>
+
+                        <div style="text-align: center; font-size: 2rem; opacity: 0.5;">→</div>
+
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">2018</div>
+                            <div style="font-size: 1.1rem; opacity: 0.9;">BERT/GPT</div>
+                            <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">Contextual embeddings<br/>Attention mechanism</div>
+                        </div>
+
+                        <div style="text-align: center; font-size: 2rem; opacity: 0.5;">→</div>
+
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">2025</div>
+                            <div style="font-size: 1.1rem; opacity: 0.9;">GPT-4/Claude</div>
+                            <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">Massive scale<br/>Emergent abilities</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.1); border-radius: 10px; text-align: center;">
+                        <p style="font-size: 1.1rem; margin: 0;"><strong>Key Insight:</strong> Modern transformers are essentially "contextualized Word2Vec" with attention. Understanding the foundation makes you a better AI practitioner, not just a user.</p>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3 style="color: #667eea;">🎯 What You'll Gain From This Comparison</h3>
+                    <table>
+                        <tr>
+                            <th style="width: 30%;">Skill</th>
+                            <th>How This Page Helps</th>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold; color: #667eea;">Choose the Right Tool</td>
+                            <td>See when simple TF-IDF outperforms complex embeddings for your specific use case</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold; color: #667eea;">Debug Embeddings</td>
+                            <td>Understand why "cat" and "dog" are similar in embedding space but not in TF-IDF</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold; color: #667eea;">Optimize Costs</td>
+                            <td>Know when you can use Word2Vec (free, fast) instead of GPT-4 API ($$$)</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold; color: #667eea;">Ace Interviews</td>
+                            <td>Answer "What's the difference between SGNS and CBOW?" with concrete examples</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold; color: #667eea;">Build Better Systems</td>
+                            <td>Combine TF-IDF for retrieval + transformers for understanding (RAG pattern)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="callout-concept">
+                    <h4>💼 Real-World Example: Modern RAG Systems</h4>
+                    <p>2025's most popular architecture (Retrieval-Augmented Generation) uses:</p>
+                    <ol style="margin-left: 1.5rem; color: #666;">
+                        <li><strong>TF-IDF or BM25</strong> for fast initial retrieval (milliseconds, cheap)</li>
+                        <li><strong>Dense embeddings</strong> (Word2Vec descendants) for semantic reranking</li>
+                        <li><strong>LLM</strong> (GPT-4, Claude) for final answer generation</li>
+                    </ol>
+                    <p style="margin-top: 1rem;"><strong>You need to understand steps 1 & 2 to build efficient RAG!</strong></p>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 3: TF-IDF
+                 ======================================== -->
+            <section id="tfidf" class="section">
+                <h2>3. Method 1: TF-IDF</h2>
+
+                <div class="method-card tfidf">
+                    <h3>📊 TF-IDF (Term Frequency - Inverse Document Frequency)</h3>
+                    <p><strong>Goal:</strong> Identify important words in each document by weighing frequency against rarity across documents.</p>
+                    <p><strong>Formula:</strong> $$\text{TF-IDF}(t, d) = \text{TF}(t, d) \times \text{IDF}(t) = \frac{f_{t,d}}{\sum_{t' \in d} f_{t',d}} \times \log\frac{N}{df_t}$$</p>
+
+                    <h4>Step 1: Compute Term Frequency (TF)</h4>
+                    <p>For Document 1: "The cat sat on the mat. The cat was happy."</p>
+                    <table>
+                        <tr>
+                            <th>Word</th>
+                            <th>Count</th>
+                            <th>TF (count / total)</th>
+                        </tr>
+                        <tr>
+                            <td>the</td>
+                            <td>3</td>
+                            <td>3 / 10 = 0.300</td>
+                        </tr>
+                        <tr>
+                            <td>cat</td>
+                            <td>2</td>
+                            <td>2 / 10 = 0.200</td>
+                        </tr>
+                        <tr>
+                            <td>sat, on, mat, was, happy</td>
+                            <td>1 each</td>
+                            <td>1 / 10 = 0.100</td>
+                        </tr>
+                    </table>
+
+                    <h4>Step 2: Compute Inverse Document Frequency (IDF)</h4>
+                    <table>
+                        <tr>
+                            <th>Word</th>
+                            <th>Appears in Docs</th>
+                            <th>IDF = log(8 / df)</th>
+                        </tr>
+                        <tr>
+                            <td>the</td>
+                            <td>8 / 8</td>
+                            <td>log(8/8) = 0.000</td>
+                        </tr>
+                        <tr>
+                            <td>cat</td>
+                            <td>4 / 8</td>
+                            <td>log(8/4) = 0.693</td>
+                        </tr>
+                        <tr>
+                            <td>dog</td>
+                            <td>4 / 8</td>
+                            <td>log(8/4) = 0.693</td>
+                        </tr>
+                        <tr>
+                            <td>bird</td>
+                            <td>2 / 8</td>
+                            <td>log(8/2) = 1.386</td>
+                        </tr>
+                        <tr>
+                            <td>mat</td>
+                            <td>2 / 8</td>
+                            <td>log(8/2) = 1.386</td>
+                        </tr>
+                        <tr>
+                            <td>sang</td>
+                            <td>1 / 8</td>
+                            <td>log(8/1) = 2.079</td>
+                        </tr>
+                    </table>
+
+                    <h4>Step 3: TF-IDF for Document 1</h4>
+                    <table>
+                        <tr>
+                            <th>Word</th>
+                            <th>TF</th>
+                            <th>IDF</th>
+                            <th>TF-IDF</th>
+                        </tr>
+                        <tr>
+                            <td>the</td>
+                            <td>0.300</td>
+                            <td>0.000</td>
+                            <td style="font-weight: bold;">0.000</td>
+                        </tr>
+                        <tr>
+                            <td>cat</td>
+                            <td>0.200</td>
+                            <td>0.693</td>
+                            <td style="font-weight: bold; color: #4299e1;">0.139</td>
+                        </tr>
+                        <tr>
+                            <td>sat</td>
+                            <td>0.100</td>
+                            <td>1.386</td>
+                            <td style="font-weight: bold; color: #4299e1;">0.139</td>
+                        </tr>
+                        <tr>
+                            <td>mat</td>
+                            <td>0.100</td>
+                            <td>1.386</td>
+                            <td style="font-weight: bold; color: #4299e1;">0.139</td>
+                        </tr>
+                        <tr>
+                            <td>happy</td>
+                            <td>0.100</td>
+                            <td>1.099</td>
+                            <td style="font-weight: bold;">0.110</td>
+                        </tr>
+                    </table>
+
+                    <h4>Document 1 Vector (Top 5 Terms)</h4>
+                    <div class="vector-display">
+                        {
+                            "cat": 0.139,
+                            "sat": 0.139,
+                            "mat": 0.139,
+                            "happy": 0.110,
+                            "was": 0.055
+                        }
+                    </div>
+
+                    <div class="callout-concept">
+                        <h4>📌 TF-IDF Insights</h4>
+                        <ul>
+                            <li><strong>"the"</strong> gets 0.000 because it appears in every document (not discriminative)</li>
+                            <li><strong>"cat", "sat", "mat"</strong> get high scores (important for this document)</li>
+                            <li><strong>Limitation:</strong> No semantic meaning—doesn't know "cat" and "dog" are similar</li>
+                            <li><strong>Use case:</strong> Document search, keyword extraction</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 4: WORD2VEC (SGNS)
+                 ======================================== -->
+            <section id="sgns" class="section">
+                <h2>4. Method 2: Word2Vec (Skip-Gram with Negative Sampling)</h2>
+
+                <div class="method-card sgns">
+                    <h3>🎯 Skip-Gram with Negative Sampling (SGNS)</h3>
+                    <p><strong>Goal:</strong> Learn dense vector embeddings where words with similar contexts are close in vector space.</p>
+                    <p><strong>Approach:</strong> Predict context words from target word, use negative sampling for efficiency.</p>
+
+                    <h4>Step 1: Generate Training Pairs (Window Size = 2)</h4>
+                    <p>From sentence: "The <strong>cat</strong> sat on the mat"</p>
+                    <table>
+                        <tr>
+                            <th>Target Word</th>
+                            <th>Context Words (Window ±2)</th>
+                        </tr>
+                        <tr>
+                            <td>cat</td>
+                            <td>the, sat (positive); bird, ran (negative samples)</td>
+                        </tr>
+                        <tr>
+                            <td>sat</td>
+                            <td>the, cat, on (positive); flew, park (negative samples)</td>
+                        </tr>
+                        <tr>
+                            <td>mat</td>
+                            <td>on, the (positive); bird, sang (negative samples)</td>
+                        </tr>
+                    </table>
+
+                    <h4>Step 2: Training Objective</h4>
+                    <p>Maximize probability of seeing real context, minimize for random words:</p>
+                    <p>$$\text{Loss} = -\log \sigma(\mathbf{v}_c \cdot \mathbf{v}_t) - \sum_{i=1}^{k} \log \sigma(-\mathbf{v}_{n_i} \cdot \mathbf{v}_t)$$</p>
+                    <p>Where \(\mathbf{v}_c\) = context vector, \(\mathbf{v}_t\) = target vector, \(\mathbf{v}_{n_i}\) = negative samples</p>
+
+                    <h4>Step 3: Learned Embeddings (Simplified 3D)</h4>
+                    <p>After training with embedding dimension = 3:</p>
+                    <table>
+                        <tr>
+                            <th>Word</th>
+                            <th>Vector (3D)</th>
+                        </tr>
+                        <tr>
+                            <td>cat</td>
+                            <td>[0.82, -0.31, 0.47]</td>
+                        </tr>
+                        <tr>
+                            <td>dog</td>
+                            <td>[0.79, -0.28, 0.54]</td>
+                        </tr>
+                        <tr>
+                            <td>bird</td>
+                            <td>[0.71, -0.22, 0.66]</td>
+                        </tr>
+                        <tr>
+                            <td>mat</td>
+                            <td>[-0.15, 0.91, -0.39]</td>
+                        </tr>
+                        <tr>
+                            <td>park</td>
+                            <td>[-0.12, 0.88, -0.46]</td>
+                        </tr>
+                        <tr>
+                            <td>tree</td>
+                            <td>[-0.18, 0.85, -0.49]</td>
+                        </tr>
+                    </table>
+
+                    <h4>Step 4: Similarity Analysis</h4>
+                    <p>Cosine similarity between word pairs:</p>
+                    <table>
+                        <tr>
+                            <th>Word Pair</th>
+                            <th>Cosine Similarity</th>
+                            <th>Interpretation</th>
+                        </tr>
+                        <tr>
+                            <td>cat ↔ dog</td>
+                            <td style="color: #48bb78; font-weight: bold;">0.92</td>
+                            <td>Very similar (both animals)</td>
+                        </tr>
+                        <tr>
+                            <td>cat ↔ bird</td>
+                            <td style="color: #48bb78; font-weight: bold;">0.87</td>
+                            <td>Similar (both animals)</td>
+                        </tr>
+                        <tr>
+                            <td>dog ↔ bird</td>
+                            <td style="color: #48bb78; font-weight: bold;">0.90</td>
+                            <td>Similar (both animals)</td>
+                        </tr>
+                        <tr>
+                            <td>mat ↔ park</td>
+                            <td style="color: #48bb78; font-weight: bold;">0.98</td>
+                            <td>Very similar (both locations)</td>
+                        </tr>
+                        <tr>
+                            <td>cat ↔ mat</td>
+                            <td style="color: #f56565; font-weight: bold;">0.12</td>
+                            <td>Dissimilar (different semantic groups)</td>
+                        </tr>
+                    </table>
+
+                    <div class="callout-concept">
+                        <h4>📌 SGNS Insights</h4>
+                        <ul>
+                            <li><strong>Dense vectors:</strong> Every word gets a fixed-length vector (e.g., 50-300 dimensions)</li>
+                            <li><strong>Semantic similarity:</strong> "cat", "dog", "bird" cluster together</li>
+                            <li><strong>Context-based:</strong> Words in similar contexts get similar embeddings</li>
+                            <li><strong>Limitation:</strong> One embedding per word (can't handle polysemy like "bank")</li>
+                            <li><strong>Use case:</strong> Text classification, clustering, semantic search</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 5: CBOW
+                 ======================================== -->
+            <section id="cbow" class="section">
+                <h2>5. Method 3: CBOW (Continuous Bag of Words)</h2>
+
+                <div class="method-card cbow">
+                    <h3>🎒 Continuous Bag of Words (CBOW)</h3>
+                    <p><strong>Goal:</strong> Same as SGNS (dense embeddings), but reversed: predict target word from context.</p>
+                    <p><strong>Difference from SGNS:</strong> CBOW is faster but slightly less accurate; better for frequent words.</p>
+
+                    <h4>Step 1: Generate Training Examples (Window Size = 2)</h4>
+                    <p>From sentence: "The cat sat on the mat"</p>
+                    <table>
+                        <tr>
+                            <th>Context Words</th>
+                            <th>Target Word</th>
+                        </tr>
+                        <tr>
+                            <td>[the, sat]</td>
+                            <td>cat</td>
+                        </tr>
+                        <tr>
+                            <td>[the, cat, on]</td>
+                            <td>sat</td>
+                        </tr>
+                        <tr>
+                            <td>[sat, on, the]</td>
+                            <td>mat (predict this)</td>
+                        </tr>
+                    </table>
+
+                    <h4>Step 2: Forward Pass Example</h4>
+                    <p>To predict "cat" from context [the, sat]:</p>
+                    <ol>
+                        <li>Get embeddings: \(\mathbf{v}_{\text{the}} = [0.1, 0.3, -0.2]\), \(\mathbf{v}_{\text{sat}} = [0.4, -0.1, 0.5]\)</li>
+                        <li>Average context: \(\mathbf{v}_{\text{context}} = \frac{1}{2}([0.1, 0.3, -0.2] + [0.4, -0.1, 0.5]) = [0.25, 0.10, 0.15]\)</li>
+                        <li>Score all words: \(\text{score}(w) = \mathbf{v}_{\text{context}} \cdot \mathbf{v}_w\)</li>
+                        <li>Apply softmax: \(P(\text{cat} | \text{the, sat}) = \frac{e^{\text{score}(\text{cat})}}{\sum_{w'} e^{\text{score}(w')}}\)</li>
+                    </ol>
+
+                    <h4>Step 3: Learned Embeddings (3D)</h4>
+                    <p>CBOW produces similar embeddings to SGNS, but with slight differences:</p>
+                    <table>
+                        <tr>
+                            <th>Word</th>
+                            <th>CBOW Vector (3D)</th>
+                            <th>SGNS Vector (3D)</th>
+                        </tr>
+                        <tr>
+                            <td>cat</td>
+                            <td>[0.84, -0.29, 0.46]</td>
+                            <td>[0.82, -0.31, 0.47]</td>
+                        </tr>
+                        <tr>
+                            <td>dog</td>
+                            <td>[0.81, -0.26, 0.53]</td>
+                            <td>[0.79, -0.28, 0.54]</td>
+                        </tr>
+                        <tr>
+                            <td>bird</td>
+                            <td>[0.73, -0.20, 0.65]</td>
+                            <td>[0.71, -0.22, 0.66]</td>
+                        </tr>
+                    </table>
+
+                    <h4>Step 4: SGNS vs. CBOW Comparison</h4>
+                    <table>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>SGNS (Skip-Gram)</th>
+                            <th>CBOW</th>
+                        </tr>
+                        <tr>
+                            <td>Prediction</td>
+                            <td>Context from target</td>
+                            <td>Target from context</td>
+                        </tr>
+                        <tr>
+                            <td>Training speed</td>
+                            <td>Slower</td>
+                            <td style="color: #48bb78; font-weight: bold;">Faster</td>
+                        </tr>
+                        <tr>
+                            <td>Rare words</td>
+                            <td style="color: #48bb78; font-weight: bold;">Better</td>
+                            <td>Worse</td>
+                        </tr>
+                        <tr>
+                            <td>Frequent words</td>
+                            <td>Good</td>
+                            <td style="color: #48bb78; font-weight: bold;">Better</td>
+                        </tr>
+                        <tr>
+                            <td>Accuracy</td>
+                            <td style="color: #48bb78; font-weight: bold;">Higher</td>
+                            <td>Slightly lower</td>
+                        </tr>
+                    </table>
+
+                    <div class="callout-concept">
+                        <h4>📌 CBOW Insights</h4>
+                        <ul>
+                            <li><strong>Context averaging:</strong> Smooths out noise from individual context words</li>
+                            <li><strong>Faster training:</strong> One prediction per example vs. multiple for SGNS</li>
+                            <li><strong>Better for common words:</strong> "the", "cat", "dog" get better embeddings</li>
+                            <li><strong>Limitation:</strong> Struggles with rare words (less training signal)</li>
+                            <li><strong>Use case:</strong> When speed matters and vocabulary is not too large</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 6: GloVe
+                 ======================================== -->
+            <section id="glove" class="section">
+                <h2>6. Method 4: GloVe (Global Vectors)</h2>
+
+                <div class="method-card glove">
+                    <h3>🌍 GloVe: Global Vectors for Word Representation</h3>
+                    <p><strong>Goal:</strong> Combine global co-occurrence statistics with local context (best of both worlds).</p>
+                    <p><strong>Key idea:</strong> Word embeddings should encode ratios of co-occurrence probabilities.</p>
+
+                    <h4>Step 1: Build Co-occurrence Matrix (Window Size = 2)</h4>
+                    <p>Count how often word <em>i</em> appears near word <em>j</em> across the entire corpus:</p>
+                    <table>
+                        <tr>
+                            <th></th>
+                            <th>cat</th>
+                            <th>dog</th>
+                            <th>bird</th>
+                            <th>mat</th>
+                            <th>park</th>
+                            <th>happy</th>
+                        </tr>
+                        <tr>
+                            <th>cat</th>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <th>dog</th>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>1</td>
+                        </tr>
+                        <tr>
+                            <th>bird</th>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                        <tr>
+                            <th>mat</th>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1</td>
+                        </tr>
+                        <tr>
+                            <th>park</th>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                    </table>
+
+                    <h4>Step 2: GloVe Objective Function</h4>
+                    <p>Minimize the weighted least squares loss:</p>
+                    <p>$$J = \sum_{i,j=1}^{V} f(X_{ij}) \left( \mathbf{w}_i^T \mathbf{w}_j + b_i + b_j - \log X_{ij} \right)^2$$</p>
+                    <p>Where:</p>
+                    <ul>
+                        <li>\(X_{ij}\) = co-occurrence count of words <em>i</em> and <em>j</em></li>
+                        <li>\(\mathbf{w}_i, \mathbf{w}_j\) = word vectors to learn</li>
+                        <li>\(b_i, b_j\) = bias terms</li>
+                        <li>\(f(X_{ij})\) = weighting function (caps at 100 to prevent overweighting common pairs)</li>
+                    </ul>
+
+                    <h4>Step 3: Co-occurrence Ratios (Key Insight)</h4>
+                    <p>GloVe learns from <em>ratios</em> of co-occurrence probabilities:</p>
+                    <table>
+                        <tr>
+                            <th>Word Pair</th>
+                            <th>P(mat | cat)</th>
+                            <th>P(mat | dog)</th>
+                            <th>Ratio</th>
+                            <th>Meaning</th>
+                        </tr>
+                        <tr>
+                            <td>cat → mat</td>
+                            <td>4/10 = 0.40</td>
+                            <td>0/10 = 0.00</td>
+                            <td style="color: #48bb78; font-weight: bold;">∞</td>
+                            <td>"mat" strongly associated with "cat"</td>
+                        </tr>
+                        <tr>
+                            <td>dog → park</td>
+                            <td>0/10 = 0.00</td>
+                            <td>5/10 = 0.50</td>
+                            <td style="color: #48bb78; font-weight: bold;">0</td>
+                            <td>"park" strongly associated with "dog"</td>
+                        </tr>
+                        <tr>
+                            <td>cat/dog → animals</td>
+                            <td>0.20</td>
+                            <td>0.20</td>
+                            <td style="color: #4299e1; font-weight: bold;">1.0</td>
+                            <td>Both equally associated with "animals"</td>
+                        </tr>
+                    </table>
+
+                    <h4>Step 4: Learned Embeddings (3D)</h4>
+                    <table>
+                        <tr>
+                            <th>Word</th>
+                            <th>GloVe Vector (3D)</th>
+                        </tr>
+                        <tr>
+                            <td>cat</td>
+                            <td>[0.85, -0.30, 0.43]</td>
+                        </tr>
+                        <tr>
+                            <td>dog</td>
+                            <td>[0.83, -0.27, 0.49]</td>
+                        </tr>
+                        <tr>
+                            <td>bird</td>
+                            <td>[0.76, -0.21, 0.61]</td>
+                        </tr>
+                        <tr>
+                            <td>mat</td>
+                            <td>[-0.14, 0.93, -0.34]</td>
+                        </tr>
+                        <tr>
+                            <td>park</td>
+                            <td>[-0.11, 0.90, -0.42]</td>
+                        </tr>
+                    </table>
+
+                    <div class="callout-concept">
+                        <h4>📌 GloVe Insights</h4>
+                        <ul>
+                            <li><strong>Global statistics:</strong> Uses entire corpus co-occurrence matrix (unlike Word2Vec's local windows)</li>
+                            <li><strong>Deterministic:</strong> Given the same data, produces same embeddings (Word2Vec is stochastic)</li>
+                            <li><strong>Faster convergence:</strong> Often trains faster than Word2Vec on large corpora</li>
+                            <li><strong>Better on word analogies:</strong> "king - man + woman = queen" works better with GloVe</li>
+                            <li><strong>Limitation:</strong> Requires building full co-occurrence matrix (memory intensive)</li>
+                            <li><strong>Use case:</strong> When you have enough RAM and want stable, reproducible embeddings</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 SECTION 7: FINAL COMPARISON
+                 ======================================== -->
+            <section id="comparison" class="section">
+                <h2>7. Final Comparison</h2>
+
+                <div class="content-block">
+                    <h3>Embedding Space Visualization</h3>
+                    <p>All methods place semantically similar words close together, but with different geometries:</p>
+                    <div class="chart-container">
+                        <canvas id="embeddingChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Similarity Scores for "cat"</h3>
+                    <p>Cosine similarity of "cat" with other words across all methods:</p>
+                    <table>
+                        <tr>
+                            <th>Target Word</th>
+                            <th>TF-IDF</th>
+                            <th>SGNS</th>
+                            <th>CBOW</th>
+                            <th>GloVe</th>
+                        </tr>
+                        <tr>
+                            <td>dog</td>
+                            <td>0.15</td>
+                            <td style="background: #d4f4dd; font-weight: bold;">0.92</td>
+                            <td style="background: #d4f4dd; font-weight: bold;">0.91</td>
+                            <td style="background: #d4f4dd; font-weight: bold;">0.93</td>
+                        </tr>
+                        <tr>
+                            <td>bird</td>
+                            <td>0.08</td>
+                            <td style="background: #d4f4dd; font-weight: bold;">0.87</td>
+                            <td style="background: #d4f4dd; font-weight: bold;">0.88</td>
+                            <td style="background: #d4f4dd; font-weight: bold;">0.86</td>
+                        </tr>
+                        <tr>
+                            <td>mat</td>
+                            <td style="background: #fed7d7;">0.82</td>
+                            <td>0.12</td>
+                            <td>0.14</td>
+                            <td>0.11</td>
+                        </tr>
+                        <tr>
+                            <td>park</td>
+                            <td>0.00</td>
+                            <td>0.05</td>
+                            <td>0.07</td>
+                            <td>0.04</td>
+                        </tr>
+                        <tr>
+                            <td>happy</td>
+                            <td>0.45</td>
+                            <td>0.34</td>
+                            <td>0.36</td>
+                            <td>0.38</td>
+                        </tr>
+                    </table>
+                    <p><strong>Interpretation:</strong></p>
+                    <ul>
+                        <li><span style="background: #d4f4dd; padding: 0.2rem 0.5rem;">Green</span> = High similarity (semantically related)</li>
+                        <li><span style="background: #fed7d7; padding: 0.2rem 0.5rem;">Red</span> = High similarity but incorrect (TF-IDF thinks "cat" and "mat" are similar just because they co-occur)</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>Method Comparison Summary</h3>
+                    <table>
+                        <tr>
+                            <th>Method</th>
+                            <th>Representation</th>
+                            <th>Semantic Capture</th>
+                            <th>Training Data</th>
+                            <th>Best Use Case</th>
+                        </tr>
+                        <tr style="border-left: 5px solid #4299e1;">
+                            <td><strong>TF-IDF</strong></td>
+                            <td>Sparse vectors (vocab size)</td>
+                            <td>❌ None (just frequency)</td>
+                            <td>Minimal</td>
+                            <td>Document search, keyword extraction</td>
+                        </tr>
+                        <tr style="border-left: 5px solid #ed8936;">
+                            <td><strong>SGNS</strong></td>
+                            <td>Dense vectors (50-300D)</td>
+                            <td>✅ Strong (context-based)</td>
+                            <td>Large corpus</td>
+                            <td>Rare words, semantic similarity</td>
+                        </tr>
+                        <tr style="border-left: 5px solid #9f7aea;">
+                            <td><strong>CBOW</strong></td>
+                            <td>Dense vectors (50-300D)</td>
+                            <td>✅ Strong (context-based)</td>
+                            <td>Large corpus</td>
+                            <td>Frequent words, fast training</td>
+                        </tr>
+                        <tr style="border-left: 5px solid #f56565;">
+                            <td><strong>GloVe</strong></td>
+                            <td>Dense vectors (50-300D)</td>
+                            <td>✅ Strongest (global stats)</td>
+                            <td>Large corpus</td>
+                            <td>Word analogies, reproducibility</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="comparison-grid">
+                    <div class="comparison-item tfidf">
+                        <h4>TF-IDF</h4>
+                        <p><strong>Pros:</strong></p>
+                        <ul>
+                            <li>Simple, fast, interpretable</li>
+                            <li>No training required</li>
+                            <li>Works with small data</li>
+                        </ul>
+                        <p><strong>Cons:</strong></p>
+                        <ul>
+                            <li>No semantic understanding</li>
+                            <li>Sparse, high-dimensional</li>
+                            <li>Can't capture synonymy</li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-item sgns">
+                        <h4>SGNS</h4>
+                        <p><strong>Pros:</strong></p>
+                        <ul>
+                            <li>Captures semantics</li>
+                            <li>Dense, efficient</li>
+                            <li>Great for rare words</li>
+                        </ul>
+                        <p><strong>Cons:</strong></p>
+                        <ul>
+                            <li>Requires large corpus</li>
+                            <li>Slower than CBOW</li>
+                            <li>Stochastic (non-reproducible)</li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-item cbow">
+                        <h4>CBOW</h4>
+                        <p><strong>Pros:</strong></p>
+                        <ul>
+                            <li>Faster than SGNS</li>
+                            <li>Better for common words</li>
+                            <li>Smooths noise</li>
+                        </ul>
+                        <p><strong>Cons:</strong></p>
+                        <ul>
+                            <li>Worse for rare words</li>
+                            <li>Slightly less accurate</li>
+                            <li>Requires large corpus</li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-item glove">
+                        <h4>GloVe</h4>
+                        <p><strong>Pros:</strong></p>
+                        <ul>
+                            <li>Best for word analogies</li>
+                            <li>Deterministic</li>
+                            <li>Faster convergence</li>
+                        </ul>
+                        <p><strong>Cons:</strong></p>
+                        <ul>
+                            <li>Memory-intensive</li>
+                            <li>Requires co-occurrence matrix</li>
+                            <li>More complex implementation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="callout-concept">
+                    <h4>🎯 When to Use Which Method?</h4>
+                    <ul>
+                        <li><strong>TF-IDF:</strong> Quick and dirty document similarity, no ML infrastructure</li>
+                        <li><strong>SGNS:</strong> General-purpose embeddings, especially if vocabulary has rare words</li>
+                        <li><strong>CBOW:</strong> When training speed matters and vocabulary is dominated by common words</li>
+                        <li><strong>GloVe:</strong> When you need reproducible embeddings and have RAM for co-occurrence matrix</li>
+                        <li><strong>Modern approach:</strong> Use pre-trained contextual embeddings (BERT, GPT) for best results!</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        </article><!-- End presentation -->
+
+        <footer>
+            <div class="footer-links">
+                <a href="nlp_guide_index.html">Home</a>
+                <a href="tfidf_educational.html">TF-IDF</a>
+                <a href="word2vec_educational.html">Word2Vec</a>
+                <a href="sgns_educational.html">SGNS</a>
+                <a href="cbow_educational.html">CBOW</a>
+                <a href="glove_educational.html">GloVe</a>
+                <a href="neural_networks_educational.html">Neural Networks</a>
+            </div>
+            <p>&copy; 2025 NLP Knowledge Base. Comparing methods for deeper understanding.</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Content aligned with Jurafsky & Martin (2026), Speech and Language Processing, Chapters 5 & 11</p>
+        </footer>
+    </div>
+
+    <!-- Home Button -->
+    <a href="nlp_guide_index.html" class="home-btn" title="Back to Home">🏠</a>
+
+</body>
+</html>
