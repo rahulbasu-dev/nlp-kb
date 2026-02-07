@@ -1,0 +1,675 @@
+/* ============================================
+   SLIDE PRESENTATION SYSTEM - NLP Knowledge Base
+   Responsive presentation-style layout for educational content
+   ============================================ */
+
+/* ===== PRESENTATION CONTAINER ===== */
+.presentation {
+    /* Default to scroll mode for better compatibility */
+    scroll-snap-type: none;
+    height: auto;
+    overflow-y: visible;
+    scroll-behavior: smooth;
+}
+
+/* Enable snap mode when explicitly requested */
+.presentation.snap-mode {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+}
+
+/* Allow normal scrolling (default behavior) */
+.presentation.scroll-mode {
+    scroll-snap-type: none;
+    height: auto;
+    overflow-y: visible;
+}
+
+/* ===== SLIDE BASE STYLES ===== */
+.slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2rem, 5vw, 4rem);
+    padding-bottom: 4rem; /* Space for navigation bar */
+    scroll-snap-align: start;
+    box-sizing: border-box;
+    position: relative;
+    background: var(--bg-primary, #ffffff);
+    width: 100%;
+}
+
+/* Ensure uniform content width within slides */
+.slide > * {
+    max-width: 1200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Alternate slide backgrounds for visual rhythm */
+.slide:nth-child(even) {
+    background: var(--bg-secondary, #f8fafc);
+}
+
+/* ===== SLIDE TYPES ===== */
+
+/* Title Slide */
+.slide.title-slide {
+    background: linear-gradient(135deg, var(--primary-color, #2563eb) 0%, var(--secondary-color, #7c3aed) 100%);
+    color: white;
+    text-align: center;
+}
+
+.slide.title-slide h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+    color: white;
+}
+
+.slide.title-slide .subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    opacity: 0.95;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    line-height: 1.6;
+}
+
+.slide.title-slide cite {
+    display: block;
+    margin-top: 2rem;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    opacity: 0.85;
+    font-style: normal;
+}
+
+.slide.title-slide cite::before {
+    content: "Reference: ";
+    font-weight: 600;
+}
+
+/* Concept Slide */
+.slide.concept-slide h2 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    margin-bottom: 1.5rem;
+    color: var(--text-primary, #1f2937);
+}
+
+/* Math Slide */
+.slide.math-slide {
+    padding: clamp(2rem, 4vw, 3rem);
+}
+
+.slide.math-slide h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    margin-bottom: 1.5rem;
+}
+
+/* Interactive Slide */
+.slide.interactive-slide {
+    background: var(--bg-tertiary, #f1f5f9);
+}
+
+/* Reference Slide */
+.slide.reference-slide {
+    background: linear-gradient(135deg, var(--bg-tertiary, #f1f5f9) 0%, var(--bg-secondary, #f8fafc) 100%);
+}
+
+.slide.reference-slide h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* ===== SLIDE CONTENT LAYOUTS ===== */
+.slide-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Single column layout for focused content */
+.slide-content.single-column {
+    grid-template-columns: 1fr;
+    max-width: 900px;
+}
+
+/* Visual + Text layout */
+.slide-content .visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slide-content .explanation {
+    padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+.slide-content .explanation ul {
+    list-style: none;
+    padding: 0;
+}
+
+.slide-content .explanation li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: clamp(1rem, 1.8vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--text-secondary, #4b5563);
+}
+
+.slide-content .explanation li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color, #2563eb);
+    border-radius: 50%;
+}
+
+/* ===== RESPONSIVE TYPOGRAPHY ===== */
+.slide h2 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    margin-bottom: 1rem;
+    color: var(--text-primary, #1f2937);
+    line-height: 1.2;
+}
+
+.slide h3 {
+    font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+    margin-bottom: 0.75rem;
+    color: var(--text-primary, #1f2937);
+}
+
+.slide p, .slide li {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    line-height: 1.7;
+    color: var(--text-secondary, #4b5563);
+}
+
+/* ===== INTUITION BOX ===== */
+.intuition-box {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%);
+    padding: clamp(1rem, 2vw, 1.5rem);
+    border-radius: var(--radius-lg, 1rem);
+    border-left: 4px solid var(--primary-color, #2563eb);
+    margin-bottom: 1.5rem;
+    max-width: 900px;
+}
+
+.intuition-box strong {
+    color: var(--primary-color, #2563eb);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.intuition-box p {
+    margin: 0;
+    font-size: clamp(1rem, 1.8vw, 1.15rem);
+    color: var(--text-secondary, #4b5563);
+}
+
+[data-theme="dark"] .intuition-box {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(124, 58, 237, 0.1) 100%);
+}
+
+/* ===== FORMULA HIGHLIGHT ===== */
+.formula-highlight {
+    background: var(--bg-elevated, #ffffff);
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    border-radius: var(--radius-lg, 1rem);
+    border: 2px solid var(--primary-color, #2563eb);
+    text-align: center;
+    margin: 1.5rem auto;
+    max-width: 800px;
+    box-shadow: var(--shadow-md, 0 6px 12px -2px rgba(0, 0, 0, 0.12));
+    overflow-x: auto;
+}
+
+.formula-highlight .MathJax {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem) !important;
+}
+
+[data-theme="dark"] .formula-highlight {
+    background: var(--bg-tertiary, #334155);
+    border-color: var(--primary-light, #3b82f6);
+}
+
+/* ===== FORMULA MEANING ===== */
+.formula-meaning {
+    max-width: 800px;
+    margin: 1rem auto;
+    padding: 1rem;
+    font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+    color: var(--text-tertiary, #6b7280);
+}
+
+.formula-meaning ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.formula-meaning li {
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-secondary, #f8fafc);
+    border-radius: var(--radius, 0.5rem);
+    font-size: 0.95rem;
+}
+
+.formula-meaning code {
+    background: var(--primary-color, #2563eb);
+    color: white;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.85em;
+    margin-right: 0.5rem;
+}
+
+/* ===== VISUALIZATION CONTAINER ===== */
+.visualization-container {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16/9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-elevated, #ffffff);
+    border-radius: var(--radius-lg, 1rem);
+    overflow: hidden;
+    box-shadow: var(--shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+.visualization-container.square {
+    aspect-ratio: 1/1;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Responsive canvas sizing */
+.slide canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* ===== REFERENCE CARDS ===== */
+.reference-card {
+    background: var(--bg-elevated, #ffffff);
+    padding: clamp(1.5rem, 3vw, 2rem);
+    border-radius: var(--radius-lg, 1rem);
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    border-left: 4px solid var(--border-color, #e5e7eb);
+}
+
+.reference-card.primary {
+    border-left-color: var(--primary-color, #2563eb);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, var(--bg-elevated, #ffffff) 100%);
+}
+
+.reference-card.secondary {
+    border-left-color: var(--secondary-color, #7c3aed);
+}
+
+.reference-card strong {
+    display: block;
+    color: var(--text-primary, #1f2937);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.reference-card cite {
+    font-style: normal;
+    color: var(--text-secondary, #4b5563);
+    font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+    line-height: 1.6;
+}
+
+/* ===== NAVIGATION UI ===== */
+.slide-nav {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-elevated, #ffffff);
+    padding: 0.4rem 0.75rem;
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    z-index: 1000;
+    opacity: 0.85;
+    transition: opacity 0.3s ease;
+}
+
+.slide-nav:hover {
+    opacity: 1;
+}
+
+/* Hide navigation when scrolling down, show when near bottom */
+.slide-nav.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.slide-nav button {
+    background: var(--bg-tertiary, #f1f5f9);
+    border: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+}
+
+.slide-nav button svg {
+    width: 12px;
+    height: 12px;
+}
+
+.slide-nav button:hover {
+    background: var(--primary-color, #2563eb);
+    color: white;
+}
+
+.slide-nav button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+#slideCounter {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--text-secondary, #4b5563);
+    min-width: 3rem;
+    text-align: center;
+}
+
+/* Progress Bar */
+.progress-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--bg-tertiary, #f1f5f9);
+    z-index: 1001;
+}
+
+#progressBar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color, #2563eb), var(--secondary-color, #7c3aed));
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Table of Contents Overlay */
+.toc-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.toc-overlay.show {
+    display: flex;
+}
+
+.toc-content {
+    background: var(--bg-elevated, #ffffff);
+    padding: 2rem;
+    border-radius: var(--radius-xl, 1.5rem);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.toc-content h3 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.toc-content ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+}
+
+.toc-content li {
+    padding: 0.5rem 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.toc-content li:hover {
+    color: var(--primary-color, #2563eb);
+}
+
+.toc-content li.current {
+    font-weight: 600;
+    color: var(--primary-color, #2563eb);
+}
+
+/* ===== MODE TOGGLE ===== */
+.presentation-mode-toggle {
+    position: fixed;
+    top: 4.5rem;
+    right: 1rem;
+    width: 2rem;
+    height: 2rem;
+    background: var(--bg-elevated, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    z-index: 999;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.presentation-mode-toggle:hover {
+    opacity: 1;
+}
+
+.presentation-mode-toggle svg {
+    width: 14px;
+    height: 14px;
+}
+
+.presentation-mode-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .presentation {
+        scroll-snap-type: none;
+        height: auto;
+        overflow: visible;
+    }
+
+    .slide {
+        min-height: auto;
+        page-break-after: always;
+        padding: 1.5rem;
+        break-inside: avoid;
+    }
+
+    .slide.title-slide {
+        background: var(--primary-color, #2563eb) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .slide-nav,
+    .progress-container,
+    .toc-overlay,
+    .presentation-mode-toggle {
+        display: none !important;
+    }
+
+    .visualization-container {
+        aspect-ratio: auto;
+        max-height: 400px;
+    }
+
+    .formula-highlight {
+        border: 1px solid #ccc;
+        box-shadow: none;
+    }
+}
+
+/* ===== MOBILE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+    .slide {
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+        min-height: auto;
+        scroll-snap-align: none;
+    }
+
+    .presentation {
+        scroll-snap-type: none;
+        height: auto;
+        overflow-y: visible;
+    }
+
+    .slide-content {
+        grid-template-columns: 1fr;
+    }
+
+    .slide-nav {
+        bottom: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .visualization-container {
+        aspect-ratio: 4/3;
+    }
+
+    .formula-highlight {
+        padding: 1rem;
+    }
+
+    .presentation-mode-toggle {
+        top: auto;
+        bottom: 4rem;
+        right: 1rem;
+    }
+}
+
+/* ===== LARGE SCREEN OPTIMIZATIONS ===== */
+@media (min-width: 1920px) {
+    .slide {
+        padding: clamp(3rem, 5vw, 5rem);
+    }
+
+    .slide-content {
+        max-width: 1600px;
+    }
+
+    .slide h2 {
+        font-size: 3.5rem;
+    }
+
+    .slide p, .slide li {
+        font-size: 1.35rem;
+    }
+}
+
+/* ===== FULLSCREEN MODE ===== */
+.presentation:fullscreen .slide {
+    min-height: 100vh;
+}
+
+.presentation:fullscreen .slide-nav {
+    opacity: 1;
+}
+
+/* ===== KEYBOARD HINTS ===== */
+.keyboard-hints {
+    position: fixed;
+    bottom: 5rem;
+    right: 2rem;
+    background: var(--bg-elevated, #ffffff);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius, 0.5rem);
+    font-size: 0.8rem;
+    color: var(--text-tertiary, #6b7280);
+    box-shadow: var(--shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 999;
+}
+
+.keyboard-hints.show {
+    opacity: 1;
+}
+
+.keyboard-hints kbd {
+    display: inline-block;
+    padding: 0.2rem 0.4rem;
+    background: var(--bg-tertiary, #f1f5f9);
+    border-radius: 0.25rem;
+    font-family: inherit;
+    font-size: 0.75rem;
+    margin: 0 0.2rem;
+}
+
+/* ===== DARK MODE ADJUSTMENTS ===== */
+[data-theme="dark"] .slide {
+    background: var(--bg-primary, #0f172a);
+}
+
+[data-theme="dark"] .slide:nth-child(even) {
+    background: var(--bg-secondary, #1e293b);
+}
+
+[data-theme="dark"] .slide-nav {
+    background: var(--bg-tertiary, #334155);
+}
+
+[data-theme="dark"] .toc-content {
+    background: var(--bg-secondary, #1e293b);
+}
+
+[data-theme="dark"] .reference-card {
+    background: var(--bg-tertiary, #334155);
+}
+
+[data-theme="dark"] .formula-meaning li {
+    background: var(--bg-tertiary, #334155);
+}
