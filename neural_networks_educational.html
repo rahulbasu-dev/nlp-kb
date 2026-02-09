@@ -395,22 +395,22 @@
             </p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
                 <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 10px;">
-                    <span style="font-size: 2rem;">起点</span>
+                    <span style="font-size: 2rem;">🏠</span>
                     <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Start Here</p>
                     <p style="font-size: 0.85rem; opacity: 0.9;">Begin with Intuition section for foundational understanding</p>
                 </div>
                 <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 10px;">
-                    <span style="font-size: 2rem;">探索</span>
+                    <span style="font-size: 2rem;">🔍</span>
                     <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Explore</p>
                     <p style="font-size: 0.85rem; opacity: 0.9;">Play with interactive visualizations to see concepts in action</p>
                 </div>
                 <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 10px;">
-                    <span style="font-size: 2rem;">代码</span>
+                    <span style="font-size: 2rem;">💻</span>
                     <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Code</p>
                     <p style="font-size: 0.85rem; opacity: 0.9;">Implement your own neural network from scratch</p>
                 </div>
                 <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 10px;">
-                    <span style="font-size: 2rem;">练习</span>
+                    <span style="font-size: 2rem;">🎯</span>
                     <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Practice</p>
                     <p style="font-size: 0.85rem; opacity: 0.9;">Use the Playground to train networks on real problems</p>
                 </div>
@@ -694,7 +694,7 @@
                     <button class="btn-primary" onclick="showProblem('OR')">Show OR (Linearly Separable)</button>
                     <button class="btn-secondary" onclick="showProblem('XOR')">Show XOR (NOT Linearly Separable)</button>
                 </div>
-                <p><strong>观察 (Observe):</strong> Can you draw one straight line that separates all green points from all red points?</p>
+                <p><strong>Observe:</strong> Can you draw one straight line that separates all green points from all red points?</p>
             </div>
         </section>
 
@@ -1361,9 +1361,9 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-success" onclick="stepForward()">▶️ Forward Pass</button>
-                    <button class="btn-primary" onclick="stepBackward()">◀️ Backward Pass</button>
-                    <button class="btn-secondary" onclick="stepUpdate()">🔄 Update Weights</button>
+                    <button class="btn-success" onclick="fullStepForward()">▶️ Forward Pass</button>
+                    <button class="btn-primary" onclick="fullStepBackward()">◀️ Backward Pass</button>
+                    <button class="btn-secondary" onclick="fullStepUpdate()">🔄 Update Weights</button>
                     <button class="btn-secondary" onclick="resetAnimation()">↺ Reset</button>
                     <span id="animationStatus" style="margin-left: 1rem; font-weight: bold; color: var(--primary-color);"></span>
                 </div>
@@ -3368,7 +3368,7 @@
             return s * (1 - s);
         }
 
-        function stepForward() {
+        function fullStepForward() {
             if (fullNetworkState.step !== 0) return;
             fullNetworkState.step = 1;
 
@@ -3393,8 +3393,8 @@
             updateFullNetworkDisplay();
         }
 
-        function stepBackward() {
-            if (fullNetworkState.step < 1) stepForward();
+        function fullStepBackward() {
+            if (fullNetworkState.step < 1) fullStepForward();
             fullNetworkState.step = 2;
 
             // Backpropagation
@@ -3425,8 +3425,8 @@
             updateFullNetworkDisplay();
         }
 
-        function stepUpdate() {
-            if (fullNetworkState.step < 2) stepBackward();
+        function fullStepUpdate() {
+            if (fullNetworkState.step < 2) fullStepBackward();
             fullNetworkState.step = 3;
             fullNetworkState.iteration++;
 
@@ -3446,7 +3446,7 @@
             }
 
             // Recalculate after update
-            stepForward();
+            fullStepForward();
             fullNetworkState.step = 0;
 
             updateFullNetworkDisplay();
@@ -3464,9 +3464,9 @@
         }
 
         function runFullCycle() {
-            stepForward();
-            stepBackward();
-            stepUpdate();
+            fullStepForward();
+            fullStepBackward();
+            fullStepUpdate();
         }
 
         function fastForward(steps) {
