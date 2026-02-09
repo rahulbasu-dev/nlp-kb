@@ -374,11 +374,12 @@
         <div class="nav-container">
             <div class="logo">Neural Networks</div>
             <ul>
-                <li><a href="#intro">Introduction</a></li>
+                <li><a href="#intuition">Intuition</a></li>
                 <li><a href="#xor">XOR Problem</a></li>
                 <li><a href="#forward">Forward Pass</a></li>
                 <li><a href="#training">Training</a></li>
                 <li><a href="#activation">Activations</a></li>
+                <li><a href="#visualizations">Visualizations</a></li>
                 <li><a href="#playground">Playground</a></li>
             </ul>
         </div>
@@ -386,36 +387,84 @@
 
     <!-- Main Content -->
     <main>
-        <!-- Introduction -->
-        <section id="intro">
-            <h1>Neural Networks: A Visual Guide</h1>
-            <p class="subtitle" style="font-size: 1.2rem; color: var(--text-light); margin-bottom: 2rem;">
-                Understanding neural networks through interactive visualizations and step-by-step explanations.
-            </p>
+        <!-- 1. Intuition: What Are Neural Networks? -->
+        <section id="intuition">
+            <h2>1. Intuition: What Are Neural Networks?</h2>
 
             <div class="card">
-                <h2>What is a Neural Network?</h2>
-                <p>
-                    A neural network is a computational model inspired by biological neural networks in the brain.
-                    It consists of interconnected nodes (neurons) organized in layers that process information through
-                    weighted connections.
-                </p>
-                <p>
-                    <strong>Key Components:</strong>
-                </p>
-                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
-                    <li><strong>Input Layer:</strong> Receives the input data</li>
-                    <li><strong>Hidden Layers:</strong> Process information through weighted connections</li>
-                    <li><strong>Output Layer:</strong> Produces the final prediction</li>
-                    <li><strong>Weights:</strong> Control the strength of connections between neurons</li>
-                    <li><strong>Activation Functions:</strong> Introduce non-linearity (e.g., sigmoid, ReLU)</li>
+                <div class="callout">
+                    <strong>Historical Context (Jurafsky & Martin, 2026, p. 128)</strong>
+                    <p>Neural networks evolved from the McCulloch-Pitts neuron (1943), a simplified model of biological computation. Modern feedforward networks stack layers of these units, with backpropagation enabling learning via gradient descent.</p>
+                </div>
+
+                <p>A <strong>neural network</strong> is a computational model inspired by how biological neurons in the brain process information. At its core, it's a pattern recognition machine that learns to map inputs to outputs through examples.</p>
+
+                <div class="callout callout-info">
+                    <h4>🧠 The Brain Analogy</h4>
+                    <p>Just as your brain has billions of interconnected neurons that fire in patterns to recognize faces, understand language, or control movement, artificial neural networks use interconnected mathematical "neurons" (nodes) that learn patterns in data. Each connection has a <strong>weight</strong> that determines how strongly one neuron influences another—similar to synaptic strength in biological neurons.</p>
+                    <p><strong>First modeled by:</strong> McCulloch & Pitts (1943)<span class="citation" title="McCulloch & Pitts, 1943">[1]</span>, formalized as the perceptron by Rosenblatt (1958)<span class="citation" title="Rosenblatt, 1958">[2]</span>.</p>
+                </div>
+
+                <h3>How Neural Networks Learn</h3>
+                <p>Neural networks learn through <strong>supervised learning</strong>:</p>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><strong>Start with random guesses:</strong> Initialize weights randomly</li>
+                    <li><strong>Make predictions:</strong> Feed input data through the network</li>
+                    <li><strong>Measure error:</strong> Compare predictions to true labels</li>
+                    <li><strong>Adjust weights:</strong> Use backpropagation<span class="citation" title="Rumelhart et al., 1986">[3]</span> to reduce error</li>
+                    <li><strong>Repeat:</strong> Iterate thousands of times until accurate</li>
+                </ol>
+
+                <div class="callout callout-info">
+                    <h4>📧 Example: Spam Detection</h4>
+                    <p><strong>Input:</strong> Email text (converted to numbers representing word frequencies)</p>
+                    <p><strong>Hidden layers:</strong> Learn patterns like "free money" + "click now" = suspicious</p>
+                    <p><strong>Output:</strong> Probability the email is spam (0.0 = not spam, 1.0 = spam)</p>
+                    <p>After training on thousands of labeled emails, the network learns which word combinations indicate spam, even for emails it's never seen before!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <div>
+                        <h3>Input → Hidden → Output Flow</h3>
+                        <p><strong>Input Layer:</strong> Raw features (pixels, words, numbers)</p>
+                        <p><strong>Hidden Layers:</strong> Learn progressively abstract patterns</p>
+                        <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                            <li>Layer 1: Edges and textures</li>
+                            <li>Layer 2: Shapes and parts</li>
+                            <li>Layer 3: Complex objects</li>
+                        </ul>
+                        <p><strong>Output Layer:</strong> Final prediction (class, number, etc.)</p>
+                    </div>
+
+                    <div>
+                        <h3>Learning by Trial and Error</h3>
+                        <p><strong>Forward Pass:</strong> Make a prediction with current weights</p>
+                        <p><strong>Loss Calculation:</strong> How wrong was the prediction?</p>
+                        <p><strong>Backpropagation:</strong> Calculate how to adjust each weight</p>
+                        <p><strong>Gradient Descent:</strong> Update weights to reduce error</p>
+                        <p><strong>Repeat:</strong> Each iteration (epoch) improves accuracy</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💡 Key Concepts</h3>
+                <ul style="margin-left: 2rem;">
+                    <li><strong>Neuron (Node):</strong> Computes weighted sum + bias, then applies activation function</li>
+                    <li><strong>Weight:</strong> Connection strength between neurons (learned during training)</li>
+                    <li><strong>Bias:</strong> Shifts activation threshold (like a y-intercept)</li>
+                    <li><strong>Activation Function:</strong> Introduces non-linearity (e.g., sigmoid, ReLU)</li>
+                    <li><strong>Epoch:</strong> One complete pass through all training data</li>
+                    <li><strong>Learning Rate:</strong> Step size for weight updates (too big = unstable, too small = slow)</li>
                 </ul>
             </div>
         </section>
 
         <!-- XOR Problem -->
         <section id="xor">
-            <h2>1. The XOR Problem: Why We Need Hidden Layers</h2>
+            <h2>2. The XOR Problem: Why We Need Hidden Layers</h2>
 
             <div class="card">
                 <h3>Linear Separability</h3>
@@ -475,132 +524,9 @@
             </div>
         </section>
 
-        <!-- Forward Propagation -->
-        <section id="forward">
-            <h2>2. Forward Propagation</h2>
-
-            <div class="card">
-                <h3>How Information Flows Through the Network</h3>
-                <p>
-                    Forward propagation is the process of computing the output of a neural network given an input.
-                    Information flows from the input layer through hidden layers to the output layer.
-                </p>
-
-                <div class="canvas-container">
-                    <canvas id="forwardCanvas" width="900" height="500"></canvas>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn-primary" onclick="playForwardAnimation()">▶ Play Animation</button>
-                    <button class="btn-secondary" onclick="pauseForwardAnimation()">⏸ Pause</button>
-                    <button class="btn-secondary" onclick="resetForwardAnimation()">⟲ Reset</button>
-                    <button class="btn-success" onclick="stepForwardAnimation()">Step Forward</button>
-                </div>
-
-                <div class="control-panel">
-                    <h4>Input Values:</h4>
-                    <div class="slider-group">
-                        <label>Input 1: <span id="input1Value">1.0</span></label>
-                        <input type="range" id="input1Slider" min="-2" max="2" step="0.1" value="1.0"
-                               oninput="updateForwardPass()">
-                    </div>
-                    <div class="slider-group">
-                        <label>Input 2: <span id="input2Value">0.5</span></label>
-                        <input type="range" id="input2Slider" min="-2" max="2" step="0.1" value="0.5"
-                               oninput="updateForwardPass()">
-                    </div>
-                    <div class="slider-group">
-                        <label>Animation Speed: <span id="animSpeedValue">Normal</span></label>
-                        <input type="range" id="animSpeedSlider" min="0.5" max="2" step="0.5" value="1"
-                               oninput="updateAnimationSpeed()">
-                    </div>
-                </div>
-
-                <div class="value-display" id="forwardStepDisplay" style="background: #fef3c7; border-left: 4px solid #d97706;">
-                    <h4>Current Step: <span id="currentStepName">Ready to start</span></h4>
-                    <div id="currentStepDetails" style="font-family: 'Consolas', monospace; color: #1f2937; margin-top: 0.5rem;">
-                        Click "Play Animation" to see forward propagation in action!
-                    </div>
-                </div>
-
-                <div class="value-display" id="forwardValues">
-                    <h4>Network Values</h4>
-                    <div id="forwardValuesContent"></div>
-                </div>
-
-                <div class="math-block">
-                    <h4>Forward Propagation Equations:</h4>
-                    <p><strong>Step 1: Hidden Layer</strong></p>
-                    <p>\[ z^{[1]} = W^{[1]} \cdot x + b^{[1]} \]</p>
-                    <p>\[ a^{[1]} = \sigma(z^{[1]}) = \frac{1}{1 + e^{-z^{[1]}}} \]</p>
-
-                    <p><strong>Step 2: Output Layer</strong></p>
-                    <p>\[ z^{[2]} = W^{[2]} \cdot a^{[1]} + b^{[2]} \]</p>
-                    <p>\[ \hat{y} = \sigma(z^{[2]}) = \frac{1}{1 + e^{-z^{[2]}}} \]</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Training Cycle -->
-        <section id="training">
-            <h2>3. Complete Training Cycle</h2>
-
-            <div class="card">
-                <h3>Forward Pass → Loss → Backward Pass → Update Weights</h3>
-                <p>
-                    Training a neural network involves three steps repeated over many iterations:
-                </p>
-                <ol style="margin-left: 2rem; margin-bottom: 1.5rem;">
-                    <li><strong>Forward Pass:</strong> Compute predictions</li>
-                    <li><strong>Compute Loss:</strong> Measure how wrong the predictions are</li>
-                    <li><strong>Backward Pass:</strong> Calculate gradients using backpropagation</li>
-                    <li><strong>Update Weights:</strong> Adjust weights to reduce the loss</li>
-                </ol>
-
-                <div class="canvas-container">
-                    <canvas id="trainingCanvas" width="800" height="500"></canvas>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn-primary" onclick="stepForward()">Step 1: Forward</button>
-                    <button class="btn-primary" onclick="stepBackward()">Step 2: Backward</button>
-                    <button class="btn-success" onclick="stepUpdate()">Step 3: Update</button>
-                    <button class="btn-secondary" onclick="trainEpoch()">Train 1 Epoch</button>
-                </div>
-
-                <div class="value-display" id="trainingValues">
-                    <h4>Training Metrics</h4>
-                    <div id="trainingValuesContent"></div>
-                </div>
-
-                <div class="math-block">
-                    <h4>Backpropagation (Chain Rule):</h4>
-                    <p><strong>Step 1: Loss Function (Binary Cross-Entropy)</strong></p>
-                    <p>\[ L = -[y \log(\hat{y}) + (1-y) \log(1-\hat{y})] \]</p>
-
-                    <p><strong>Step 2: Output Layer Gradient</strong></p>
-                    <p>\[ \frac{\partial L}{\partial z^{[2]}} = \hat{y} - y \]</p>
-
-                    <p><strong>Step 3: Hidden Layer Gradient</strong></p>
-                    <p>\[ \frac{\partial L}{\partial z^{[1]}} = (W^{[2]})^T \frac{\partial L}{\partial z^{[2]}} \odot \sigma'(z^{[1]}) \]</p>
-
-                    <p><strong>Step 4: Weight Update</strong></p>
-                    <p>\[ W^{[2]} := W^{[2]} - \alpha \frac{\partial L}{\partial W^{[2]}} \]</p>
-                    <p>\[ W^{[1]} := W^{[1]} - \alpha \frac{\partial L}{\partial W^{[1]}} \]</p>
-                </div>
-
-                <div class="callout">
-                    <strong>Why Binary Cross-Entropy?</strong><br>
-                    BCE provides stronger gradients for wrong predictions compared to Mean Squared Error (MSE).
-                    When the prediction is confident but wrong, BCE produces large gradients that help the network
-                    learn faster. MSE suffers from vanishing gradients when used with sigmoid activation.
-                </div>
-            </div>
-        </section>
-
         <!-- Activation Functions -->
         <section id="activation">
-            <h2>4. Activation Functions</h2>
+            <h2>3. Activation Functions</h2>
 
             <div class="card">
                 <h3>Interactive Activation Function Explorer</h3>
@@ -658,9 +584,267 @@
             </div>
         </section>
 
+        <!-- Forward Propagation -->
+        <section id="forward">
+            <h2>4. Forward Propagation</h2>
+
+            <div class="card">
+                <h3>How Information Flows Through the Network</h3>
+                <p>
+                    Forward propagation is the process of computing the output of a neural network given an input.
+                    Information flows from the input layer through hidden layers to the output layer.
+                </p>
+
+                <div class="canvas-container">
+                    <canvas id="forwardCanvas" width="900" height="500"></canvas>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="playForwardAnimation()">Play Animation</button>
+                    <button class="btn-secondary" onclick="pauseForwardAnimation()">Pause</button>
+                    <button class="btn-secondary" onclick="resetForwardAnimation()">Reset</button>
+                    <button class="btn-success" onclick="stepForwardAnimation()">Step Forward</button>
+                </div>
+
+                <div class="control-panel">
+                    <h4>Input Values:</h4>
+                    <div class="slider-group">
+                        <label>Input 1: <span id="input1Value">1.0</span></label>
+                        <input type="range" id="input1Slider" min="-2" max="2" step="0.1" value="1.0"
+                               oninput="updateForwardPass()">
+                    </div>
+                    <div class="slider-group">
+                        <label>Input 2: <span id="input2Value">0.5</span></label>
+                        <input type="range" id="input2Slider" min="-2" max="2" step="0.1" value="0.5"
+                               oninput="updateForwardPass()">
+                    </div>
+                    <div class="slider-group">
+                        <label>Animation Speed: <span id="animSpeedValue">Normal</span></label>
+                        <input type="range" id="animSpeedSlider" min="0.5" max="2" step="0.5" value="1"
+                               oninput="updateAnimationSpeed()">
+                    </div>
+                </div>
+
+                <div class="value-display" id="forwardStepDisplay" style="background: #fef3c7; border-left: 4px solid #d97706;">
+                    <h4>Current Step: <span id="currentStepName">Ready to start</span></h4>
+                    <div id="currentStepDetails" style="font-family: 'Consolas', monospace; color: #1f2937; margin-top: 0.5rem;">
+                        Click "Play Animation" to see forward propagation in action!
+                    </div>
+                </div>
+
+                <div class="value-display" id="forwardValues">
+                    <h4>Network Values</h4>
+                    <div id="forwardValuesContent"></div>
+                </div>
+
+                <div class="math-block">
+                    <h4>Forward Propagation Equations:</h4>
+                    <p><strong>Step 1: Hidden Layer</strong></p>
+                    <p>\[ z^{[1]} = W^{[1]} \cdot x + b^{[1]} \]</p>
+                    <p>\[ a^{[1]} = \sigma(z^{[1]}) = \frac{1}{1 + e^{-z^{[1]}}} \]</p>
+
+                    <p><strong>Step 2: Output Layer</strong></p>
+                    <p>\[ z^{[2]} = W^{[2]} \cdot a^{[1]} + b^{[2]} \]</p>
+                    <p>\[ \hat{y} = \sigma(z^{[2]}) = \frac{1}{1 + e^{-z^{[2]}}} \]</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Training Cycle -->
+        <section id="training">
+            <h2>5. Complete Training Cycle</h2>
+
+            <div class="card">
+                <h3>Forward Pass Loss Backward Pass Update Weights</h3>
+                <p>
+                    Training a neural network involves three steps repeated over many iterations:
+                </p>
+                <ol style="margin-left: 2rem; margin-bottom: 1.5rem;">
+                    <li><strong>Forward Pass:</strong> Compute predictions</li>
+                    <li><strong>Compute Loss:</strong> Measure how wrong the predictions are</li>
+                    <li><strong>Backward Pass:</strong> Calculate gradients using backpropagation</li>
+                    <li><strong>Update Weights:</strong> Adjust weights to reduce the loss</li>
+                </ol>
+
+                <div class="canvas-container">
+                    <canvas id="trainingCanvas" width="800" height="500"></canvas>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="stepForward()">Step 1: Forward</button>
+                    <button class="btn-primary" onclick="stepBackward()">Step 2: Backward</button>
+                    <button class="btn-success" onclick="stepUpdate()">Step 3: Update</button>
+                    <button class="btn-secondary" onclick="trainEpoch()">Train 1 Epoch</button>
+                </div>
+
+                <div class="value-display" id="trainingValues">
+                    <h4>Training Metrics</h4>
+                    <div id="trainingValuesContent"></div>
+                </div>
+
+                <div class="math-block">
+                    <h4>Backpropagation (Chain Rule):</h4>
+                    <p><strong>Step 1: Loss Function (Binary Cross-Entropy)</strong></p>
+                    <p>\[ L = -[y \log(\hat{y}) + (1-y) \log(1-\hat{y})] \]</p>
+
+                    <p><strong>Step 2: Output Layer Gradient</strong></p>
+                    <p>\[ \frac{\partial L}{\partial z^{[2]}} = \hat{y} - y \]</p>
+
+                    <p><strong>Step 3: Hidden Layer Gradient</strong></p>
+                    <p>\[ \frac{\partial L}{\partial z^{[1]}} = (W^{[2]})^T \frac{\partial L}{\partial z^{[2]}} \odot \sigma'(z^{[1]}) \]</p>
+
+                    <p><strong>Step 4: Weight Update</strong></p>
+                    <p>\[ W^{[2]} := W^{[2]} - \alpha \frac{\partial L}{\partial W^{[2]}} \]</p>
+                    <p>\[ W^{[1]} := W^{[1]} - \alpha \frac{\partial L}{\partial W^{[1]}} \]</p>
+                </div>
+
+                <div class="callout">
+                    <strong>Why Binary Cross-Entropy?</strong><br>
+                    BCE provides stronger gradients for wrong predictions compared to Mean Squared Error (MSE).
+                    When the prediction is confident but wrong, BCE produces large gradients that help the network
+                    learn faster. MSE suffers from vanishing gradients when used with sigmoid activation.
+                </div>
+            </div>
+        </section>
+
+        <!-- Additional Visualizations -->
+        <section id="visualizations">
+            <h2>7. Additional Visualizations</h2>
+
+            <div class="card">
+                <h3>C. Network Architecture Visualizer</h3>
+                <p>Customize the network structure and see how neurons connect:</p>
+
+                <div class="canvas-container">
+                    <canvas id="networkCanvas" width="900" height="600"></canvas>
+                </div>
+
+                <div class="control-panel">
+                    <div class="slider-group">
+                        <label>Layer Sizes (comma-separated): <span id="layerDisplay">[2, 4, 1]</span></label>
+                        <input type="text" id="layerInput" value="2, 4, 1" placeholder="e.g., 2, 4, 1">
+                        <button class="btn-primary" onclick="updateNetwork()">Update Network</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>E. Gradient Descent on Loss Surface 🏔️</h3>
+                <p>Visualize how gradient descent finds the minimum of the loss function:</p>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="animateGradientDescent()" id="gdAnimateBtn">🚀 Animate Gradient Descent</button>
+                    <button class="btn-secondary" onclick="resetGradientDescent()">↺ Reset</button>
+                    <div class="slider-group" style="display: inline-block; margin-left: 1rem;">
+                        <label>Learning Rate: <span id="lrValue">0.1</span></label>
+                        <input type="range" id="learningRateSlider" min="0.01" max="0.5" step="0.01" value="0.1" oninput="updateLearningRate()">
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div>
+                            <canvas id="lossSurface3D" width="400" height="400"></canvas>
+                            <p style="text-align: center; color: var(--text-light); font-size: 0.9rem;">3D Loss Surface</p>
+                        </div>
+                        <div>
+                            <canvas id="lossContour" width="400" height="400"></canvas>
+                            <p style="text-align: center; color: var(--text-light); font-size: 0.9rem;">Contour Plot with Gradient Path</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="value-display">
+                    <h4>📈 Optimization Details</h4>
+                    <div id="gdDetails" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; font-size: 0.9rem;">
+                        <div><strong>Step:</strong> <span id="gdStep">0</span></div>
+                        <div><strong>Loss:</strong> <span id="gdLoss">-</span></div>
+                        <div><strong>Weight 1:</strong> <span id="gdW1">-</span></div>
+                        <div><strong>Weight 2:</strong> <span id="gdW2">-</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>F. Training Loss Visualizer</h3>
+                <p>Simulate network training and watch the loss decrease over epochs:</p>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="startTraining()" id="trainBtn">Start Training</button>
+                    <button class="btn-secondary" onclick="pauseTraining()" id="pauseBtn" disabled>Pause</button>
+                    <button class="btn-secondary" onclick="resetTraining()">Reset</button>
+                    <span id="epochDisplay" style="margin-left: 1rem; font-weight: bold;">Epoch: 0 / 1000</span>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="lossChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>G. Complete Forward & Backward Pass with Live Values 🔄</h3>
+                <p>Watch every neuron, weight, and gradient update in real-time:</p>
+
+                <div class="button-group">
+                    <button class="btn-success" onclick="stepForward()">▶️ Forward Pass</button>
+                    <button class="btn-primary" onclick="stepBackward()">◀️ Backward Pass</button>
+                    <button class="btn-secondary" onclick="stepUpdate()">🔄 Update Weights</button>
+                    <button class="btn-secondary" onclick="resetAnimation()">↺ Reset</button>
+                    <span id="animationStatus" style="margin-left: 1rem; font-weight: bold; color: var(--primary-color);"></span>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="runFullCycle()">🔁 1 Complete Cycle</button>
+                    <button class="btn-secondary" onclick="fastForward(10)">⚡ +10 Steps</button>
+                    <button class="btn-secondary" onclick="fastForward(100)">⚡⚡ +100 Steps</button>
+                </div>
+
+                <div class="value-display" style="background: #fef3c7;">
+                    <h4>📊 Current Metrics</h4>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: var(--text-light);">Iteration</div>
+                            <div id="iterationDisplay" style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">0</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: var(--text-light);">Current Loss</div>
+                            <div id="currentLossDisplay" style="font-size: 1.5rem; font-weight: bold; color: #ef4444;">--</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: var(--text-light);">Loss Reduction</div>
+                            <div id="lossReductionDisplay" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-color);">--</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: var(--text-light);">Avg Weight Change</div>
+                            <div id="weightChangeDisplay" style="font-size: 1.5rem; font-weight: bold; color: #d97706;">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="fullNetworkCanvas" width="1100" height="500"></canvas>
+                </div>
+
+                <div class="value-display">
+                    <h4>📊 Current Network Values</h4>
+                    <div id="currentValuesContent" style="font-family: 'Consolas', monospace; font-size: 0.9rem; line-height: 1.6;"></div>
+                </div>
+
+                <div class="value-display">
+                    <h4>📉 Gradients (∂L/∂W)</h4>
+                    <div id="gradientsDisplayContent" style="font-family: 'Consolas', monospace; font-size: 0.9rem; line-height: 1.6;"></div>
+                </div>
+
+                <div class="value-display">
+                    <h4>📈 Training Progress</h4>
+                    <div id="progressDisplayContent" style="font-family: 'Consolas', monospace; font-size: 0.9rem; line-height: 1.6;"></div>
+                </div>
+            </div>
+        </section>
+
         <!-- Interactive Playground -->
         <section id="playground">
-            <h2>5. Neural Network Playground</h2>
+            <h2>8. Neural Network Playground</h2>
 
             <div class="card">
                 <h3>Interactive Exploration</h3>
@@ -715,7 +899,7 @@
 
         <!-- Python Implementation -->
         <section id="code">
-            <h2>6. Python Implementation</h2>
+            <h2>9. Python Implementation</h2>
 
             <div class="card">
                 <h3>Complete Neural Network from Scratch</h3>
@@ -1961,6 +2145,712 @@ print(<span class="string">"Predictions:"</span>, predictions.flatten())</code><
         // Initialize playground
         initPlayground();
         updatePlaygroundMetrics();
+
+        // ==================== Network Architecture Visualizer ====================
+        let networkCanvas = document.getElementById('networkCanvas');
+        let networkCtx = networkCanvas ? networkCanvas.getContext('2d') : null;
+
+        let networkConfig = {
+            layerSizes: [2, 4, 1],
+            layerNames: ['Input', 'Hidden', 'Output']
+        };
+
+        function updateNetwork() {
+            const input = document.getElementById('layerInput').value;
+            const sizes = input.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0);
+            if (sizes.length >= 2) {
+                networkConfig.layerSizes = sizes;
+                networkConfig.layerNames = sizes.map((_, i) => i === 0 ? 'Input' : i === sizes.length - 1 ? 'Output' : `Hidden ${i}`);
+                drawNetworkArchitecture();
+                document.getElementById('layerDisplay').textContent = JSON.stringify(sizes);
+            }
+        }
+
+        function drawNetworkArchitecture() {
+            if (!networkCtx || !networkCanvas) return;
+            networkCtx.clearRect(0, 0, networkCanvas.width, networkCanvas.height);
+
+            const layers = networkConfig.layerSizes;
+            const numLayers = layers.length;
+            const canvasWidth = networkCanvas.width;
+            const canvasHeight = networkCanvas.height;
+            const padding = 60;
+
+            // Calculate layer spacing
+            const layerSpacing = (canvasWidth - 2 * padding) / (numLayers - 1);
+
+            // Draw layers
+            layers.forEach((numNeurons, layerIdx) => {
+                const x = padding + layerIdx * layerSpacing;
+                const neuronSpacing = canvasHeight / (numNeurons + 1);
+
+                // Draw neurons
+                for (let i = 0; i < numNeurons; i++) {
+                    const y = neuronSpacing * (i + 1);
+                    networkCtx.beginPath();
+                    networkCtx.arc(x, y, 15, 0, Math.PI * 2);
+                    networkCtx.fillStyle = '#2563eb';
+                    networkCtx.fill();
+                    networkCtx.strokeStyle = '#1f2937';
+                    networkCtx.lineWidth = 2;
+                    networkCtx.stroke();
+
+                    // Draw neuron count label
+                    networkCtx.font = '12px Inter';
+                    networkCtx.fillStyle = '#6b7280';
+                    networkCtx.textAlign = 'center';
+                    networkCtx.fillText(numNeurons, x, y + 30);
+                }
+
+                // Draw layer label
+                networkCtx.font = 'bold 14px Inter';
+                networkCtx.fillStyle = '#1f2937';
+                networkCtx.textAlign = 'center';
+                networkCtx.fillText(networkConfig.layerNames[layerIdx] + ` (${numNeurons})`, x, canvasHeight - 20);
+            });
+
+            // Draw connections between layers
+            for (let l = 0; l < numLayers - 1; l++) {
+                const numNeurons1 = layers[l];
+                const numNeurons2 = layers[l + 1];
+                const x1 = padding + l * layerSpacing;
+                const x2 = padding + (l + 1) * layerSpacing;
+                const neuronSpacing1 = canvasHeight / (numNeurons1 + 1);
+                const neuronSpacing2 = canvasHeight / (numNeurons2 + 1);
+
+                for (let i = 0; i < numNeurons1; i++) {
+                    for (let j = 0; j < numNeurons2; j++) {
+                        const y1 = neuronSpacing1 * (i + 1);
+                        const y2 = neuronSpacing2 * (j + 1);
+
+                        networkCtx.strokeStyle = '#6b728040';
+                        networkCtx.lineWidth = 1;
+                        networkCtx.beginPath();
+                        networkCtx.moveTo(x1, y1);
+                        networkCtx.lineTo(x2, y2);
+                        networkCtx.stroke();
+                    }
+                }
+            }
+
+            // Draw title
+            networkCtx.font = 'bold 18px Inter';
+            networkCtx.fillStyle = '#1f2937';
+            networkCtx.textAlign = 'center';
+            networkCtx.fillText('Network Architecture Visualizer', canvasWidth / 2, 30);
+        }
+
+        // Initialize network visualizer
+        updateNetwork();
+
+        // ==================== Gradient Descent Visualizer ====================
+        let gdCanvas3D = document.getElementById('lossSurface3D');
+        let gdCanvasContour = document.getElementById('lossContour');
+        let gdCtx3D = gdCanvas3D ? gdCanvas3D.getContext('2d') : null;
+        let gdCtxContour = gdCanvasContour ? gdCanvasContour.getContext('2d') : null;
+
+        let gradientDescentState = {
+            w1: 2.5,
+            w2: 2.5,
+            lr: 0.1,
+            step: 0,
+            path: [],
+            isAnimating: false,
+            animationId: null
+        };
+
+        function lossFunction(w1, w2) {
+            // Simple quadratic loss surface
+            return 0.5 * (w1 * w1 + w2 * w2) + 0.1 * w1 * w2;
+        }
+
+        function lossGradient(w1, w2) {
+            return [w1 + 0.1 * w2, w2 + 0.1 * w1];
+        }
+
+        function updateLearningRate() {
+            const lr = parseFloat(document.getElementById('learningRateSlider').value);
+            gradientDescentState.lr = lr;
+            document.getElementById('lrValue').textContent = lr.toFixed(2);
+            if (!gradientDescentState.isAnimating) {
+                updateGradientDescentDisplay();
+            }
+        }
+
+        function animateGradientDescent() {
+            if (gradientDescentState.isAnimating) return;
+            gradientDescentState.isAnimating = true;
+            gradientDescentState.animationId = requestAnimationFrame(stepGradientDescent);
+            document.getElementById('gdAnimateBtn').textContent = '⏸ Pause';
+            document.getElementById('gdAnimateBtn').onclick = pauseGradientDescent;
+        }
+
+        function pauseGradientDescent() {
+            gradientDescentState.isAnimating = false;
+            if (gradientDescentState.animationId) {
+                cancelAnimationFrame(gradientDescentState.animationId);
+            }
+            document.getElementById('gdAnimateBtn').textContent = '🚀 Animate Gradient Descent';
+            document.getElementById('gdAnimateBtn').onclick = animateGradientDescent;
+        }
+
+        function resetGradientDescent() {
+            gradientDescentState.isAnimating = false;
+            if (gradientDescentState.animationId) {
+                cancelAnimationFrame(gradientDescentState.animationId);
+            }
+            gradientDescentState.w1 = 2.5;
+            gradientDescentState.w2 = 2.5;
+            gradientDescentState.step = 0;
+            gradientDescentState.path = [];
+            updateLearningRate();
+            drawGradientDescent();
+            updateGradientDescentDisplay();
+            document.getElementById('gdAnimateBtn').textContent = '🚀 Animate Gradient Descent';
+            document.getElementById('gdAnimateBtn').onclick = animateGradientDescent;
+        }
+
+        function stepGradientDescent() {
+            if (!gradientDescentState.isAnimating) return;
+
+            const [gw1, gw2] = lossGradient(gradientDescentState.w1, gradientDescentState.w2);
+            gradientDescentState.w1 -= gradientDescentState.lr * gw1;
+            gradientDescentState.w2 -= gradientDescentState.lr * gw2;
+            gradientDescentState.step++;
+
+            gradientDescentState.path.push({
+                w1: gradientDescentState.w1,
+                w2: gradientDescentState.w2,
+                loss: lossFunction(gradientDescentState.w1, gradientDescentState.w2)
+            });
+
+            drawGradientDescent();
+            updateGradientDescentDisplay();
+
+            if (gradientDescentState.isAnimating) {
+                gradientDescentState.animationId = requestAnimationFrame(stepGradientDescent);
+            }
+        }
+
+        function drawGradientDescent() {
+            if (!gdCtx3D || !gdCanvas3D || !gdCtxContour || !gdCanvasContour) return;
+
+            // Clear 3D canvas
+            gdCtx3D.clearRect(0, 0, gdCanvas3D.width, gdCanvas3D.height);
+            gdCtxContour.clearRect(0, 0, gdCanvasContour.width, gdCanvasContour.height);
+
+            const width = gdCanvas3D.width;
+            const height = gdCanvas3D.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // Draw 3D Loss Surface (simplified projection)
+            const scale = 40;
+            const maxVal = 3;
+            const range = 2 * maxVal;
+
+            // Draw surface grid
+            gdCtx3D.strokeStyle = '#e5e7eb';
+            gdCtx3D.lineWidth = 1;
+
+            for (let i = 0; i <= 10; i++) {
+                const x = (i / 10) * range - maxVal;
+                gdCtx3D.beginPath();
+                for (let j = 0; j <= 10; j++) {
+                    const z = (j / 10) * range - maxVal;
+                    const y = 100 - lossFunction(x, z) * 15;
+                    const canvasX = centerX + (x - z) * scale * 0.5;
+                    const canvasY = centerY - y + (x + z) * scale * 0.2;
+                    if (j === 0) gdCtx3D.moveTo(canvasX, canvasY);
+                    else gdCtx3D.lineTo(canvasX, canvasY);
+                }
+                gdCtx3D.stroke();
+            }
+
+            // Draw contour plot
+            const contourWidth = gdCanvasContour.width;
+            const contourHeight = gdCanvasContour.height;
+            const contourCenterX = contourWidth / 2;
+            const contourCenterY = contourHeight / 2;
+            const contourScale = 60;
+
+            // Draw contour lines
+            gdCtxContour.lineWidth = 1;
+            for (let level = 0.1; level <= 5; level += 0.5) {
+                gdCtxContour.strokeStyle = '#2563eb';
+                gdCtxContour.beginPath();
+                for (let angle = 0; angle < Math.PI * 2; angle += 0.05) {
+                    // Approximate ellipse for contour
+                    const a = Math.sqrt(level * 2);
+                    const x = a * Math.cos(angle);
+                    const z = a * Math.sin(angle);
+                    gdCtxContour.lineTo(contourCenterX + x * contourScale, contourCenterY + z * contourScale);
+                }
+                gdCtxContour.stroke();
+            }
+
+            // Draw current position
+            const currX = gradientDescentState.w1;
+            const currZ = gradientDescentState.w2;
+
+            // 3D position
+            const projX = centerX + (currX - currZ) * scale * 0.5;
+            const projY = centerY - (100 - lossFunction(currX, currZ) * 15) + (currX + currZ) * scale * 0.2;
+
+            gdCtx3D.beginPath();
+            gdCtx3D.arc(projX, projY, 6, 0, Math.PI * 2);
+            gdCtx3D.fillStyle = '#ef4444';
+            gdCtx3D.fill();
+            gdCtx3D.strokeStyle = '#1f2937';
+            gdCtx3D.stroke();
+
+            // Contour position
+            gdCtxContour.beginPath();
+            gdCtxContour.arc(contourCenterX + currX * contourScale, contourCenterY + currZ * contourScale, 6, 0, Math.PI * 2);
+            gdCtxContour.fillStyle = '#ef4444';
+            gdCtxContour.fill();
+            gdCtxContour.strokeStyle = '#1f2937';
+            gdCtxContour.stroke();
+
+            // Draw path on contour
+            gdCtxContour.strokeStyle = '#f59e0b';
+            gdCtxContour.lineWidth = 2;
+            gdCtxContour.setLineDash([3, 3]);
+            gdCtxContour.beginPath();
+            gradientDescentState.path.forEach((point, i) => {
+                const px = contourCenterX + point.w1 * contourScale;
+                const py = contourCenterY + point.w2 * contourScale;
+                if (i === 0) gdCtxContour.moveTo(px, py);
+                else gdCtxContour.lineTo(px, py);
+            });
+            gdCtxContour.stroke();
+            gdCtxContour.setLineDash([]);
+        }
+
+        function updateGradientDescentDisplay() {
+            document.getElementById('gdStep').textContent = gradientDescentState.step;
+            document.getElementById('gdLoss').textContent = gradientDescentState.path.length > 0
+                ? gradientDescentState.path[gradientDescentState.path.length - 1].loss.toFixed(4)
+                : '-';
+            document.getElementById('gdW1').textContent = gradientDescentState.w1.toFixed(4);
+            document.getElementById('gdW2').textContent = gradientDescentState.w2.toFixed(4);
+        }
+
+        // Initialize gradient descent
+        updateLearningRate();
+        drawGradientDescent();
+        updateGradientDescentDisplay();
+
+        // ==================== Training Loss Visualizer ====================
+        let lossChartCanvas = document.getElementById('lossChart');
+        let lossChartCtx = lossChartCanvas ? lossChartCanvas.getContext('2d') : null;
+
+        let trainingLossState = {
+            epochs: 0,
+            maxEpochs: 1000,
+            losses: [],
+            isTraining: false,
+            trainingId: null
+        };
+
+        function startTraining() {
+            if (trainingLossState.isTraining) return;
+            trainingLossState.isTraining = true;
+            document.getElementById('trainBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('pauseBtn').textContent = '⏸ Pause';
+            trainingLossState.trainingId = requestAnimationFrame(trainStep);
+        }
+
+        function pauseTraining() {
+            trainingLossState.isTraining = false;
+            if (trainingLossState.trainingId) {
+                cancelAnimationFrame(trainingLossState.trainingId);
+            }
+            document.getElementById('trainBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+        }
+
+        function resetTraining() {
+            trainingLossState.isTraining = false;
+            if (trainingLossState.trainingId) {
+                cancelAnimationFrame(trainingLossState.trainingId);
+            }
+            trainingLossState.epochs = 0;
+            trainingLossState.losses = [];
+            document.getElementById('trainBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+            document.getElementById('epochDisplay').textContent = 'Epoch: 0 / 1000';
+            drawLossChart();
+        }
+
+        function trainStep() {
+            if (!trainingLossState.isTraining) return;
+
+            // Simulate training loss decrease
+            trainingLossState.epochs++;
+            const maxEpochs = trainingLossState.maxEpochs;
+
+            // Loss decreases exponentially with some noise
+            const baseLoss = 2.0;
+            const decay = 0.005;
+            const noise = (Math.random() - 0.5) * 0.1;
+            const loss = baseLoss * Math.exp(-decay * trainingLossState.epochs) + noise;
+
+            trainingLossState.losses.push(loss);
+
+            // Keep only last 200 losses for display
+            if (trainingLossState.losses.length > 200) {
+                trainingLossState.losses.shift();
+            }
+
+            drawLossChart();
+            document.getElementById('epochDisplay').textContent = `Epoch: ${trainingLossState.epochs} / ${maxEpochs}`;
+
+            if (trainingLossState.epochs < maxEpochs && trainingLossState.isTraining) {
+                trainingLossState.trainingId = requestAnimationFrame(trainStep);
+            } else {
+                trainingLossState.isTraining = false;
+                document.getElementById('trainBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+            }
+        }
+
+        function drawLossChart() {
+            if (!lossChartCtx || !lossChartCanvas) return;
+            const width = lossChartCanvas.width;
+            const height = lossChartCanvas.height;
+
+            lossChartCtx.clearRect(0, 0, width, height);
+
+            const losses = trainingLossState.losses;
+            if (losses.length === 0) return;
+
+            // Draw axes
+            lossChartCtx.strokeStyle = '#d1d5db';
+            lossChartCtx.lineWidth = 2;
+            lossChartCtx.beginPath();
+            lossChartCtx.moveTo(50, 20);
+            lossChartCtx.lineTo(50, height - 30);
+            lossChartCtx.lineTo(width - 20, height - 30);
+            lossChartCtx.stroke();
+
+            // Draw labels
+            lossChartCtx.font = '12px Inter';
+            lossChartCtx.fillStyle = '#6b7280';
+            lossChartCtx.fillText('Epoch', width - 40, height - 10);
+            lossChartCtx.save();
+            lossChartCtx.translate(20, height / 2);
+            lossChartCtx.rotate(-Math.PI / 2);
+            lossChartCtx.fillText('Loss', 0, 0);
+            lossChartCtx.restore();
+
+            // Draw loss curve
+            const maxLoss = losses.length > 0 ? Math.max(...losses, 2.0) : 2.0;
+            const minLoss = losses.length > 0 ? Math.min(...losses, 0) : 0;
+            const range = maxLoss - minLoss || 1;
+            const stepX = losses.length > 1 ? (width - 70) / (losses.length - 1) : 0;
+
+            if (losses.length > 1) {
+                lossChartCtx.strokeStyle = '#2563eb';
+                lossChartCtx.lineWidth = 2;
+                lossChartCtx.beginPath();
+
+                losses.forEach((loss, i) => {
+                    const x = 60 + i * stepX;
+                    const y = height - 40 - ((loss - minLoss) / range) * (height - 60);
+                    if (i === 0) lossChartCtx.moveTo(x, y);
+                    else lossChartCtx.lineTo(x, y);
+                });
+
+                lossChartCtx.stroke();
+
+                // Fill area under curve
+                lossChartCtx.lineTo(width - 20, height - 30);
+                lossChartCtx.lineTo(60, height - 30);
+                lossChartCtx.fillStyle = '#2563eb20';
+                lossChartCtx.fill();
+            }
+
+            // Draw current loss value
+            const currentLoss = losses[losses.length - 1];
+            const lastX = losses.length > 1 ? 60 + (losses.length - 1) * stepX : 60;
+            const lastY = losses.length > 0 ? height - 40 - ((currentLoss - minLoss) / range) * (height - 60) : height - 40;
+
+            lossChartCtx.beginPath();
+            lossChartCtx.arc(lastX, lastY, 5, 0, Math.PI * 2);
+            lossChartCtx.fillStyle = '#10b981';
+            lossChartCtx.fill();
+            lossChartCtx.strokeStyle = '#1f2937';
+            lossChartCtx.stroke();
+
+            // Draw current loss text
+            lossChartCtx.font = 'bold 14px Inter';
+            lossChartCtx.fillStyle = '#1f2937';
+            lossChartCtx.fillText(`Loss: ${currentLoss.toFixed(4)}`, lastX, lastY - 15);
+        }
+
+        // Initialize loss chart
+        drawLossChart();
+
+        // ==================== Full Network Animation ====================
+        let fullNetworkCanvas = document.getElementById('fullNetworkCanvas');
+        let fullNetworkCtx = fullNetworkCanvas ? fullNetworkCanvas.getContext('2d') : null;
+
+        let fullNetworkState = {
+            w1: [[0.5, 0.2, -0.3, 0.4], [0.3, -0.1, 0.6, 0.2]],
+            b1: [0.1, -0.1, 0.2, 0.0],
+            w2: [[0.6], [-0.2], [0.3], [-0.1]],
+            b2: [0.1],
+            input: [1.0, 0.5],
+            hidden: [],
+            output: 0,
+            loss: 0,
+            iteration: 0,
+            step: 0, // 0=ready, 1=forward, 2=backward, 3=update
+            target: 1.0
+        };
+
+        function sigmoid(x) {
+            return 1 / (1 + Math.exp(-x));
+        }
+
+        function sigmoidDerivative(x) {
+            const s = sigmoid(x);
+            return s * (1 - s);
+        }
+
+        function stepForward() {
+            if (fullNetworkState.step !== 0) return;
+            fullNetworkState.step = 1;
+
+            // Forward pass
+            const input = fullNetworkState.input;
+
+            // Hidden layer
+            fullNetworkState.hidden = fullNetworkState.b1.map((b, i) => {
+                const z = input[0] * fullNetworkState.w1[0][i] + input[1] * fullNetworkState.w1[1][i] + b;
+                return sigmoid(z);
+            });
+
+            // Output layer
+            const zOut = fullNetworkState.hidden.reduce((sum, h, i) => sum + h * fullNetworkState.w2[i][0], 0) + fullNetworkState.b2[0];
+            fullNetworkState.output = sigmoid(zOut);
+
+            // Compute loss
+            const y = fullNetworkState.target;
+            const yHat = fullNetworkState.output;
+            fullNetworkState.loss = -(y * Math.log(yHat + 1e-8) + (1 - y) * Math.log(1 - yHat + 1e-8));
+
+            updateFullNetworkDisplay();
+        }
+
+        function stepBackward() {
+            if (fullNetworkState.step < 1) stepForward();
+            fullNetworkState.step = 2;
+
+            // Backpropagation
+            const y = fullNetworkState.target;
+            const yHat = fullNetworkState.output;
+
+            // Output layer gradient
+            const dz2 = yHat - y;
+
+            // Hidden layer gradient
+            const dz1 = fullNetworkState.hidden.map((h, i) => dz2 * fullNetworkState.w2[i][0] * sigmoidDerivative(
+                fullNetworkState.input[0] * fullNetworkState.w1[0][i] + fullNetworkState.input[1] * fullNetworkState.w1[1][i] + fullNetworkState.b1[i]
+            ));
+
+            // Store gradients for display
+            fullNetworkState.gradients = {
+                dz2: dz2,
+                dz1: dz1,
+                dW2: fullNetworkState.hidden.map(h => h * dz2),
+                db2: dz2,
+                dW1: fullNetworkState.hidden.map((h, i) => [
+                    fullNetworkState.input[0] * dz1[i],
+                    fullNetworkState.input[1] * dz1[i]
+                ]),
+                db1: dz1
+            };
+
+            updateFullNetworkDisplay();
+        }
+
+        function stepUpdate() {
+            if (fullNetworkState.step < 2) stepBackward();
+            fullNetworkState.step = 3;
+            fullNetworkState.iteration++;
+
+            const lr = 0.1;
+
+            // Update W2 and b2
+            for (let i = 0; i < fullNetworkState.w2.length; i++) {
+                fullNetworkState.w2[i][0] -= lr * fullNetworkState.gradients.dW2[i];
+            }
+            fullNetworkState.b2[0] -= lr * fullNetworkState.gradients.db2;
+
+            // Update W1 and b1
+            for (let i = 0; i < fullNetworkState.hidden.length; i++) {
+                fullNetworkState.w1[0][i] -= lr * fullNetworkState.gradients.dW1[i][0];
+                fullNetworkState.w1[1][i] -= lr * fullNetworkState.gradients.dW1[i][1];
+                fullNetworkState.b1[i] -= lr * fullNetworkState.gradients.db1[i];
+            }
+
+            // Recalculate after update
+            stepForward();
+            fullNetworkState.step = 0;
+
+            updateFullNetworkDisplay();
+        }
+
+        function resetAnimation() {
+            fullNetworkState.w1 = [[0.5, 0.2, -0.3, 0.4], [0.3, -0.1, 0.6, 0.2]];
+            fullNetworkState.b1 = [0.1, -0.1, 0.2, 0.0];
+            fullNetworkState.w2 = [[0.6], [-0.2], [0.3], [-0.1]];
+            fullNetworkState.b2 = [0.1];
+            fullNetworkState.iteration = 0;
+            fullNetworkState.step = 0;
+            fullNetworkState.loss = 0;
+            updateFullNetworkDisplay();
+        }
+
+        function runFullCycle() {
+            stepForward();
+            stepBackward();
+            stepUpdate();
+        }
+
+        function fastForward(steps) {
+            for (let i = 0; i < steps; i++) {
+                runFullCycle();
+            }
+        }
+
+        function updateFullNetworkDisplay() {
+            // Update status
+            const stepNames = ['Ready', 'Forward Pass', 'Backward Pass', 'Weights Updated'];
+            document.getElementById('animationStatus').textContent = stepNames[fullNetworkState.step];
+
+            // Update metrics
+            document.getElementById('iterationDisplay').textContent = fullNetworkState.iteration;
+            document.getElementById('currentLossDisplay').textContent = fullNetworkState.loss ? fullNetworkState.loss.toFixed(4) : '--';
+            document.getElementById('lossReductionDisplay').textContent = fullNetworkState.iteration > 0 ? 'N/A' : '--';
+            document.getElementById('weightChangeDisplay').textContent = fullNetworkState.step === 3 ? 'Updated' : '--';
+
+            // Update values display
+            let valuesHtml = '';
+            valuesHtml += `<div style="margin-bottom: 0.5rem;"><strong>Input:</strong> [${fullNetworkState.input.map(x => x.toFixed(3)).join(', ')}]</div>`;
+            valuesHtml += `<div style="margin-bottom: 0.5rem;"><strong>Hidden:</strong> [${fullNetworkState.hidden.map(x => x.toFixed(3)).join(', ')}]</div>`;
+            valuesHtml += `<div style="margin-bottom: 0.5rem;"><strong>Output:</strong> ${fullNetworkState.output.toFixed(4)}</div>`;
+            valuesHtml += `<div style="margin-bottom: 0.5rem;"><strong>Target:</strong> ${fullNetworkState.target}</div>`;
+            valuesHtml += `<div><strong>Loss:</strong> ${fullNetworkState.loss.toFixed(4)}</div>`;
+            document.getElementById('currentValuesContent').innerHTML = valuesHtml;
+
+            // Update gradients display
+            if (fullNetworkState.gradients) {
+                let gradHtml = '';
+                gradHtml += `<div style="margin-bottom: 0.5rem;"><strong>dW2:</strong> [${fullNetworkState.gradients.dW2.map(x => x.toFixed(4)).join(', ')}]</div>`;
+                gradHtml += `<div><strong>db2:</strong> ${fullNetworkState.gradients.db2.toFixed(4)}</div>`;
+                document.getElementById('gradientsDisplayContent').innerHTML = gradHtml;
+            } else {
+                document.getElementById('gradientsDisplayContent').innerHTML = '<i>No gradients computed yet</i>';
+            }
+
+            // Update progress display
+            let progressHtml = '';
+            progressHtml += `<div style="margin-bottom: 0.5rem;"><strong>Iterations:</strong> ${fullNetworkState.iteration}</div>`;
+            progressHtml += `<div><strong>Current Loss:</strong> ${fullNetworkState.loss.toFixed(4)}</div>`;
+            document.getElementById('progressDisplayContent').innerHTML = progressHtml;
+
+            // Draw network
+            drawFullNetwork();
+        }
+
+        function drawFullNetwork() {
+            if (!fullNetworkCtx || !fullNetworkCanvas) return;
+            fullNetworkCtx.clearRect(0, 0, fullNetworkCanvas.width, fullNetworkCanvas.height);
+
+            const width = fullNetworkCanvas.width;
+            const height = fullNetworkCanvas.height;
+
+            // Draw title
+            fullNetworkCtx.font = 'bold 18px Inter';
+            fullNetworkCtx.fillStyle = '#1f2937';
+            fullNetworkCtx.textAlign = 'center';
+            fullNetworkCtx.fillText('Forward & Backward Pass Visualization', width / 2, 30);
+
+            const layers = [
+                { neurons: 2, x: 150, values: fullNetworkState.input, label: 'Input' },
+                { neurons: 4, x: 450, values: fullNetworkState.hidden, label: 'Hidden' },
+                { neurons: 1, x: 750, values: [fullNetworkState.output], label: 'Output' }
+            ];
+
+            // Draw connections
+            for (let l = 0; l < layers.length - 1; l++) {
+                const layer1 = layers[l];
+                const layer2 = layers[l + 1];
+
+                for (let i = 0; i < layer1.neurons; i++) {
+                    for (let j = 0; j < layer2.neurons; j++) {
+                        const y1 = 150 - (layer1.neurons - 1) * 25 + i * 50;
+                        const y2 = 150 - (layer2.neurons - 1) * 25 + j * 50;
+
+                        let weight;
+                        if (l === 0) weight = fullNetworkState.w1[i][j];
+                        else weight = fullNetworkState.w2[i][0];
+
+                        fullNetworkCtx.strokeStyle = weight > 0 ? '#10b98160' : '#ef444460';
+                        fullNetworkCtx.lineWidth = Math.abs(weight) * 2;
+
+                        fullNetworkCtx.beginPath();
+                        fullNetworkCtx.moveTo(layer1.x, y1);
+                        fullNetworkCtx.lineTo(layer2.x, y2);
+                        fullNetworkCtx.stroke();
+                    }
+                }
+            }
+
+            // Draw neurons
+            layers.forEach((layer, layerIdx) => {
+                for (let i = 0; i < layer.neurons; i++) {
+                    const y = 150 - (layer.neurons - 1) * 25 + i * 50;
+                    const value = layer.values[i] || 0;
+
+                    fullNetworkCtx.beginPath();
+                    fullNetworkCtx.arc(layer.x, y, 20, 0, Math.PI * 2);
+                    fullNetworkCtx.fillStyle = `hsl(${120 * value}, 70%, 60%)`;
+                    fullNetworkCtx.fill();
+                    fullNetworkCtx.strokeStyle = '#1f2937';
+                    fullNetworkCtx.lineWidth = 2;
+                    fullNetworkCtx.stroke();
+
+                    fullNetworkCtx.font = 'bold 11px Inter';
+                    fullNetworkCtx.fillStyle = '#1f2937';
+                    fullNetworkCtx.textAlign = 'center';
+                    fullNetworkCtx.fillText(value.toFixed(2), layer.x, y + 4);
+                }
+
+                // Layer labels
+                fullNetworkCtx.font = 'bold 14px Inter';
+                fullNetworkCtx.fillStyle = '#1f2937';
+                fullNetworkCtx.textAlign = 'center';
+                fullNetworkCtx.fillText(layer.label, layer.x, 300);
+            });
+
+            // Draw step indicator
+            const stepColors = ['#6b7280', '#2563eb', '#f59e0b', '#10b981'];
+            fullNetworkCtx.font = 'bold 16px Inter';
+            fullNetworkCtx.fillStyle = stepColors[fullNetworkState.step];
+            fullNetworkCtx.textAlign = 'center';
+            const stepNames = ['Ready', 'Forward Pass', 'Backward Pass', 'Update'];
+            fullNetworkCtx.fillText(stepNames[fullNetworkState.step], width / 2, 350);
+        }
+
+        // Initialize full network display
+        updateFullNetworkDisplay();
     </script>
 </body>
 </html>
