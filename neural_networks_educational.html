@@ -387,13 +387,71 @@
 
     <!-- Main Content -->
     <main>
+        <!-- Start Here Overview -->
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 2rem; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+            <h1 style="color: white; font-size: 2rem; margin-bottom: 1rem;">🎓 Welcome to Neural Networks!</h1>
+            <p style="font-size: 1.1rem; line-height: 1.6; opacity: 0.95;">
+                This interactive guide will help you understand neural networks from the ground up. No advanced math required!
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 10px;">
+                    <span style="font-size: 2rem;">起点</span>
+                    <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Start Here</p>
+                    <p style="font-size: 0.85rem; opacity: 0.9;">Begin with Intuition section for foundational understanding</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 10px;">
+                    <span style="font-size: 2rem;">探索</span>
+                    <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Explore</p>
+                    <p style="font-size: 0.85rem; opacity: 0.9;">Play with interactive visualizations to see concepts in action</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 10px;">
+                    <span style="font-size: 2rem;">代码</span>
+                    <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Code</p>
+                    <p style="font-size: 0.85rem; opacity: 0.9;">Implement your own neural network from scratch</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 10px;">
+                    <span style="font-size: 2rem;">练习</span>
+                    <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Practice</p>
+                    <p style="font-size: 0.85rem; opacity: 0.9;">Use the Playground to train networks on real problems</p>
+                </div>
+            </div>
+            <p style="margin-top: 2rem; font-style: italic; opacity: 0.9;">"The most powerful learning algorithm we know of." - Geoffrey Hinton</p>
+        </div>
+
         <!-- 1. Intuition: What Are Neural Networks? -->
         <section id="intuition">
             <h2>1. Intuition: What Are Neural Networks?</h2>
 
+            <!-- What You'll Learn -->
+            <div class="card" style="background: #e0f2fe; border-left: 4px solid #0ea5e9;">
+                <h3 style="color: #0284c7; margin-top: 0;">🎯 What You'll Learn</h3>
+                <ul style="margin-left: 2rem; line-height: 1.8;">
+                    <li><strong>What a neuron is:</strong> A simple computing unit that makes decisions</li>
+                    <li><strong>How neurons connect:</strong> Neurons form layers to create powerful pattern recognizers</li>
+                    <li><strong>Why we call it "learning":</strong> Networks adjust weights to improve predictions</li>
+                    <li><strong>The big picture:</strong> From pixels → neurons → predictions</li>
+                </ul>
+            </div>
+
+            <!-- The Voting Machine Analogy -->
+            <div class="card">
+                <h3 style="color: #000000;">🤖 The Voting Machine Analogy</h3>
+                <p>Imagine each neuron is like a <strong>small voting machine</strong> that makes decisions:</p>
+
+                <div style="background: #fff; border: 2px solid #e5e7eb; border-radius: 10px; padding: 1.5rem; margin: 1rem 0;">
+                    <p style="margin: 0; line-height: 1.8;">
+                        <strong>Input (Yes/No votes):</strong> Each vote gets multiplied by an <strong>importance weight</strong><br>
+                        <strong>Calculation:</strong> weighted_sum = (vote₁ × weight₁) + (vote₂ × weight₂) + ... + bias<br>
+                        <strong>Decision:</strong> If weighted_sum > threshold, output = "YES" (1), else "NO" (0)
+                    </p>
+                </div>
+
+                <p><strong>Weights are the key:</strong> They tell us which inputs matter more. If "free money" is in an email, the weight for that phrase might be high (+0.8), making the network more likely to classify it as spam.</p>
+            </div>
+
             <div class="card">
                 <div class="callout">
-                    <strong>Historical Context (Jurafsky & Martin, 2026, p. 128)</strong>
+                    <strong>Historical Context</strong>
                     <p>Neural networks evolved from the McCulloch-Pitts neuron (1943), a simplified model of biological computation. Modern feedforward networks stack layers of these units, with backpropagation enabling learning via gradient descent.</p>
                 </div>
 
@@ -402,25 +460,76 @@
                 <div class="callout callout-info">
                     <h4>🧠 The Brain Analogy</h4>
                     <p>Just as your brain has billions of interconnected neurons that fire in patterns to recognize faces, understand language, or control movement, artificial neural networks use interconnected mathematical "neurons" (nodes) that learn patterns in data. Each connection has a <strong>weight</strong> that determines how strongly one neuron influences another—similar to synaptic strength in biological neurons.</p>
-                    <p><strong>First modeled by:</strong> McCulloch & Pitts (1943)<span class="citation" title="McCulloch & Pitts, 1943">[1]</span>, formalized as the perceptron by Rosenblatt (1958)<span class="citation" title="Rosenblatt, 1958">[2]</span>.</p>
+                    <p><strong>First modeled by:</strong> McCulloch & Pitts (1943), formalized as the perceptron by Rosenblatt (1958).</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📝 What's Really Happening?</h3>
+                <p>Let's trace how your brain recognizes a cat photo:</p>
+
+                <div style="background: #f8fafc; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; font-family: 'Consolas', monospace;">
+                    <p style="margin: 0.5rem 0; line-height: 1.6;">
+                        <span style="color: #2563eb;">Photos of cat</span> (raw pixels)
+                    </p>
+                    <p style="margin: 0; text-align: center; font-size: 0.9rem; color: #94a3b8;">↓</p>
+                    <p style="margin: 0.5rem 0; line-height: 1.6;">
+                        <span style="color: #10b981;">Neuron 1:</span> (0.5 × pixel₁) + (0.3 × pixel₂) + ... → <strong>activation</strong> = 0.7
+                    </p>
+                    <p style="margin: 0.5rem 0; line-height: 1.6;">
+                        <span style="color: #10b981;">Neuron 2:</span> (0.4 × neuron₁_out) + (0.6 × neuron₂_out) + ... → <strong>activation</strong> = 0.9
+                    </p>
+                    <p style="margin: 0; text-align: center; font-size: 0.9rem; color: #94a3b8;">↓</p>
+                    <p style="margin: 0.5rem 0; line-height: 1.6;">
+                        <strong>Output Layer:</strong> "This looks like a cat!" with <span style="color: #ef4444;">95% probability</span>
+                    </p>
                 </div>
 
-                <h3>How Neural Networks Learn</h3>
-                <p>Neural networks learn through <strong>supervised learning</strong>:</p>
-                <ol style="margin-left: 2rem; margin-bottom: 1rem;">
-                    <li><strong>Start with random guesses:</strong> Initialize weights randomly</li>
-                    <li><strong>Make predictions:</strong> Feed input data through the network</li>
-                    <li><strong>Measure error:</strong> Compare predictions to true labels</li>
-                    <li><strong>Adjust weights:</strong> Use backpropagation<span class="citation" title="Rumelhart et al., 1986">[3]</span> to reduce error</li>
-                    <li><strong>Repeat:</strong> Iterate thousands of times until accurate</li>
-                </ol>
+                <p><strong>Key insight:</strong> Each layer extracts progressively more complex features. Early layers detect edges and colors. Middle layers detect shapes and parts. Final layers recognize whole objects.</p>
+            </div>
 
-                <div class="callout callout-info">
-                    <h4>📧 Example: Spam Detection</h4>
-                    <p><strong>Input:</strong> Email text (converted to numbers representing word frequencies)</p>
-                    <p><strong>Hidden layers:</strong> Learn patterns like "free money" + "click now" = suspicious</p>
-                    <p><strong>Output:</strong> Probability the email is spam (0.0 = not spam, 1.0 = spam)</p>
-                    <p>After training on thousands of labeled emails, the network learns which word combinations indicate spam, even for emails it's never seen before!</p>
+            <div class="card">
+                <h3>📚 Vocabulary Cheat Sheet</h3>
+                <p>Before diving deeper, let's clarify the terminology:</p>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                        <tr style="background: #e5e7eb;">
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #d1d5db;">Term</th>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #d1d5db;">What It Means</th>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #d1d5db;">Analogy</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>Neuron (Node)</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Basic computing unit that makes decisions</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">A small voting machine</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>Weight</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Connection strength between neurons (learned during training)</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Importance score for each vote</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>Bias</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Threshold adjustment (like a y-intercept)</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Starting preference before seeing votes</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>Activation</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Neuron's output after processing inputs</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Final "YES" or "NO" decision</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>Epoch</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">One complete pass through all training data</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">One full practice session</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>Learning Rate</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Step size for weight updates</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">How aggressively the student changes their mind</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
 
@@ -460,33 +569,82 @@
                     <li><strong>Learning Rate:</strong> Step size for weight updates (too big = unstable, too small = slow)</li>
                 </ul>
             </div>
+
+            <!-- Try This Checkpoint -->
+            <div class="card" style="background: #fef3c7; border-left: 4px solid #d97706;">
+                <h3> ✏️ Try This!</h3>
+                <p><strong>Quick Check:</strong> If a neuron has inputs [1.0, 0.5] with weights [0.5, 0.2] and bias 0.1:</p>
+                <div style="background: white; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: 'Consolas', monospace;">
+                    <p style="margin: 0;">Weighted sum = (1.0 × 0.5) + (0.5 × 0.2) + 0.1 = <strong>0.7</strong></p>
+                </div>
+                <p>After sigmoid activation: σ(0.7) ≈ 0.67 (the neuron "fires" with 67% strength)</p>
+            </div>
         </section>
 
         <!-- XOR Problem -->
         <section id="xor">
             <h2>2. The XOR Problem: Why We Need Hidden Layers</h2>
 
+            <!-- What is Linear Separability? -->
+            <div class="card" style="background: #e0f2fe; border-left: 4px solid #0ea5e9;">
+                <h3 style="color: #0284c7; margin-top: 0;">📐 What is Linear Separability?</h3>
+                <p style="margin-bottom: 1rem;"><strong>Linearly Separable = Can separate classes with ONE straight line.</strong></p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 1.5rem 0;">
+                    <div>
+                        <p style="font-weight: bold; color: #10b981;">✓ YES - Linearly Separable</p>
+                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                            <li>AND problem</li>
+                            <li>OR problem</li>
+                            <li>Classify: positive (green) on one side, negative (red) on the other</li>
+                        </ul>
+                        <div style="background: #dcfce7; border-radius: 8px; padding: 1rem; margin-top: 1rem; text-align: center; font-family: 'Consolas', monospace;">
+                            <span style="color: #10b981;">Green points</span> can be separated from<br>
+                            <span style="color: #ef4444;">Red points</span> with ONE straight line!<br>
+                            <span style="font-size: 0.9rem; color: #6b7280;">→ Single neuron can solve this!</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="font-weight: bold; color: #ef4444;">✗ NO - NOT Linearly Separable</p>
+                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                            <li>XOR problem</li>
+                            <li>Positive (green) and negative (red) are diagonally opposite</li>
+                            <li>NO single line can separate them</li>
+                        </ul>
+                        <div style="background: #fee2e2; border-radius: 8px; padding: 1rem; margin-top: 1rem; text-align: center; font-family: 'Consolas', monospace;">
+                            <span style="color: #ef4444;">Red</span> and <span style="color: #10b981;">Green</span> are mixed diagonally<br>
+                            Single line can't separate!<br>
+                            <span style="font-size: 0.9rem; color: #6b7280;">→ Need hidden layers!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
-                <h3>Linear Separability</h3>
+                <h3>Why Does This Matter?</h3>
                 <p>
-                    Some problems can be solved with a single line (linear separator), while others cannot.
-                    The XOR problem demonstrates why we need hidden layers in neural networks.
+                    A single neuron (without hidden layers) can only learn <strong>linear decision boundaries</strong> - essentially one straight line that separates positive from negative examples.
                 </p>
 
-                <div class="canvas-container">
-                    <canvas id="xorCanvas" width="800" height="800"></canvas>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn-primary" onclick="showProblem('AND')">Show AND</button>
-                    <button class="btn-primary" onclick="showProblem('OR')">Show OR</button>
-                    <button class="btn-secondary" onclick="showProblem('XOR')">Show XOR</button>
-                </div>
-
                 <div class="callout callout-info">
-                    <strong>Key Insight:</strong> AND and OR are linearly separable (can be solved with a single line),
-                    but XOR is not. This is why we need hidden layers—they allow the network to learn non-linear
-                    decision boundaries by combining multiple linear separators.
+                    <h4>Visual Explanation</h4>
+                    <p>For XOR, we need <strong>TWO decision boundaries</strong> to properly separate the data:</p>
+
+                    <div style="background: white; border-radius: 8px; padding: 1rem; margin: 1rem 0; text-align: center; font-family: 'Consolas', monospace;">
+                        For XOR, we need to learn:
+                        <br><br>
+                        <span style="color: #2563eb;">IF (x1 AND NOT x2) OR (NOT x1 AND x2)</span>
+                        <br><br>
+                        This requires <strong>TWO lines</strong> (two decision boundaries):
+                        <br>
+                        <span style="color: #ef4444;">Line 1:</span> separates (0,1) from others
+                        <br>
+                        <span style="color: #f59e0b;">Line 2:</span> separates (1,0) from others
+                        <br><br>
+                        The intersection creates the "kink" needed for XOR!
+                    </div>
+
+                    <p><strong>Key insight:</strong> A network with <strong>hidden layers</strong> can learn multiple decision boundaries and combine them. This is why we need hidden layers!</p>
                 </div>
 
                 <div class="math-block">
@@ -497,36 +655,112 @@
                             <th style="padding: 0.5rem; border: 1px solid #d1d5db;">x₁</th>
                             <th style="padding: 0.5rem; border: 1px solid #d1d5db;">x₂</th>
                             <th style="padding: 0.5rem; border: 1px solid #d1d5db;">Output</th>
+                            <th style="padding: 0.5rem; border: 1px solid #d1d5db;">Why?</th>
                         </tr>
                         <tr>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">Same inputs → 0</td>
                         </tr>
                         <tr>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">Different → 1</td>
                         </tr>
                         <tr>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">Different → 1</td>
                         </tr>
                         <tr>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1</td>
                             <td style="padding: 0.5rem; border: 1px solid #d1d5db;">0</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">Same inputs → 0</td>
                         </tr>
                     </table>
-                    <p>No single line \( w_1x_1 + w_2x_2 + b = 0 \) can separate the positive and negative examples.</p>
+                    <p style="margin-top: 1rem;">No single line \( w_1x_1 + w_2x_2 + b = 0 \) can separate the positive (1) and negative (0) examples. The positive examples are diagonally opposite!</p>
                 </div>
+            </div>
+
+            <div class="card" style="background: #fef3c7; border-left: 4px solid #d97706;">
+                <h3> ✏️ Try This!</h3>
+                <p>Click the buttons below to see which problems can be solved with a single line:</p>
+                <div style="margin: 1rem 0;">
+                    <button class="btn-primary" onclick="showProblem('AND')">Show AND (Linearly Separable)</button>
+                    <button class="btn-primary" onclick="showProblem('OR')">Show OR (Linearly Separable)</button>
+                    <button class="btn-secondary" onclick="showProblem('XOR')">Show XOR (NOT Linearly Separable)</button>
+                </div>
+                <p><strong>观察 (Observe):</strong> Can you draw one straight line that separates all green points from all red points?</p>
             </div>
         </section>
 
         <!-- Activation Functions -->
         <section id="activation">
             <h2>3. Activation Functions</h2>
+
+            <!-- Why Non-Linearity? -->
+            <div class="card" style="background: #e0f2fe; border-left: 4px solid #0ea5e9;">
+                <h3 style="color: #0284c7; margin-top: 0;">❓ Why Do We Need Non-Linearity?</h3>
+                <p style="line-height: 1.8;">Without activation functions, a neural network would be just repeated matrix multiplication:</p>
+
+                <div style="background: white; border: 2px solid #e5e7eb; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; font-family: 'Consolas', monospace;">
+                    <p style="margin-bottom: 0.5rem; color: #6b7280;">Layer 1: output = W₁·input + b₁</p>
+                    <p style="margin-bottom: 0.5rem; color: #6b7280;">Layer 2: output = W₂·(W₁·input + b₁) + b₂</p>
+                    <p style="margin-bottom: 0.5rem; color: #6b7280;">Layer 3: output = W₃·(W₂·(W₁·input + b₁) + b₂) + b₃</p>
+                    <hr style="border: none; border-top: 1px dashed #e5e7eb; margin: 1rem 0;">
+                    <p style="margin: 0; font-weight: bold; color: #ef4444;">This simplifies to:</p>
+                    <p style="margin: 0.5rem 0 0 0; color: #2563eb;">output = W·input + b</p>
+                    <p style="font-size: 0.85rem; color: #6b7280;">Just ONE linear transformation!</p>
+                </div>
+
+                <p><strong>Activation functions prevent this collapse</strong> - they introduce non-linearity that lets the network learn complex, curved decision boundaries.</p>
+
+                <div class="callout" style="background: #fef3c7; border-left-color: #d97706;">
+                    <strong>Analogy:</strong><br>
+                    Linear transformations are like straight lines on a map. Activation functions add "kinks" and curves, allowing the network to fit complex, real-world patterns that aren't straight lines!
+                </div>
+            </div>
+
+            <!-- When to Use Which -->
+            <div class="card">
+                <h3>📋 When to Use Which Activation Function?</h3>
+                <p>Choose your activation function based on your problem:</p>
+
+                <div style="background: white; border: 2px solid #e5e7eb; border-radius: 10px; padding: 1.5rem; margin: 1rem 0;">
+                    <div style="font-weight: bold; margin-bottom: 1rem; color: #1f2937;">Decision Tree:</div>
+
+                    <div style="background: #f8fafc; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <p style="font-weight: bold; margin-bottom: 0.5rem;">Step 1: What's your output layer?</p>
+                        <div style="margin-left: 1rem; line-height: 1.6;">
+                            <p style="margin: 0;">Binary classification (yes/no)? → <strong>Sigmoid</strong> (outputs 0-1)</p>
+                            <p style="margin: 0;">Multi-class (which category)? → <strong>Softmax</strong> (outputs probabilities)</p>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <p style="font-weight: bold; margin-bottom: 0.5rem;">Step 2: What about hidden layers?</p>
+                        <div style="margin-left: 1rem; line-height: 1.6;">
+                            <p style="margin: 0;">Most cases? → <strong>ReLU</strong> (fast, no vanishing gradients)</p>
+                            <p style="margin: 0;">Experiencing dying neurons? → <strong>Leaky ReLU</strong> (allows small negatives)</p>
+                            <p style="margin: 0;">Need zero-centered outputs? → <strong>Tanh</strong> (outputs -1 to 1)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout" style="background: #fee2e2; border-left-color: #ef4444;">
+                    <h4>⚠️ The "Dying ReLU" Problem</h4>
+                    <p>For ReLU: f(x) = max(0, x)</p>
+                    <p style="font-family: 'Consolas', monospace; margin: 0.5rem 0;">
+                        If x = -5: f(x) = 0, f'(x) = 0<br>
+                        <strong>No gradient flows backward → neuron stops learning!</strong>
+                    </p>
+                    <p><strong>Solution:</strong> Use Leaky ReLU instead - it allows small negative values (0.01x), so gradients still flow even for negative inputs.</p>
+                </div>
+            </div>
 
             <div class="card">
                 <h3>Interactive Activation Function Explorer</h3>
@@ -573,13 +807,44 @@
                 </div>
 
                 <div class="callout callout-info">
-                    <strong>Comparison:</strong>
+                    <h3>Function Comparison</h3>
                     <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                        <li><strong>Sigmoid:</strong> Outputs between 0 and 1, suffers from vanishing gradients</li>
-                        <li><strong>Tanh:</strong> Outputs between -1 and 1, zero-centered (better than sigmoid)</li>
+                        <li><strong>Sigmoid:</strong> Outputs between 0 and 1, suffers from vanishing gradients, used for output layer</li>
+                        <li><strong>Tanh:</strong> Outputs between -1 and 1, zero-centered (better than sigmoid), used in RNNs</li>
                         <li><strong>ReLU:</strong> Fast computation, no vanishing gradient for positive values, but "dying ReLU" problem</li>
-                        <li><strong>Leaky ReLU:</strong> Fixes dying ReLU problem by allowing small negative values</li>
+                        <li><strong>Leaky ReLU:</strong> Fixes dying ReLU problem by allowing small negative values (0.01x)</li>
                     </ul>
+                </div>
+
+                <div class="callout" style="background: #e0f2fe; border-left-color: #0ea5e9; margin-top: 1rem;">
+                    <strong>Quick Reference:</strong>
+                    <table style="width: 100%; margin-top: 0.5rem;">
+                        <tr style="background: #e5e7eb;">
+                            <th style="padding: 0.5rem; border: 1px solid #d1d5db;">Function</th>
+                            <th style="padding: 0.5rem; border: 1px solid #d1d5db;">Formula</th>
+                            <th style="padding: 0.5rem; border: 1px solid #d1d5db;">Best For</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;"><strong>Sigmoid</strong></td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">1/(1+e<sup>-x</sup>)</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">Output layer (probabilities)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;"><strong>Tanh</strong></td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">(e<sup>x</sup>-e<sup>-x</sup>)/(e<sup>x</sup>+e<sup>-x</sup>)</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">Hidden layers (zero-centered)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;"><strong>ReLU</strong></td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">max(0, x)</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">Default hidden layer</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;"><strong>Leaky ReLU</strong></td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">max(0.01x, x)</td>
+                            <td style="padding: 0.5rem; border: 1px solid #d1d5db;">When ReLU neurons die</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </section>
@@ -587,6 +852,110 @@
         <!-- Forward Propagation -->
         <section id="forward">
             <h2>4. Forward Propagation</h2>
+
+            <!-- Vocabulary Sidebar -->
+            <div class="card" style="background: #e0f2fe; border-left: 4px solid #0ea5e9;">
+                <h3 style="color: #0284c7; margin-top: 0;">📚 Vocabulary Sidebar</h3>
+                <p>Before diving into the math, let's clarify what each symbol means:</p>
+
+                <div style="overflow-x: auto; margin-top: 1rem;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                        <tr style="background: #e5e7eb;">
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #d1d5db;">Symbol</th>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #d1d5db;">Name</th>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #d1d5db;">Meaning</th>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #d1d5db;">Analogy</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>x</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Input</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">The data we feed into the network</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Raw ingredients</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>W</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Weights</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Connection strengths (learned)</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Recipe measurements</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>b</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Bias</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Threshold adjustment</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Base temperature</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>z</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Weighted Sum</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Raw calculation before activation</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Mixing ingredients</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>a</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Activation</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Output after applying σ function</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Final baked result</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>σ</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Sigmoid</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">"Clamps" output between 0-1</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Thermostat (limits range)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;"><strong>ŷ</strong></td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Prediction</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Network's final output</td>
+                            <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">The answer given</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Concrete Example Before Equations -->
+            <div class="card">
+                <h3>🔢 Let's Trace One Number Through!</h3>
+                <p>Instead of starting with abstract math, let's trace <strong>one number</strong> through our simple network:</p>
+
+                <div style="background: white; border: 2px solid #e5e7eb; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; font-family: 'Consolas', monospace;">
+                    <p style="margin-bottom: 1rem; font-weight: bold; color: #1f2937;">Setup:</p>
+                    <ul style="margin: 0.5rem 0; line-height: 1.8;">
+                        <li>Input: <strong>x = [1.0, 0.5]</strong> (two features)</li>
+                        <li>Weights: <strong>W = [[0.5, 0.2, -0.3, 0.4], [0.3, -0.1, 0.6, 0.2]]</strong></li>
+                        <li>Bias: <strong>b = [0.1, -0.1, 0.2, 0.0]</strong></li>
+                        <li>Activation: <strong>σ(z) = 1 / (1 + e<sup>-z</sup>)</strong></li>
+                    </ul>
+
+                    <p style="margin: 1rem 0 0.5rem 0; font-weight: bold; color: #2563eb;">Step 1: Compute Hidden Layer</p>
+                    <p style="margin: 0.5rem 0; color: #6b7280;">For neuron 1 in hidden layer:</p>
+                    <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; margin: 0.5rem 0;">
+                        <span style="color: #2563eb;">z₁</span> = (1.0 × 0.5) + (0.5 × 0.2) + 0.1<br>
+                        <span style="color: #2563eb;">z₁</span> = 0.5 + 0.1 + 0.1 = <strong>0.7</strong>
+                    </div>
+                    <p style="margin: 0.5rem 0; color: #6b7280;">After activation:</p>
+                    <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; margin: 0.5rem 0;">
+                        <span style="color: #10b981;">a₁</span> = σ(0.7) = 1 / (1 + e<sup>-0.7</sup>)<br>
+                        <span style="color: #10b981;">a₁</span> = <strong>0.668</strong>
+                    </div>
+                    <p style="margin: 0.5rem 0; color: #6b7280;">Repeat for neurons 2, 3, 4...</p>
+
+                    <p style="margin: 1rem 0 0.5rem 0; font-weight: bold; color: #2563eb;">Step 2: Compute Output Layer</p>
+                    <p style="margin: 0.5rem 0; color: #6b7280;">Using hidden activations:</p>
+                    <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; margin: 0.5rem 0;">
+                        <span style="color: #2563eb;">z₂</span> = (0.668 × 0.6) + ... + 0.1<br>
+                        <span style="color: #2563eb;">z₂</span> = <strong>-0.12</strong>
+                    </div>
+                    <p style="margin: 0.5rem 0; color: #6b7280;">Final output:</p>
+                    <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; margin: 0.5rem 0;">
+                        <span style="color: #10b981;">ŷ</span> = σ(-0.12) = <strong>0.47</strong>
+                    </div>
+                    <p style="margin: 0.5rem 0;">So the network predicts <strong>47%</strong> probability for this input!</p>
+                </div>
+
+                <div class="callout callout-info">
+                    <strong>Key Insight:</strong> Forward propagation is just repeated multiplication and addition! Each neuron computes a weighted sum, then applies the activation function to produce an output that becomes input for the next layer.
+                </div>
+            </div>
 
             <div class="card">
                 <h3>How Information Flows Through the Network</h3>
@@ -600,9 +969,9 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="playForwardAnimation()">Play Animation</button>
-                    <button class="btn-secondary" onclick="pauseForwardAnimation()">Pause</button>
-                    <button class="btn-secondary" onclick="resetForwardAnimation()">Reset</button>
+                    <button class="btn-primary" onclick="playForwardAnimation()">▶ Play Animation</button>
+                    <button class="btn-secondary" onclick="pauseForwardAnimation()">⏸ Pause</button>
+                    <button class="btn-secondary" onclick="resetForwardAnimation()">⟲ Reset</button>
                     <button class="btn-success" onclick="stepForwardAnimation()">Step Forward</button>
                 </div>
 
@@ -639,13 +1008,24 @@
 
                 <div class="math-block">
                     <h4>Forward Propagation Equations:</h4>
-                    <p><strong>Step 1: Hidden Layer</strong></p>
+                    <p><strong>Step 1: Hidden Layer - Compute weighted sums</strong></p>
                     <p>\[ z^{[1]} = W^{[1]} \cdot x + b^{[1]} \]</p>
                     <p>\[ a^{[1]} = \sigma(z^{[1]}) = \frac{1}{1 + e^{-z^{[1]}}} \]</p>
 
-                    <p><strong>Step 2: Output Layer</strong></p>
+                    <p><strong>Step 2: Output Layer - Final prediction</strong></p>
                     <p>\[ z^{[2]} = W^{[2]} \cdot a^{[1]} + b^{[2]} \]</p>
                     <p>\[ \hat{y} = \sigma(z^{[2]}) = \frac{1}{1 + e^{-z^{[2]}}} \]</p>
+                </div>
+
+                <div class="callout" style="margin-top: 1rem;">
+                    <strong>What's happening?</strong><br>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>Input (x):</strong> Your data goes in (e.g., [1.0, 0.5])</li>
+                        <li><strong>Weights (W):</strong> Multiply each input by its importance score</li>
+                        <li><strong>Bias (b):</strong> Add a threshold offset</li>
+                        <li><strong>Activation (σ):</strong> Clamp output between 0-1</li>
+                        <li><strong>Output (ŷ):</strong> Final prediction (probability)</li>
+                    </ul>
                 </div>
             </div>
         </section>
@@ -654,26 +1034,99 @@
         <section id="training">
             <h2>5. Complete Training Cycle</h2>
 
-            <div class="card">
-                <h3>Forward Pass Loss Backward Pass Update Weights</h3>
-                <p>
-                    Training a neural network involves three steps repeated over many iterations:
-                </p>
-                <ol style="margin-left: 2rem; margin-bottom: 1.5rem;">
-                    <li><strong>Forward Pass:</strong> Compute predictions</li>
-                    <li><strong>Compute Loss:</strong> Measure how wrong the predictions are</li>
-                    <li><strong>Backward Pass:</strong> Calculate gradients using backpropagation</li>
-                    <li><strong>Update Weights:</strong> Adjust weights to reduce the loss</li>
-                </ol>
+            <!-- The Training Story -->
+            <div class="card" style="background: #e0f2fe; border-left: 4px solid #0ea5e9;">
+                <h3 style="color: #0284c7; margin-top: 0;">🎓 The Training Story: Student & Teacher</h3>
+                <p style="line-height: 1.8;">Training a neural network is like teaching a student:</p>
 
+                <div style="background: white; border: 2px solid #e5e7eb; border-radius: 10px; padding: 1.5rem; margin: 1rem 0;">
+                    <p style="margin: 0;"><strong>1. Forward Pass = Student Attempts Problem</strong></p>
+                    <p style="margin: 0.5rem 0 0 1.5rem; color: #6b7280;">
+                        The student uses their current knowledge (weights) to make a prediction.<br>
+                        <em>"Based on what I know, I think this is..."</em>
+                    </p>
+
+                    <p style="margin: 1rem 0 0 1.5rem;"><strong>2. Compute Loss = Teacher Checks Answer</strong></p>
+                    <p style="margin: 0.5rem 0 0 1.5rem; color: #6b7280;">
+                        The teacher compares the prediction to the correct answer and calculates how wrong it was.<br>
+                        <em>"Your answer was 0.8, but the correct answer was 1.0. That's wrong by 0.2!"</em>
+                    </p>
+
+                    <p style="margin: 1rem 0 0 1.5rem;"><strong>3. Backward Pass = Teacher Explains Mistakes</strong></p>
+                    <p style="margin: 0.5rem 0 0 1.5rem; color: #6b7280;">
+                        The teacher traces through the student's reasoning to find exactly which parts were wrong.<br>
+                        <em>"You got it wrong because neuron 3 was too strong and neuron 1 was too weak."</em>
+                    </p>
+
+                    <p style="margin: 1rem 0 0 1.5rem;"><strong>4. Update Weights = Student Adjusts Understanding</strong></p>
+                    <p style="margin: 0.5rem 0 0 1.5rem; color: #6b7280;">
+                        The student slightly adjusts their thinking based on the teacher's feedback.<br>
+                        <em>"I'll make neuron 3 a bit weaker and neuron 1 a bit stronger next time."</em>
+                    </p>
+
+                    <p style="margin: 1rem 0; text-align: center; font-weight: bold; color: #2563eb;">REPEAT thousands of times → Expert level achieved!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Common Misconception Box</h3>
+                <div class="callout" style="background: #fee2e2; border-left-color: #ef4444;">
+                    <h4>❌ Myth: "Backpropagation is complicated math we must memorize."</h4>
+                    <p><strong>✅ Truth:</strong> Backpropagation is just the chain rule applied repeatedly - following how changes in one weight affect the final output. We use computers to calculate these tiny derivatives automatically!</p>
+                </div>
+
+                <div class="callout" style="background: #fef3c7; border-left-color: #d97706; margin-top: 1rem;">
+                    <h4>❌ Myth: "Training is just about making the loss smaller."</h4>
+                    <p><strong>✅ Truth:</strong> Training is about finding weights that <em>generalize</em> well to new data. Too much training (too many epochs) can lead to overfitting - the network memorizes the training data but fails on new examples!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Training Process Overview</h3>
+                <p>
+                    Training a neural network involves four steps repeated over many iterations (epochs):
+                </p>
+
+                <div style="background: white; border-radius: 10px; padding: 1.5rem; margin: 1rem 0;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: #dbeafe; border-radius: 8px;">
+                            <span style="font-size: 2rem;">1️⃣</span>
+                            <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Forward Pass</p>
+                            <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">Make prediction with current weights</p>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #fee2e2; border-radius: 8px;">
+                            <span style="font-size: 2rem;">2️⃣</span>
+                            <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Compute Loss</p>
+                            <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">Measure how wrong the prediction was</p>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #fef3c7; border-radius: 8px;">
+                            <span style="font-size: 2rem;">3️⃣</span>
+                            <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Backward Pass</p>
+                            <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">Calculate gradients (where to adjust)</p>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #dcfce7; border-radius: 8px;">
+                            <span style="font-size: 2rem;">4️⃣</span>
+                            <p style="margin: 0.5rem 0 0 0; font-weight: bold;">Update Weights</p>
+                            <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">Adjust to reduce error next time</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout" style="background: #e0f2fe; border-left-color: #0ea5e9;">
+                    <strong>Why repeat?:</strong><br>
+                    One training example rarely fixes all the weights perfectly. By repeating thousands of times with many examples, the network gradually improves its understanding, similar to how we learn to ride a bike - many falls and corrections before getting it right!
+                </div>
+            </div>
+
+            <div class="card">
                 <div class="canvas-container">
                     <canvas id="trainingCanvas" width="800" height="500"></canvas>
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="stepForward()">Step 1: Forward</button>
-                    <button class="btn-primary" onclick="stepBackward()">Step 2: Backward</button>
-                    <button class="btn-success" onclick="stepUpdate()">Step 3: Update</button>
+                    <button class="btn-primary" onclick="stepForward()">1. Forward</button>
+                    <button class="btn-primary" onclick="stepBackward()">2. Backward</button>
+                    <button class="btn-success" onclick="stepUpdate()">3. Update</button>
                     <button class="btn-secondary" onclick="trainEpoch()">Train 1 Epoch</button>
                 </div>
 
@@ -704,6 +1157,17 @@
                     When the prediction is confident but wrong, BCE produces large gradients that help the network
                     learn faster. MSE suffers from vanishing gradients when used with sigmoid activation.
                 </div>
+
+                <div class="callout" style="margin-top: 1rem; background: #e0f2fe;">
+                    <strong>Analogy for the math:</strong><br>
+                    Imagine rolling a ball downhill:
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>Loss function:</strong> The shape of the hill</li>
+                        <li><strong>Gradient:</strong> The slope at the ball's current position</li>
+                        <li><strong>Weight update:</strong> Moving the ball downhill in the direction of steepest descent</li>
+                        <li><strong>Learning rate (α):</strong> How big each step is</li>
+                    </ul>
+                </div>
             </div>
         </section>
 
@@ -711,9 +1175,51 @@
         <section id="visualizations">
             <h2>7. Additional Visualizations</h2>
 
+            <!-- Learning Path -->
+            <div class="card" style="background: #e0f2fe; border-left: 4px solid #0ea5e9;">
+                <h3 style="color: #0284c7; margin-top: 0;">🗺️ Your Learning Path</h3>
+                <p>These visualizations help you understand different aspects of neural network training:</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                    <div style="background: white; padding: 1rem; border-radius: 8px; border-left: 3px solid #2563eb;">
+                        <span style="font-size: 1.5rem;">🏗️</span>
+                        <p style="font-weight: bold; margin: 0.5rem 0 0 0;">1. Network Architecture</p>
+                        <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">Visualize how layers and neurons connect</p>
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                        <span style="font-size: 1.5rem;">🏔️</span>
+                        <p style="font-weight: bold; margin: 0.5rem 0 0 0;">2. Gradient Descent</p>
+                        <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">See how optimization finds the minimum loss</p>
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; border-left: 3px solid #10b981;">
+                        <span style="font-size: 1.5rem;">📉</span>
+                        <p style="font-weight: bold; margin: 0.5rem 0 0 0;">3. Training Loss</p>
+                        <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">Track how loss decreases over training epochs</p>
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; border-left: 3px solid #8b5cf6;">
+                        <span style="font-size: 1.5rem;">🔄</span>
+                        <p style="font-weight: bold; margin: 0.5rem 0 0 0;">4. Full Network Animation</p>
+                        <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">Watch complete forward & backward passes</p>
+                    </div>
+                </div>
+
+                <p style="margin-top: 1rem;"><strong>Recommended order:</strong> Start with Network Architecture → Gradient Descent → Training Loss → Full Network Animation</p>
+            </div>
+
+            <!-- C. Network Architecture Visualizer -->
             <div class="card">
                 <h3>C. Network Architecture Visualizer</h3>
                 <p>Customize the network structure and see how neurons connect:</p>
+
+                <div class="callout" style="background: #fef3c7; border-left-color: #d97706;">
+                    <strong>Try This:</strong><br>
+                    Change the layer sizes from <code>[2, 4, 1]</code> to <code>[2, 8, 1]</code> or <code>[2, 4, 4, 1]</code>. Notice how:
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li>More neurons = more connections (thicker lines)</li>
+                        <li>More layers = deeper network (more columns)</li>
+                        <li>More connections = more parameters to learn</li>
+                    </ul>
+                </div>
 
                 <div class="canvas-container">
                     <canvas id="networkCanvas" width="900" height="600"></canvas>
@@ -726,11 +1232,44 @@
                         <button class="btn-primary" onclick="updateNetwork()">Update Network</button>
                     </div>
                 </div>
+
+                <div class="callout" style="margin-top: 1rem; background: #e0f2fe;">
+                    <strong>Architecture Impact:</strong><br>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>[2, 2, 1]:</strong> Minimal network - barely enough capacity for XOR</li>
+                        <li><strong>[2, 4, 1]:</strong> Good balance - reliable XOR solution</li>
+                        <li><strong>[2, 8, 1]:</strong> More capacity - faster convergence</li>
+                        <li><strong>[2, 4, 4, 1]:</strong> Deeper - can learn more complex patterns</li>
+                    </ul>
+                </div>
             </div>
 
+            <!-- E. Gradient Descent on Loss Surface -->
             <div class="card">
                 <h3>E. Gradient Descent on Loss Surface 🏔️</h3>
                 <p>Visualize how gradient descent finds the minimum of the loss function:</p>
+
+                <div class="callout" style="background: #fef3c7; border-left-color: #d97706;">
+                    <strong>Learning Rate Effects:</strong>
+                    <table style="width: 100%; margin-top: 0.5rem; font-size: 0.9rem;">
+                        <tr style="background: #e5e7eb;">
+                            <th style="padding: 0.5rem;">Learning Rate</th>
+                            <th style="padding: 0.5rem;">Behavior</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Too Small (0.01)</strong></td>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">Slow, steady progress, might get stuck</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Sweet Spot (0.1-0.3)</strong></td>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">Fast, stable convergence</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;"><strong>Too Large (0.5)</strong></td>
+                            <td style="padding: 0.5rem;">Overshoots, bounces around, might diverge</td>
+                        </tr>
+                    </table>
+                </div>
 
                 <div class="button-group">
                     <button class="btn-primary" onclick="animateGradientDescent()" id="gdAnimateBtn">🚀 Animate Gradient Descent</button>
@@ -745,7 +1284,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                         <div>
                             <canvas id="lossSurface3D" width="400" height="400"></canvas>
-                            <p style="text-align: center; color: var(--text-light); font-size: 0.9rem;">3D Loss Surface</p>
+                            <p style="text-align: center; color: var(--text-light); font-size: 0.9rem;">3D Loss Surface (drag to rotate)</p>
                         </div>
                         <div>
                             <canvas id="lossContour" width="400" height="400"></canvas>
@@ -763,11 +1302,31 @@
                         <div><strong>Weight 2:</strong> <span id="gdW2">-</span></div>
                     </div>
                 </div>
+
+                <div class="callout" style="margin-top: 1rem; background: #e0f2fe;">
+                    <strong>What's happening:</strong><br>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>3D Surface:</strong> Shows the loss landscape with weights on x/z axes</li>
+                        <li><strong>Red ball:</strong> Current position of the optimizer</li>
+                        <li><strong>Orange dashed line:</strong> Path taken during optimization</li>
+                        <li><strong>Contour lines:</strong> Equal loss levels - the optimizer follows these</li>
+                    </ul>
+                </div>
             </div>
 
+            <!-- F. Training Loss Visualizer -->
             <div class="card">
                 <h3>F. Training Loss Visualizer</h3>
                 <p>Simulate network training and watch the loss decrease over epochs:</p>
+
+                <div class="callout" style="background: #fef3c7; border-left-color: #d97706;">
+                    <strong>What to Look For:</strong><br>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>Good training:</strong> Loss steadily decreases and plateaus</li>
+                        <li><strong>Overfitting:</strong> Training loss ↓ but validation loss ↑ (not shown here)</li>
+                        <li><strong>Underfitting:</strong> Loss stays high even after many epochs</li>
+                    </ul>
+                </div>
 
                 <div class="button-group">
                     <button class="btn-primary" onclick="startTraining()" id="trainBtn">Start Training</button>
@@ -779,11 +1338,27 @@
                 <div class="canvas-container">
                     <canvas id="lossChart"></canvas>
                 </div>
+
+                <div class="callout" style="margin-top: 1rem; background: #e0f2fe;">
+                    <strong>Loss Chart Interpretation:</strong><br>
+                    The chart shows how the network's error decreases as it trains. A steep initial decline means rapid learning. A plateau means the network has converged to a good solution.
+                </div>
             </div>
 
+            <!-- G. Complete Forward & Backward Pass -->
             <div class="card">
                 <h3>G. Complete Forward & Backward Pass with Live Values 🔄</h3>
                 <p>Watch every neuron, weight, and gradient update in real-time:</p>
+
+                <div class="callout" style="background: #fef3c7; border-left-color: #d97706;">
+                    <strong>Step-by-Step Guide:</strong><br>
+                    <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.6;">
+                        <li>Click <strong>Forward Pass</strong> to see how input becomes output</li>
+                        <li>Click <strong>Backward Pass</strong> to see gradients (red = high magnitude)</li>
+                        <li>Click <strong>Update</strong> to see weights adjust</li>
+                        <li>Try <strong>+10 Steps</strong> or <strong>+100 Steps</strong> for faster training</li>
+                    </ol>
+                </div>
 
                 <div class="button-group">
                     <button class="btn-success" onclick="stepForward()">▶️ Forward Pass</button>
@@ -839,6 +1414,12 @@
                     <h4>📈 Training Progress</h4>
                     <div id="progressDisplayContent" style="font-family: 'Consolas', monospace; font-size: 0.9rem; line-height: 1.6;"></div>
                 </div>
+
+                <div class="callout" style="margin-top: 1rem; background: #e0f2fe;">
+                    <strong>Red connections:</strong> High gradient magnitude (needs larger weight adjustment)<br>
+                    <strong>Green connections:</strong> Low gradient magnitude (small adjustment needed)<br>
+                    <strong>Brighter neurons:</strong> Higher activation values
+                </div>
             </div>
         </section>
 
@@ -848,9 +1429,91 @@
 
             <div class="card">
                 <h3>Interactive Exploration</h3>
-                <p>
-                    Experiment with different network architectures, learning rates, and watch the training process in real-time.
-                </p>
+
+                <!-- Exploration Guide -->
+                <div class="card" style="background: #e0f2fe; border-left: 4px solid #0ea5e9; margin-bottom: 1rem;">
+                    <h3 style="color: #0284c7; margin-top: 0;">🎮 Exploration Challenges</h3>
+                    <p>Try these challenges to understand how different parameters affect training:</p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                        <div style="background: white; padding: 1rem; border-radius: 8px;">
+                            <span style="font-size: 1.5rem;">🎯</span>
+                            <p style="font-weight: bold; margin: 0.5rem 0 0.25rem 0;">Challenge 1</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: #6b7280;">Can you train a network with <strong>2 hidden neurons</strong> to solve XOR? (Try learning rate 0.1)</p>
+                        </div>
+                        <div style="background: white; padding: 1rem; border-radius: 8px;">
+                            <span style="font-size: 1.5rem;">⚡</span>
+                            <p style="font-weight: bold; margin: 0.5rem 0 0.25rem 0;">Challenge 2</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: #6b7280;">Which activation function trains <strong>fastest</strong> for XOR? Try ReLU vs Sigmoid with 4 hidden neurons.</p>
+                        </div>
+                        <div style="background: white; padding: 1rem; border-radius: 8px;">
+                            <span style="font-size: 1.5rem;">⚠️</span>
+                            <p style="font-weight: bold; margin: 0.5rem 0 0.25rem 0;">Challenge 3</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: #6b7280;">What happens if learning rate is <strong>too high</strong>? Try lr=1.0 and watch the loss oscillate!</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 8px;">
+                        <p style="font-weight: bold; margin-bottom: 0.5rem;">Architecture Experiment</p>
+                        <table style="width: 100%; font-size: 0.9rem;">
+                            <tr style="background: #e5e7eb;">
+                                <th style="padding: 0.5rem;">Architecture</th>
+                                <th style="padding: 0.5rem;">Expected Result</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">[2, 2, 1]</td>
+                                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">Hard - barely enough capacity for XOR</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">[2, 4, 1]</td>
+                                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">Reliable - good balance for XOR</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">[2, 8, 1]</td>
+                                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">Faster convergence</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.5rem;">[2, 4, 4, 1]</td>
+                                <td style="padding: 0.5rem;">Deeper - can learn more complex patterns</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Readout Panel -->
+                <div class="card" style="background: #f8fafc; border: 2px solid #e5e7eb; border-radius: 10px; margin-bottom: 1rem;">
+                    <h3 style="color: #1f2937; margin-top: 0;">📊 What to Look For</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                        <div>
+                            <p style="font-weight: bold; margin-bottom: 0.25rem;">Decision Boundary</p>
+                            <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">
+                                The colored regions show what the network "thinks":
+                                <ul style="margin: 0.25rem 0 0 1.5rem;">
+                                    <li><span style="color: #10b981;">Green areas</span> = network predicts "1"</li>
+                                    <li><span style="color: #ef4444;">Red areas</span> = network predicts "0"</li>
+                                </ul>
+                            </p>
+                        </div>
+                        <div>
+                            <p style="font-weight: bold; margin-bottom: 0.25rem;">Network Activity</p>
+                            <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">
+                                Brighter neurons = higher activation values<br>
+                                Thicker lines = stronger weights
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Training Tips -->
+                <div class="card" style="background: #fef3c7; border-left: 4px solid #d97706; margin-bottom: 1rem;">
+                    <h3 style="color: #d97706; margin-top: 0;">💡 Training Tips</h3>
+                    <p><strong>If loss isn't decreasing:</strong></p>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Try smaller learning rate (0.05 or 0.01)</li>
+                        <li>Try more hidden neurons (5 or 6 instead of 2)</li>
+                        <li>Train for more epochs (100 or 1000 instead of 10)</li>
+                    </ul>
+                </div>
 
                 <div class="canvas-container">
                     <canvas id="playgroundCanvas" width="1000" height="600"></canvas>
@@ -905,45 +1568,83 @@
                 <h3>Complete Neural Network from Scratch</h3>
                 <p>Here's a minimal implementation of a neural network in Python using only NumPy:</p>
 
+                <!-- Before You Run -->
+                <div class="card" style="background: #e0f2fe; border-left: 4px solid #0ea5e9; margin-bottom: 1rem;">
+                    <h3 style="color: #0284c7; margin-top: 0;">⚙️ Before You Run</h3>
+                    <p>Make sure NumPy is installed:</p>
+                    <div style="background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: 'Consolas', monospace; margin: 1rem 0;">
+                        pip install numpy
+                    </div>
+                    <p>Then run the script:</p>
+                    <div style="background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: 'Consolas', monospace;">
+                        python neural_network_xor.py
+                    </div>
+                </div>
+
+                <!-- Annotated Code -->
                 <pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
 
 <span class="keyword">class</span> <span class="function">NeuralNetwork</span>:
+    <span class="comment"># ============================================</span>
+    <span class="comment"># INITIALIZATION: This runs when we create a new network</span>
+    <span class="comment"># Why random weights? If all weights start the same,</span>
+    <span class="comment"># neurons learn the same things and the network fails!</span>
+    <span class="comment"># ============================================</span>
     <span class="keyword">def</span> <span class="function">__init__</span>(self, input_size, hidden_size, output_size):
-        <span class="comment"># Initialize weights randomly</span>
+        <span class="comment"># Initialize weights randomly (small numbers between -0.5 and 0.5)</span>
+        <span class="comment"># Small random weights help break symmetry between neurons</span>
         self.W1 = np.random.randn(input_size, hidden_size) * <span class="number">0.5</span>
         self.b1 = np.zeros((<span class="number">1</span>, hidden_size))
         self.W2 = np.random.randn(hidden_size, output_size) * <span class="number">0.5</span>
         self.b2 = np.zeros((<span class="number">1</span>, output_size))
 
     <span class="keyword">def</span> <span class="function">sigmoid</span>(self, z):
+        <span class="comment"># Activation function: clamps output between 0 and 1</span>
         <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + np.exp(-z))
 
     <span class="keyword">def</span> <span class="function">sigmoid_derivative</span>(self, z):
+        <span class="comment"># Used for backpropagation - tells us how much to adjust weights</span>
         <span class="keyword">return</span> self.sigmoid(z) * (<span class="number">1</span> - self.sigmoid(z))
 
     <span class="keyword">def</span> <span class="function">forward</span>(self, X):
-        <span class="comment"># Forward propagation</span>
+        <span class="comment"># Forward propagation: compute predictions</span>
+        <span class="comment"># z1 = input * weights + bias (weighted sum)</span>
         self.z1 = np.dot(X, self.W1) + self.b1
+        <span class="comment"># a1 = sigmoid(z1) - apply activation function</span>
         self.a1 = self.sigmoid(self.z1)
+        <span class="comment"># z2 = hidden * weights + bias (output layer)</span>
         self.z2 = np.dot(self.a1, self.W2) + self.b2
+        <span class="comment"># a2 = sigmoid(z2) - final output (prediction)</span>
         self.a2 = self.sigmoid(self.z2)
         <span class="keyword">return</span> self.a2
 
     <span class="keyword">def</span> <span class="function">backward</span>(self, X, y, learning_rate):
-        <span class="comment"># Backpropagation</span>
+        <span class="comment"># Backpropagation: calculate gradients for weight updates</span>
+        <span class="comment"># m = number of training examples</span>
         m = X.shape[<span class="number">0</span>]
 
-        <span class="comment"># Output layer gradients</span>
+        <span class="comment"># ============================================</span>
+        <span class="comment"># Output Layer Gradients</span>
+        <span class="comment"># Error = prediction - true_label</span>
+        <span class="comment"># Gradient = how much this layer contributed to the error</span>
+        <span class="comment"># ============================================</span>
         dz2 = self.a2 - y
         dW2 = np.dot(self.a1.T, dz2) / m
         db2 = np.sum(dz2, axis=<span class="number">0</span>, keepdims=<span class="keyword">True</span>) / m
 
-        <span class="comment"># Hidden layer gradients</span>
+        <span class="comment"># ============================================</span>
+        <span class="comment"># Hidden Layer Gradients</span>
+        <span class="comment"># Error from output layer backpropagated through weights</span>
+        <span class="comment"># Multiplied by derivative to get how activation changed</span>
+        <span class="comment"># ============================================</span>
         dz1 = np.dot(dz2, self.W2.T) * self.sigmoid_derivative(self.z1)
         dW1 = np.dot(X.T, dz1) / m
         db1 = np.sum(dz1, axis=<span class="number">0</span>, keepdims=<span class="keyword">True</span>) / m
 
-        <span class="comment"># Update weights</span>
+        <span class="comment"># ============================================</span>
+        <span class="comment"># Update Weights: Move in direction that reduces error</span>
+        <span class="comment"># learning_rate = how big each step is</span>
+        <span class="comment"># ============================================</span>
         self.W2 -= learning_rate * dW2
         self.b2 -= learning_rate * db2
         self.W1 -= learning_rate * dW1
@@ -951,29 +1652,74 @@
 
     <span class="keyword">def</span> <span class="function">train</span>(self, X, y, epochs, learning_rate):
         <span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):
-            <span class="comment"># Forward pass</span>
+            <span class="comment"># Forward pass: make predictions</span>
             predictions = self.forward(X)
 
-            <span class="comment"># Compute loss (Binary Cross-Entropy)</span>
+            <span class="comment"># Compute loss (how wrong were we?)</span>
             loss = -np.mean(y * np.log(predictions + <span class="number">1e-8</span>) +
                            (<span class="number">1</span> - y) * np.log(<span class="number">1</span> - predictions + <span class="number">1e-8</span>))
 
-            <span class="comment"># Backward pass</span>
+            <span class="comment"># Backward pass: calculate gradients</span>
             self.backward(X, y, learning_rate)
 
             <span class="keyword">if</span> epoch % <span class="number">100</span> == <span class="number">0</span>:
-                print(<span class="string">f"Epoch {epoch}, Loss: {loss:.4f}"</span>)
+                print(<span class="string">f"Epoch {epoch}, Loss: {loss:.4f}"</span>)</code></pre>
 
-<span class="comment"># Example: Training on XOR problem</span>
-X = np.array([[<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">1</span>], [<span class="number">1</span>, <span class="number">0</span>], [<span class="number">1</span>, <span class="number">1</span>]])
-y = np.array([[<span class="number">0</span>], [<span class="number">1</span>], [<span class="number">1</span>], [<span class="number">0</span>]])
+                <div style="background: #f8fafc; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
+                    <h4 style="margin-bottom: 0.5rem;">💡 Try This: Modify the Code</h4>
+                    <p>Change these values and see what happens:</p>
+                    <pre><code><span class="comment"># Try different configurations:</span>
+<span class="comment"># nn = NeuralNetwork(input_size=2, hidden_size=2, output_size=1)</span>
+<span class="comment">#   - Bare minimum for XOR (harder to learn)</span>
+<span class="comment"># nn = NeuralNetwork(input_size=2, hidden_size=8, output_size=1)</span>
+<span class="comment">#   - More capacity, faster learning</span>
+<span class="comment"># nn.train(X, y, epochs=1000, learning_rate=0.1)</span>
+<span class="comment">#   - Fewer epochs, smaller learning rate</span>
+<span class="comment"># nn.train(X, y, epochs=10000, learning_rate=1.0)</span>
+<span class="comment">#   - More epochs, higher learning rate (might overshoot!)</span></code></pre>
+                </div>
 
-nn = NeuralNetwork(input_size=<span class="number">2</span>, hidden_size=<span class="number">4</span>, output_size=<span class="number">1</span>)
-nn.train(X, y, epochs=<span class="number">5000</span>, learning_rate=<span class="number">0.5</span>)
+                <div class="callout" style="background: #fef3c7; border-left-color: #d97706;">
+                    <h4>Interpreting the Results</h4>
+                    <p><strong>Epoch 0, Loss: ~0.7</strong> - Network makes random predictions (expected)</p>
+                    <p><strong>Epoch 100, Loss: ~0.5</strong> - Learning is happening!</p>
+                    <p><strong>Epoch 500, Loss: ~0.2</strong> - Getting better...</p>
+                    <p><strong>Epoch 1000, Loss: ~0.05</strong> - Almost perfect!</p>
+                    <p><strong>Final predictions:</strong> Close to [0.05, 0.95, 0.95, 0.08] = Excellent!</p>
+                </div>
 
-<span class="comment"># Test the trained network</span>
-predictions = nn.forward(X)
-print(<span class="string">"Predictions:"</span>, predictions.flatten())</code></pre>
+                <div class="callout" style="background: #fee2e2; border-left-color: #ef4444; margin-top: 1rem;">
+                    <h4>Common Errors</h4>
+                    <table style="width: 100%; font-size: 0.9rem;">
+                        <tr style="background: #e5e7eb;">
+                            <th style="padding: 0.5rem;">Error</th>
+                            <th style="padding: 0.5rem;">Fix</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>ModuleNotFoundError: No module named 'numpy'</code></td>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">Run <code>pip install numpy</code></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">Loss stays at ~0.7</td>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">Try higher learning rate or more hidden neurons</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">Predictions all ~0.5</td>
+                            <td style="padding: 0.5rem;">Try more epochs or adjust learning rate</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="callout" style="background: #e0f2fe; border-left-color: #0ea5e9; margin-top: 1rem;">
+                    <h4>From Scratch vs Frameworks</h4>
+                    <p style="line-height: 1.6;">| Aspect | From Scratch (above) | PyTorch/TensorFlow |
+|--------|---------------------|-------------------|
+| Learning | <strong>Great</strong> for understanding the math | Abstracts details away |
+| Speed | Slow (Python loops) | <strong>Fast</strong> (GPU acceleration) |
+| Flexibility | <strong>Full control</strong> | Limited by framework |
+
+<strong>Tip:</strong> First learn with from-scratch code to understand what's happening, then use frameworks for real projects!</p>
+                </div>
             </div>
         </section>
     </main>
