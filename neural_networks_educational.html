@@ -1729,7 +1729,8 @@
 
     <!-- JavaScript for Interactivity -->
     <script>
-        // ==================== XOR Visualization ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // ==================== XOR Visualization ====================
         const xorCanvas = document.getElementById('xorCanvas');
         const xorCtx = xorCanvas.getContext('2d');
 
@@ -3597,6 +3598,7 @@
 
         // Initialize full network display
         updateFullNetworkDisplay();
+    });
     </script>
 </body>
 </html>
