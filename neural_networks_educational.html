@@ -2408,6 +2408,75 @@
         drawTrainingNetwork();
         updateTrainingDisplay();
 
+        // ==================== Activation Functions (defined early for playground) ====================
+        const activationFunctions = {
+            sigmoid: {
+                fn: (x) => 1 / (1 + Math.exp(-x)),
+                deriv: (x) => {
+                    const s = 1 / (1 + Math.exp(-x));
+                    return s * (1 - s);
+                },
+                name: 'Sigmoid',
+                formula: '\\( \\sigma(x) = \\frac{1}{1 + e^{-x}} \\)',
+                derivFormula: '\\( \\sigma\'(x) = \\sigma(x) \\cdot (1 - \\sigma(x)) \\)',
+                range: '(0, 1)',
+                usedFor: 'Binary classification output layer, gates in LSTM',
+                advantages: 'Smooth gradient, outputs are bounded',
+                disadvantages: 'Vanishing gradient problem for large |x|'
+            },
+            tanh: {
+                fn: (x) => Math.tanh(x),
+                deriv: (x) => 1 - Math.pow(Math.tanh(x), 2),
+                name: 'Tanh',
+                formula: '\\( \\tanh(x) = \\frac{e^x - e^{-x}}{e^x + e^{-x}} \\)',
+                derivFormula: '\\( \\tanh\'(x) = 1 - \\tanh^2(x) \\)',
+                range: '(-1, 1)',
+                usedFor: 'Hidden layers in RNNs, when zero-centered outputs are preferred',
+                advantages: 'Zero-centered, stronger gradients than sigmoid',
+                disadvantages: 'Still suffers from vanishing gradient problem'
+            },
+            relu: {
+                fn: (x) => Math.max(0, x),
+                deriv: (x) => x > 0 ? 1 : 0,
+                name: 'ReLU (Rectified Linear Unit)',
+                formula: '\\( \\text{ReLU}(x) = \\max(0, x) \\)',
+                derivFormula: '\\( \\text{ReLU}\'(x) = \\begin{cases} 1 & \\text{if } x > 0 \\\\ 0 & \\text{if } x \\leq 0 \\end{cases} \\)',
+                range: '[0, ∞)',
+                usedFor: 'Hidden layers in deep networks (most common)',
+                advantages: 'Fast computation, no vanishing gradient for positive values, sparse activation',
+                disadvantages: 'Dying ReLU problem (neurons can stop learning if they output 0)'
+            },
+            leaky_relu: {
+                fn: (x) => x > 0 ? x : 0.01 * x,
+                deriv: (x) => x > 0 ? 1 : 0.01,
+                name: 'Leaky ReLU',
+                formula: '\\( \\text{Leaky ReLU}(x) = \\begin{cases} x & \\text{if } x > 0 \\\\ 0.01x & \\text{if } x \\leq 0 \\end{cases} \\)',
+                derivFormula: '\\( \\text{Leaky ReLU}\'(x) = \\begin{cases} 1 & \\text{if } x > 0 \\\\ 0.01 & \\text{if } x \\leq 0 \\end{cases} \\)',
+                range: '(-∞, ∞)',
+                usedFor: 'Hidden layers, alternative to ReLU',
+                advantages: 'Fixes dying ReLU problem, allows small negative values',
+                disadvantages: 'Hyperparameter (0.01) needs tuning'
+            }
+        };
+
+        // Helper functions for activation (needed before trainPlayground)
+        function applyActivation(x, activationType) {
+            const func = activationFunctions[activationType];
+            return func ? func.fn(x) : sigmoid(x);
+        }
+
+        function applyActivationDerivative(x, activationType) {
+            const func = activationFunctions[activationType];
+            if (!func) return x * (1 - x); // sigmoid derivative
+
+            // For ReLU-type functions, we need to compute derivative differently
+            if (activationType === 'relu' || activationType === 'leaky_relu') {
+                return func.deriv(x);
+            }
+            // For sigmoid/tanh, derivative uses the output value
+            return func.deriv(x);
+        }
+
         // ==================== Playground ====================
         const playgroundCanvas = document.getElementById('playgroundCanvas');
         const playgroundCtx = playgroundCanvas ? playgroundCanvas.getContext('2d') : null;
@@ -2867,24 +2936,6 @@
             activationCtx.setLineDash([]);
             activationCtx.fillStyle = '#1f2937';
             activationCtx.fillText("f'(x)", 70, 55);
-        }
-
-        // Update playground to use selected activation
-        function applyActivation(x, activationType) {
-            const func = activationFunctions[activationType];
-            return func ? func.fn(x) : sigmoid(x);
-        }
-
-        function applyActivationDerivative(x, activationType) {
-            const func = activationFunctions[activationType];
-            if (!func) return x * (1 - x); // sigmoid derivative
-
-            // For ReLU-type functions, we need to compute derivative differently
-            if (activationType === 'relu' || activationType === 'leaky_relu') {
-                return func.deriv(x);
-            }
-            // For sigmoid/tanh, derivative uses the output value
-            return func.deriv(x);
         }
 
         // Initialize activation visualization
