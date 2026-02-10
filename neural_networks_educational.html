@@ -696,6 +696,10 @@
                 </div>
                 <p><strong>Observe:</strong> Can you draw one straight line that separates all green points from all red points?</p>
             </div>
+
+            <div class="canvas-container">
+                <canvas id="xorCanvas" width="800" height="500"></canvas>
+            </div>
         </section>
 
         <!-- Activation Functions -->
@@ -1732,7 +1736,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // ==================== XOR Visualization ====================
         const xorCanvas = document.getElementById('xorCanvas');
-        const xorCtx = xorCanvas.getContext('2d');
+        const xorCtx = xorCanvas ? xorCanvas.getContext('2d') : null;
 
         const problems = {
             'AND': {
@@ -1879,7 +1883,7 @@
 
         // ==================== Forward Propagation ====================
         const forwardCanvas = document.getElementById('forwardCanvas');
-        const forwardCtx = forwardCanvas.getContext('2d');
+        const forwardCtx = forwardCanvas ? forwardCanvas.getContext('2d') : null;
 
         let forwardNet = {
             W1: [[0.5, 0.2, -0.3, 0.4], [0.3, -0.1, 0.6, 0.2]],
@@ -2191,7 +2195,7 @@
 
         // ==================== Training Cycle ====================
         const trainingCanvas = document.getElementById('trainingCanvas');
-        const trainingCtx = trainingCanvas.getContext('2d');
+        const trainingCtx = trainingCanvas ? trainingCanvas.getContext('2d') : null;
 
         let trainingData = {
             input: [1.0, 0.5],
@@ -2406,7 +2410,7 @@
 
         // ==================== Playground ====================
         const playgroundCanvas = document.getElementById('playgroundCanvas');
-        const playgroundCtx = playgroundCanvas.getContext('2d');
+        const playgroundCtx = playgroundCanvas ? playgroundCanvas.getContext('2d') : null;
 
         let playground = {
             lr: 0.1,
@@ -2652,7 +2656,7 @@
 
         // ==================== Activation Functions ====================
         const activationCanvas = document.getElementById('activationCanvas');
-        const activationCtx = activationCanvas.getContext('2d');
+        const activationCtx = activationCanvas ? activationCanvas.getContext('2d') : null;
 
         // Define activation functions and their derivatives
         const activationFunctions = {
