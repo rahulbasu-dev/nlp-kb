@@ -1733,150 +1733,155 @@
 
     <!-- JavaScript for Interactivity -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // ==================== XOR Visualization ====================
-        const xorCanvas = document.getElementById('xorCanvas');
-        const xorCtx = xorCanvas ? xorCanvas.getContext('2d') : null;
-
-        const problems = {
-            'AND': {
-                points: [[0,0,0], [0,1,0], [1,0,0], [1,1,1]],
-                line: {x1: 0.5, y1: 1, x2: 1, y2: 0.5},
-                color: '#059669'
-            },
-            'OR': {
-                points: [[0,0,0], [0,1,1], [1,0,1], [1,1,1]],
-                line: {x1: 0, y1: 0.5, x2: 0.5, y2: 0},
-                color: '#2563eb'
-            },
-            'XOR': {
-                points: [[0,0,0], [0,1,1], [1,0,1], [1,1,0]],
-                lines: [
-                    {x1: 0, y1: 0.7, x2: 1, y2: 0.3},
-                    {x1: 0, y1: 0.3, x2: 1, y2: 0.7}
-                ],
-                color: '#7c3aed'
-            }
-        };
-
+        // ==================== XOR Visualization (defined outside DOMContentLoaded for onclick handlers) ====================
         function showProblem(type) {
+            const canvas = document.getElementById('xorCanvas');
+            const ctx = canvas ? canvas.getContext('2d') : null;
+            if (!ctx || !canvas) return;
+
+            const problems = {
+                'AND': {
+                    points: [[0,0,0], [0,1,0], [1,0,0], [1,1,1]],
+                    line: {x1: 0.5, y1: 1, x2: 1, y2: 0.5},
+                    color: '#059669'
+                },
+                'OR': {
+                    points: [[0,0,0], [0,1,1], [1,0,1], [1,1,1]],
+                    line: {x1: 0, y1: 0.5, x2: 0.5, y2: 0},
+                    color: '#2563eb'
+                },
+                'XOR': {
+                    points: [[0,0,0], [0,1,1], [1,0,1], [1,1,0]],
+                    lines: [
+                        {x1: 0, y1: 0.7, x2: 1, y2: 0.3},
+                        {x1: 0, y1: 0.3, x2: 1, y2: 0.7}
+                    ],
+                    color: '#7c3aed'
+                }
+            };
+
             const problem = problems[type];
             const padding = 100;
             const scale = 600;
 
-            xorCtx.clearRect(0, 0, xorCanvas.width, xorCanvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Draw title
-            xorCtx.font = 'bold 24px Inter';
-            xorCtx.fillStyle = '#1f2937';
-            xorCtx.textAlign = 'center';
-            xorCtx.fillText(`${type} Problem`, xorCanvas.width / 2, 40);
+            ctx.font = 'bold 24px Inter';
+            ctx.fillStyle = '#1f2937';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${type} Problem`, canvas.width / 2, 40);
 
             // Draw axes
-            xorCtx.strokeStyle = '#d1d5db';
-            xorCtx.lineWidth = 2;
-            xorCtx.beginPath();
-            xorCtx.moveTo(padding, xorCanvas.height - padding);
-            xorCtx.lineTo(xorCanvas.width - padding, xorCanvas.height - padding);
-            xorCtx.moveTo(padding, xorCanvas.height - padding);
-            xorCtx.lineTo(padding, padding);
-            xorCtx.stroke();
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, canvas.height - padding);
+            ctx.lineTo(canvas.width - padding, canvas.height - padding);
+            ctx.moveTo(padding, canvas.height - padding);
+            ctx.lineTo(padding, padding);
+            ctx.stroke();
 
             // Draw labels
-            xorCtx.font = '16px Inter';
-            xorCtx.fillStyle = '#6b7280';
-            xorCtx.textAlign = 'center';
-            xorCtx.fillText('x₁', xorCanvas.width - padding / 2, xorCanvas.height - padding + 30);
-            xorCtx.save();
-            xorCtx.translate(padding - 40, xorCanvas.height / 2);
-            xorCtx.rotate(-Math.PI / 2);
-            xorCtx.fillText('x₂', 0, 0);
-            xorCtx.restore();
+            ctx.font = '16px Inter';
+            ctx.fillStyle = '#6b7280';
+            ctx.textAlign = 'center';
+            ctx.fillText('x₁', canvas.width - padding / 2, canvas.height - padding + 30);
+            ctx.save();
+            ctx.translate(padding - 40, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('x₂', 0, 0);
+            ctx.restore();
 
             // Draw grid
-            xorCtx.strokeStyle = '#f3f4f6';
-            xorCtx.lineWidth = 1;
+            ctx.strokeStyle = '#f3f4f6';
+            ctx.lineWidth = 1;
             for (let i = 0; i <= 4; i++) {
                 const x = padding + (i * scale / 4);
-                const y = xorCanvas.height - padding - (i * scale / 4);
-                xorCtx.beginPath();
-                xorCtx.moveTo(x, padding);
-                xorCtx.lineTo(x, xorCanvas.height - padding);
-                xorCtx.stroke();
-                xorCtx.beginPath();
-                xorCtx.moveTo(padding, y);
-                xorCtx.lineTo(xorCanvas.width - padding, y);
-                xorCtx.stroke();
+                const y = canvas.height - padding - (i * scale / 4);
+                ctx.beginPath();
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, canvas.height - padding);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(canvas.width - padding, y);
+                ctx.stroke();
             }
 
             // Draw decision boundary
             if (type === 'XOR') {
-                xorCtx.setLineDash([5, 5]);
+                ctx.setLineDash([5, 5]);
                 problem.lines.forEach((line, idx) => {
-                    xorCtx.strokeStyle = idx === 0 ? '#ef4444' : '#f59e0b';
-                    xorCtx.lineWidth = 3;
-                    xorCtx.beginPath();
-                    xorCtx.moveTo(
+                    ctx.strokeStyle = idx === 0 ? '#ef4444' : '#f59e0b';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(
                         padding + line.x1 * scale,
-                        xorCanvas.height - padding - line.y1 * scale
+                        canvas.height - padding - line.y1 * scale
                     );
-                    xorCtx.lineTo(
+                    ctx.lineTo(
                         padding + line.x2 * scale,
-                        xorCanvas.height - padding - line.y2 * scale
+                        canvas.height - padding - line.y2 * scale
                     );
-                    xorCtx.stroke();
+                    ctx.stroke();
                 });
-                xorCtx.setLineDash([]);
+                ctx.setLineDash([]);
 
                 // Add "No solution" text
-                xorCtx.font = 'italic 18px Inter';
-                xorCtx.fillStyle = '#ef4444';
-                xorCtx.textAlign = 'center';
-                xorCtx.fillText('No single line works!', xorCanvas.width / 2, xorCanvas.height - 20);
+                ctx.font = 'italic 18px Inter';
+                ctx.fillStyle = '#ef4444';
+                ctx.textAlign = 'center';
+                ctx.fillText('No single line works!', canvas.width / 2, canvas.height - 20);
             } else {
-                xorCtx.strokeStyle = problem.color;
-                xorCtx.lineWidth = 4;
-                xorCtx.beginPath();
-                xorCtx.moveTo(
+                ctx.strokeStyle = problem.color;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(
                     padding + problem.line.x1 * scale,
-                    xorCanvas.height - padding - problem.line.y1 * scale
+                    canvas.height - padding - problem.line.y1 * scale
                 );
-                xorCtx.lineTo(
+                ctx.lineTo(
                     padding + problem.line.x2 * scale,
-                    xorCanvas.height - padding - problem.line.y2 * scale
+                    canvas.height - padding - problem.line.y2 * scale
                 );
-                xorCtx.stroke();
+                ctx.stroke();
 
                 // Add "Linearly separable" text
-                xorCtx.font = 'italic 18px Inter';
-                xorCtx.fillStyle = problem.color;
-                xorCtx.textAlign = 'center';
-                xorCtx.fillText('Linearly Separable ✓', xorCanvas.width / 2, xorCanvas.height - 20);
+                ctx.font = 'italic 18px Inter';
+                ctx.fillStyle = problem.color;
+                ctx.textAlign = 'center';
+                ctx.fillText('Linearly Separable ✓', canvas.width / 2, canvas.height - 20);
             }
 
             // Draw points
             problem.points.forEach(([x, y, label]) => {
-                xorCtx.beginPath();
-                xorCtx.arc(
+                ctx.beginPath();
+                ctx.arc(
                     padding + x * scale,
-                    xorCanvas.height - padding - y * scale,
+                    canvas.height - padding - y * scale,
                     15,
                     0,
                     Math.PI * 2
                 );
-                xorCtx.fillStyle = label === 1 ? '#10b981' : '#ef4444';
-                xorCtx.fill();
-                xorCtx.strokeStyle = '#1f2937';
-                xorCtx.lineWidth = 3;
-                xorCtx.stroke();
+                ctx.fillStyle = label === 1 ? '#10b981' : '#ef4444';
+                ctx.fill();
+                ctx.strokeStyle = '#1f2937';
+                ctx.lineWidth = 3;
+                ctx.stroke();
 
                 // Add labels
-                xorCtx.font = 'bold 14px Inter';
-                xorCtx.fillStyle = 'white';
-                xorCtx.textAlign = 'center';
-                xorCtx.fillText(label, padding + x * scale, xorCanvas.height - padding - y * scale + 5);
+                ctx.font = 'bold 14px Inter';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, padding + x * scale, canvas.height - padding - y * scale + 5);
             });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ==================== XOR Visualization ====================
+        const xorCanvas = document.getElementById('xorCanvas');
+        const xorCtx = xorCanvas ? xorCanvas.getContext('2d') : null;
 
         // Initialize with XOR
         showProblem('XOR');
