@@ -1340,7 +1340,7 @@
                 </div>
 
                 <div class="canvas-container">
-                    <canvas id="lossChart"></canvas>
+                    <canvas id="lossChart" width="800" height="400"></canvas>
                 </div>
 
                 <div class="callout" style="margin-top: 1rem; background: #e0f2fe;">
@@ -1878,8 +1878,7 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // ==================== XOR Visualization ====================
+        // ==================== XOR Visualization ====================
         const xorCanvas = document.getElementById('xorCanvas');
         const xorCtx = xorCanvas ? xorCanvas.getContext('2d') : null;
 
@@ -3607,7 +3606,7 @@
 
         // Initialize full network display
         updateFullNetworkDisplay();
-    });
+
     </script>
 </body>
 </html>
