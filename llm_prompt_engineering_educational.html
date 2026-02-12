@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive educational guide to LLMs and Prompt Engineering for classroom use">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Introduction to LLMs &amp; Prompt Engineering: A Complete Guide</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --secondary-color: #0891b2;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container - Wider Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks - Consistent Sizing */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-block.half {
+            min-height: calc(var(--block-min-height) / 2);
+        }
+
+        .content-block.auto {
+            min-height: auto;
+        }
+
+        /* Grid Layout for Side-by-Side Blocks */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .block-grid .content-block {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .block-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .icon {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #f5f3ff;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Try It Yourself Box */
+        .try-it-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px dashed var(--warning-color);
+            border-radius: 1rem;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .try-it-box h4 {
+            color: var(--warning-color);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .try-it-box .solution {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .try-it-box .solution.show {
+            display: block;
+        }
+
+        .try-it-box button {
+            background: var(--warning-color);
+            margin-top: 1rem;
+        }
+
+        .try-it-box button:hover {
+            background: #b45309;
+        }
+
+        /* Comparison Boxes */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .comparison-box {
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 2px solid;
+        }
+
+        .comparison-box.bad {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+
+        .comparison-box.good {
+            background: #f0fdf4;
+            border-color: #059669;
+        }
+
+        .comparison-box h4 {
+            margin-top: 0;
+        }
+
+        .comparison-box.bad h4 { color: #ef4444; }
+        .comparison-box.good h4 { color: #059669; }
+
+        /* Prompt Anatomy Diagram */
+        .prompt-anatomy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid var(--warning-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .prompt-part {
+            background: white;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Tree Diagram */
+        .tree-diagram {
+            background: #f8fafc;
+            border: 2px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .tree-node {
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            display: inline-block;
+            margin: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .content-block {
+                padding: 1.5rem;
+                min-height: auto;
+            }
+
+            header {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* References Section */
+        .references-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .references-list li {
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            background: var(--bg-color);
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .references-list li:hover {
+            background: #f5f3ff;
+        }
+
+        /* Home Button */
+        .home-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 999;
+            text-decoration: none;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">LLM &amp; Prompting Guide</div>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#how-llms-work">How LLMs Work</a></li>
+                <li><a href="#prompt-engineering">Prompt Engineering</a></li>
+                <li><a href="#n-shot">N-shot Prompting</a></li>
+                <li><a href="#chain-of-thought">Chain-of-Thought</a></li>
+                <li><a href="#generated-knowledge">Generated Knowledge</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#playground">Playground</a></li>
+                <li><a href="#python">Python</a></li>
+                <li><a href="#references">References</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Header -->
+        <header>
+            <h1>Introduction to LLMs &amp; Prompt Engineering</h1>
+            <p>Large Language Models have revolutionized AI, transforming how we interact with computers through natural language. Learn to harness their power through effective prompt engineering.</p>
+            <div class="subtitle">From GPT to Claude: The Era of Foundation Models</div>
+        </header>
+
+        <!-- Section 1: Introduction to LLMs -->
+        <div class="section-header" id="introduction">
+            <h2><span class="icon">🤖</span> Introduction to Large Language Models</h2>
+            <p>Understanding what LLMs are and why they matter</p>
+        </div>
+
+        <div class="content-block">
+            <h2>Introduction to Large Language Models</h2>
+
+            <div class="callout callout-analogy">
+                <h4>📚 The Well-Read Student Analogy</h4>
+                <p>Think of an LLM as an incredibly well-read student who has read billions of pages from books, websites, and documents. When you ask a question, this student draws on patterns they've seen across all that text to generate a thoughtful response. They haven't memorized everything, but they've learned deep patterns about how language works and how concepts relate to each other.</p>
+            </div>
+
+            <p>A <strong>Language Model</strong> is a system that predicts the probability of sequences of words (or tokens). At its core, it answers: "What word comes next?"</p>
+
+            <p>Traditional language models (like N-grams) used simple statistical patterns. Modern <strong>Large Language Models (LLMs)</strong> use neural networks with billions of parameters trained on massive text corpora, enabling them to understand context, generate coherent text, reason about problems, and even write code.</p>
+
+            <h4>Scale Changed Everything</h4>
+            <p>The progression of model scale has been dramatic:</p>
+            <ul>
+                <li><strong>GPT-1 (2018):</strong> 117 million parameters</li>
+                <li><strong>GPT-2 (2019):</strong> 1.5 billion parameters</li>
+                <li><strong>GPT-3 (2020):</strong> 175 billion parameters</li>
+                <li><strong>GPT-4 (2023):</strong> ~1.7 trillion parameters (estimated)</li>
+            </ul>
+            <p>As models grew, they exhibited <span class="highlight">emergent abilities</span>—capabilities that appeared suddenly at scale, like few-shot learning, chain-of-thought reasoning, and complex instruction following.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Parameters</th>
+                            <th>Context Window</th>
+                            <th>Key Strength</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>GPT-4</td><td>~1.7T</td><td>128K tokens</td><td>Reasoning, multimodal</td></tr>
+                        <tr><td>Claude 3.5</td><td>Unknown</td><td>200K tokens</td><td>Long context, safety</td></tr>
+                        <tr><td>Llama 3</td><td>70B-405B</td><td>128K tokens</td><td>Open source, efficiency</td></tr>
+                        <tr><td>Gemini Ultra</td><td>Unknown</td><td>1M tokens</td><td>Massive context</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Transformer Architecture</h3>
+            <p>Modern LLMs are built on the <strong>Transformer architecture</strong> (Vaswani et al., 2017), which uses <span class="highlight">self-attention mechanisms</span> to process sequences in parallel and capture long-range dependencies.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Self-Attention Mechanism</div>
+                \[ \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V \]
+                <div class="formula-description">
+                    <p>Where Q (queries), K (keys), and V (values) are learned projections of the input. The attention mechanism allows each token to "look at" all other tokens and weigh their importance, with scaling factor \(\sqrt{d_k}\) for numerical stability.</p>
+                </div>
+            </div>
+
+            <h3>Tokenization</h3>
+            <p>LLMs don't process words directly—they break text into <strong>tokens</strong> (subword units) using algorithms like Byte-Pair Encoding (BPE).</p>
+
+            <div class="callout callout-example">
+                <h4>📝 BPE Tokenization Example</h4>
+                <p><strong>Input:</strong> "unhappiness"</p>
+                <p><strong>Tokens:</strong> ["un", "happi", "ness"]</p>
+                <p>Common words are single tokens (e.g., "the"), while rare words split into subwords. This balances vocabulary size with coverage.</p>
+            </div>
+
+            <h3>Temperature &amp; Sampling</h3>
+            <p>LLMs generate text by sampling from a probability distribution over tokens. The <strong>temperature</strong> parameter controls randomness:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Temperature Scaling</div>
+                \[ P(x_i) = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)} \]
+                <div class="formula-description">
+                    <p><strong>T = 0:</strong> Greedy (always pick highest probability)<br>
+                    <strong>T = 1:</strong> Standard softmax distribution<br>
+                    <strong>T &gt; 1:</strong> More random, creative output<br>
+                    <strong>T &lt; 1:</strong> More focused, deterministic output</p>
+                </div>
+            </div>
+
+            <p><strong>Sampling strategies:</strong></p>
+            <ul>
+                <li><strong>Top-k:</strong> Sample from the k most likely tokens</li>
+                <li><strong>Top-p (nucleus sampling):</strong> Sample from the smallest set of tokens whose cumulative probability exceeds p</li>
+            </ul>
+
+            <div class="callout callout-warning">
+                <h4>⚠️ Hallucination Warning</h4>
+                <p>LLMs can <strong>hallucinate</strong>—they generate plausible-sounding but factually incorrect text. This happens because they're trained to predict likely continuations, not to verify truth. Always verify critical information from reliable sources.</p>
+            </div>
+        </div>
+
+        <!-- Section 2: How LLMs Work -->
+        <div class="section-header" id="how-llms-work">
+            <h2><span class="icon">⚙️</span> How LLMs Work</h2>
+            <p>The training pipeline from raw text to helpful assistant</p>
+        </div>
+
+        <div class="content-block">
+            <h2>The Training Pipeline</h2>
+            <p>Modern LLMs are created through a three-stage process:</p>
+
+            <h3>1. Pre-training: Learning Language</h3>
+            <p>Models are trained on massive text corpora (books, websites, code) to predict the next token. This is <strong>self-supervised learning</strong>—no human labels needed, just raw text.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Pre-training Loss (Causal Language Modeling)</div>
+                \[ \mathcal{L} = -\sum_{i=1}^{N} \log P(w_i | w_1, w_2, \ldots, w_{i-1}) \]
+                <div class="formula-description">
+                    <p>The model learns to minimize the negative log-likelihood of predicting each token given all previous tokens. This simple objective results in rich language understanding.</p>
+                </div>
+            </div>
+
+            <h3>2. Fine-tuning: Domain Specialization</h3>
+            <p>The pre-trained model is further trained on domain-specific data (e.g., medical texts, legal documents, or instruction-response pairs) with supervised learning.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Fine-tuning Objective</div>
+                \[ \mathcal{L}_{\text{FT}} = -\sum_{(x, y) \in \mathcal{D}} \log P(y | x) \]
+                <div class="formula-description">
+                    <p>Where \(\mathcal{D}\) is a dataset of (input, output) pairs. The model learns to generate desired outputs given specific inputs.</p>
+                </div>
+            </div>
+
+            <h3>3. RLHF: Alignment with Human Preferences</h3>
+            <p><strong>Reinforcement Learning from Human Feedback (RLHF)</strong> trains the model to produce outputs humans prefer—helpful, honest, and harmless responses.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">RLHF: Reward Model</div>
+                \[ R(x, y) = \text{Reward Model Score} \]
+                <div class="formula-description">
+                    <p>Humans rank model outputs (A vs B). A reward model learns to predict these preferences. The LLM is then optimized (using algorithms like PPO—Proximal Policy Optimization) to maximize reward while staying close to the original model.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>🌟 Emergent Abilities</h4>
+                <p><strong>Emergent abilities</strong> are capabilities that appear suddenly at scale, not present in smaller models:</p>
+                <ul>
+                    <li><strong>Few-shot learning:</strong> Learn new tasks from just a few examples in the prompt</li>
+                    <li><strong>Chain-of-thought reasoning:</strong> Break down complex problems step-by-step</li>
+                    <li><strong>Code generation:</strong> Write functional programs in multiple languages</li>
+                    <li><strong>Theory of mind:</strong> Reason about beliefs and intentions of others</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>In-Context Learning</h3>
+            <p>One of the most remarkable properties of LLMs is <strong>in-context learning</strong>: they can learn new tasks from examples provided in the prompt, <span class="highlight">without any weight updates</span>.</p>
+
+            <p>Unlike traditional machine learning (which requires training on labeled data), LLMs perform "learning" at inference time by recognizing patterns in the prompt.</p>
+
+            <div class="callout callout-example">
+                <h4>📝 In-Context Learning Example</h4>
+                <p><strong>Prompt:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">Translate English to French:
+hello → bonjour
+goodbye → au revoir
+thank you → merci
+good morning → </pre>
+                <p><strong>Model Output:</strong> "bon matin" or "bonjour"</p>
+                <p>The model recognizes the translation pattern and applies it to the new example, without being explicitly trained on translation.</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Given the pre-training objective (predict next token), why might LLMs be good at text completion but struggle with factual accuracy?</p>
+                <button onclick="document.getElementById('solution1').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution1" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p>LLMs are optimized to predict <em>likely</em> continuations based on patterns in training data, not to verify factual truth. A sentence can be grammatically perfect and contextually plausible (high probability) but factually wrong. The model lacks a "truth verification" mechanism—it doesn't have access to a knowledge base or the ability to check facts. This is why hallucinations occur: the model generates fluent, coherent text that <em>sounds</em> right but may be incorrect.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Prompt Engineering Fundamentals -->
+        <div class="section-header" id="prompt-engineering">
+            <h2><span class="icon">🎯</span> Prompt Engineering Fundamentals</h2>
+            <p>The art and science of communicating with LLMs</p>
+        </div>
+
+        <div class="content-block">
+            <h2>Prompt Engineering Fundamentals</h2>
+
+            <div class="callout callout-analogy">
+                <h4>👨‍💼 The Literal-Minded Assistant Analogy</h4>
+                <p>Prompt engineering is like giving instructions to a brilliant but literal-minded assistant. If you say "tell me about dogs," they might give a brief, generic answer. But if you say "as a veterinary expert, provide a detailed explanation of dog breeds, their health characteristics, and care requirements, formatted as a markdown table," you'll get exactly what you need. Clarity and specificity unlock the model's full potential.</p>
+            </div>
+
+            <h3>Core Principles of Effective Prompting</h3>
+
+            <h4>1. Be Specific</h4>
+            <p>Vague prompts yield vague answers. Specific prompts yield targeted, useful responses.</p>
+
+            <div class="comparison-grid">
+                <div class="comparison-box bad">
+                    <h4>❌ Bad Prompt</h4>
+                    <p>"Tell me about dogs."</p>
+                    <p style="margin-top: 1rem; font-size: 0.95rem; color: var(--text-light);">Too vague. The model doesn't know what aspect of dogs you want to know about or how detailed the answer should be.</p>
+                </div>
+                <div class="comparison-box good">
+                    <h4>✅ Good Prompt</h4>
+                    <p>"Explain the differences between working dog breeds (German Shepherds, Border Collies, Labrador Retrievers) in terms of temperament, exercise needs, and ideal living environments. Use bullet points."</p>
+                    <p style="margin-top: 1rem; font-size: 0.95rem; color: var(--text-light);">Specific topic, clear scope, defined output format.</p>
+                </div>
+            </div>
+
+            <h4>2. Provide Context</h4>
+            <p>Give the model context about the task, your goals, and the desired perspective.</p>
+
+            <div class="callout callout-example">
+                <h4>📝 System Prompts &amp; Role Assignment</h4>
+                <p><strong>System Prompt:</strong> "You are an expert marine biologist with 20 years of experience studying coral reef ecosystems."</p>
+                <p><strong>User Prompt:</strong> "Explain why coral reefs are important and how climate change affects them."</p>
+                <p>The system prompt sets the "role" and expertise level, leading to more authoritative, detailed responses.</p>
+            </div>
+
+            <h4>3. Structure Your Output</h4>
+            <p>Specify the format you want: JSON, markdown, tables, bullet points, step-by-step instructions, etc.</p>
+
+            <div class="callout callout-example">
+                <h4>📝 Output Format Specification</h4>
+                <p><strong>Prompt:</strong> "List the top 5 programming languages for web development. For each, provide: name, primary use case, difficulty level (1-5), and a one-sentence description. Format as JSON."</p>
+                <p><strong>Expected Output:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">[
+  {
+    "name": "JavaScript",
+    "use_case": "Frontend & backend development",
+    "difficulty": 3,
+    "description": "The essential language for web interactivity."
+  },
+  ...
+]</pre>
+            </div>
+
+            <h4>4. Use Delimiters</h4>
+            <p>Separate different parts of your prompt with clear delimiters: triple backticks, XML tags, section headers, etc.</p>
+
+            <div class="prompt-anatomy">
+                <h4>Prompt Anatomy Example</h4>
+                <div class="prompt-part">
+                    <strong>[System Message]</strong><br>
+                    You are a helpful coding assistant.
+                </div>
+                <div class="prompt-part">
+                    <strong>[Context/Examples]</strong><br>
+                    Here's an example of the code style I prefer: &lt;example&gt;...&lt;/example&gt;
+                </div>
+                <div class="prompt-part">
+                    <strong>[User Query]</strong><br>
+                    Write a Python function to calculate Fibonacci numbers.
+                </div>
+                <div class="prompt-part">
+                    <strong>[Output Format]</strong><br>
+                    Provide the code in a ```python code block with comments.
+                </div>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Rewrite this vague prompt into a well-structured one: "Tell me about dogs"</p>
+                <button onclick="document.getElementById('solution2').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution2" class="solution">
+                    <p><strong>Solution (Example):</strong></p>
+                    <p>"You are a veterinary expert. Provide a comprehensive guide to choosing the right dog breed for first-time owners. Include:</p>
+                    <ul>
+                        <li>5 beginner-friendly breeds with descriptions</li>
+                        <li>Key factors to consider (size, energy level, grooming needs)</li>
+                        <li>Common mistakes to avoid</li>
+                    </ul>
+                    <p>Format as markdown with section headers and bullet points."</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: N-shot Prompting -->
+        <div class="section-header" id="n-shot">
+            <h2><span class="icon">🎓</span> N-shot Prompting</h2>
+            <p>Teaching by example: zero-shot, one-shot, and few-shot learning</p>
+        </div>
+
+        <div class="content-block">
+            <h2>N-shot Prompting</h2>
+            <p>N-shot prompting refers to providing N examples of a task in the prompt before asking the model to perform the task. It's a spectrum:</p>
+
+            <h3>Zero-shot: No Examples</h3>
+            <p>The model relies entirely on its pre-trained knowledge. Modern LLMs are surprisingly capable at zero-shot tasks.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Zero-shot Probability</div>
+                \[ P(\text{output} | \text{instruction}) \]
+                <div class="formula-description">
+                    <p>The model generates output based solely on the instruction, without examples.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-example">
+                <h4>📝 Zero-shot Example: Sentiment Analysis</h4>
+                <p><strong>Prompt:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">Classify the sentiment of this review as Positive, Negative, or Neutral:
+"This product exceeded my expectations!"
+
+Sentiment:</pre>
+                <p><strong>Model Output:</strong> "Positive"</p>
+            </div>
+
+            <h3>One-shot: Single Example</h3>
+            <p>Provide one demonstration of the task to guide the model.</p>
+
+            <div class="callout callout-example">
+                <h4>📝 One-shot Example: Sentiment Analysis</h4>
+                <p><strong>Prompt:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">Classify sentiment as Positive, Negative, or Neutral:
+
+Review: "Terrible quality, broke after one day."
+Sentiment: Negative
+
+Review: "This product exceeded my expectations!"
+Sentiment:</pre>
+                <p><strong>Model Output:</strong> "Positive"</p>
+            </div>
+
+            <h3>Few-shot: Multiple Examples</h3>
+            <p>Provide several examples (typically 3-5) to establish a clear pattern.</p>
+
+            <div class="callout callout-example">
+                <h4>📝 Few-shot Example: Sentiment Analysis</h4>
+                <p><strong>Prompt:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">Classify sentiment as Positive, Negative, or Neutral:
+
+Review: "Amazing! Best purchase ever."
+Sentiment: Positive
+
+Review: "Terrible quality, broke after one day."
+Sentiment: Negative
+
+Review: "It's okay, nothing special."
+Sentiment: Neutral
+
+Review: "Love it! Highly recommend."
+Sentiment: Positive
+
+Review: "Not bad, but not great either."
+Sentiment:</pre>
+                <p><strong>Model Output:</strong> "Neutral"</p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th># Examples</th>
+                            <th>When to Use</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Zero-shot</td>
+                            <td>0</td>
+                            <td>Simple, well-known tasks</td>
+                            <td>Fast, no examples needed</td>
+                            <td>May misunderstand task</td>
+                        </tr>
+                        <tr>
+                            <td>One-shot</td>
+                            <td>1</td>
+                            <td>Clear task with specific format</td>
+                            <td>Minimal context, quick</td>
+                            <td>May not capture full pattern</td>
+                        </tr>
+                        <tr>
+                            <td>Few-shot</td>
+                            <td>3-5</td>
+                            <td>Complex or ambiguous tasks</td>
+                            <td>Clear pattern, high accuracy</td>
+                            <td>Uses more tokens, longer prompt</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-concept">
+                <h4>🧠 How In-Context Learning Works</h4>
+                <p>Few-shot prompting works because LLMs perform <strong>in-context learning</strong>—they recognize patterns from examples without updating weights. The model's attention mechanism allows it to "look back" at the examples and apply the same pattern to the new input. This is a form of meta-learning: the model has learned <em>how to learn</em> from examples during pre-training.</p>
+            </div>
+
+            <h4>Best Practices for Few-shot Prompting</h4>
+            <ul>
+                <li><strong>Diverse examples:</strong> Cover different edge cases and variations</li>
+                <li><strong>Consistent format:</strong> Use the same structure for all examples</li>
+                <li><strong>Order matters:</strong> Recent examples have more influence (recency bias)</li>
+                <li><strong>Label balance:</strong> Include examples from all classes (for classification tasks)</li>
+            </ul>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Create a few-shot prompt for classifying movie reviews as Action, Comedy, or Drama genres.</p>
+                <button onclick="document.getElementById('solution3').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution3" class="solution">
+                    <p><strong>Solution (Example):</strong></p>
+                    <pre style="background: white; color: #1f2937; padding: 0.75rem; font-size: 0.9rem;">Classify the genre of the movie based on the review:
+
+Review: "Explosions, car chases, and non-stop thrills!"
+Genre: Action
+
+Review: "I couldn't stop laughing, hilarious from start to finish."
+Genre: Comedy
+
+Review: "A powerful story about loss and redemption."
+Genre: Drama
+
+Review: "Fast-paced with incredible stunts and fight scenes."
+Genre: Action
+
+Review: "Witty dialogue and perfect comedic timing."
+Genre:</pre>
+                    <p><strong>Expected output:</strong> "Comedy"</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Chain-of-Thought Prompting -->
+        <div class="section-header" id="chain-of-thought">
+            <h2><span class="icon">🔗</span> Chain-of-Thought Prompting</h2>
+            <p>Unlocking reasoning by asking models to think step-by-step</p>
+        </div>
+
+        <div class="content-block">
+            <h2>Chain-of-Thought Prompting</h2>
+
+            <div class="callout callout-analogy">
+                <h4>📓 The Math Student Analogy</h4>
+                <p>Like asking a math student to "show your work" instead of just writing the final answer. When the model generates intermediate reasoning steps, it's more likely to arrive at the correct answer—and you can verify the logic. Without chain-of-thought, the model might jump to conclusions or make errors in complex reasoning.</p>
+            </div>
+
+            <p><strong>Chain-of-Thought (CoT) prompting</strong> encourages the model to break down complex problems into intermediate reasoning steps before providing the final answer.</p>
+
+            <h3>Standard CoT: Providing Reasoning Examples</h3>
+
+            <div class="callout callout-example">
+                <h4>📝 Without CoT (Direct Answer)</h4>
+                <p><strong>Prompt:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">Q: If a store has 23 apples and sells 14, then receives a shipment of 30 apples, how many does it have?
+A:</pre>
+                <p><strong>Model Output:</strong> "39" (Incorrect! 23 - 14 + 30 = 39, but common error is 23 + 30 - 14 = 39)</p>
+            </div>
+
+            <div class="callout callout-example">
+                <h4>📝 With CoT (Step-by-Step Reasoning)</h4>
+                <p><strong>Prompt:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">Q: If a store has 23 apples and sells 14, then receives a shipment of 30 apples, how many does it have?
+A: Let's think step by step.
+- The store starts with 23 apples
+- They sell 14 apples: 23 - 14 = 9 apples remaining
+- They receive 30 more apples: 9 + 30 = 39 apples
+Therefore, the store has 39 apples.</pre>
+                <p><strong>Model Output:</strong> (Follows the reasoning pattern correctly)</p>
+            </div>
+
+            <h3>Zero-shot CoT: Just Add "Let's think step by step"</h3>
+            <p>Surprisingly, simply appending <span class="highlight">"Let's think step by step"</span> to a prompt can dramatically improve reasoning performance—no examples needed!</p>
+
+            <div class="callout callout-example">
+                <h4>📝 Zero-shot CoT Example</h4>
+                <p><strong>Prompt:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">Q: If a train travels 120 km in 2 hours, what is its speed in meters per second?
+
+Let's think step by step.</pre>
+                <p><strong>Model Output:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">Step 1: Calculate speed in km/h: 120 km ÷ 2 hours = 60 km/h
+Step 2: Convert to m/s: 60 km/h × (1000 m / 1 km) × (1 h / 3600 s) = 16.67 m/s
+Therefore, the speed is approximately 16.67 m/s.</pre>
+            </div>
+
+            <h3>Self-Consistency: Majority Voting</h3>
+            <p>Generate multiple reasoning paths with CoT, then take the <strong>majority vote</strong> on the final answer. This reduces the impact of any single reasoning error.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Self-Consistency Voting</div>
+                \[ \text{answer} = \arg\max_{a} \sum_{i=1}^{n} \mathbb{1}[\text{path}_i \to a] \]
+                <div class="formula-description">
+                    <p>Generate n reasoning paths (e.g., n=5), extract the final answer from each, and select the most common answer. Works best with temperature &gt; 0 to get diverse reasoning paths.</p>
+                </div>
+            </div>
+
+            <h3>Tree of Thoughts: Exploring Multiple Branches</h3>
+            <p><strong>Tree of Thoughts (ToT)</strong> explores multiple reasoning branches at each step, evaluating which paths look most promising.</p>
+
+            <div class="tree-diagram">
+                <h4>Tree of Thoughts Example</h4>
+                <div style="margin: 1rem 0;">
+                    <div class="tree-node">Initial Problem</div>
+                </div>
+                <div style="margin: 1rem 0;">
+                    <div class="tree-node">Approach A</div>
+                    <div class="tree-node">Approach B</div>
+                    <div class="tree-node">Approach C</div>
+                </div>
+                <div style="margin: 1rem 0;">
+                    <div class="tree-node">A1 → Solution</div>
+                    <div class="tree-node">A2 → Dead end</div>
+                    <div class="tree-node">B1 → Solution</div>
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.95rem; color: var(--text-light);">The model explores multiple reasoning paths and can backtrack if a path doesn't look promising.</p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Standard</th>
+                            <th>Zero-shot CoT</th>
+                            <th>Few-shot CoT</th>
+                            <th>Self-Consistency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Arithmetic</td><td>35%</td><td>68%</td><td>78%</td><td>85%</td></tr>
+                        <tr><td>Commonsense Reasoning</td><td>52%</td><td>71%</td><td>79%</td><td>83%</td></tr>
+                        <tr><td>Symbolic Reasoning</td><td>28%</td><td>55%</td><td>72%</td><td>80%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-warning">
+                <h4>⚠️ Cost and Latency Tradeoff</h4>
+                <p>CoT prompting increases the number of generated tokens (reasoning steps), which means:</p>
+                <ul>
+                    <li><strong>Higher latency:</strong> More tokens take longer to generate</li>
+                    <li><strong>Higher cost:</strong> API pricing is per token</li>
+                </ul>
+                <p>Use CoT strategically for complex reasoning tasks, not for simple lookups or factual questions.</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Use CoT to solve: "A store had 42 apples. They sold 15 in the morning and received a new shipment of 28. How many do they have now?"</p>
+                <button onclick="document.getElementById('solution4').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution4" class="solution">
+                    <p><strong>Solution with Chain-of-Thought:</strong></p>
+                    <pre style="background: white; color: #1f2937; padding: 1rem;">Let's think step by step:
+1. The store starts with 42 apples
+2. They sell 15 apples in the morning: 42 - 15 = 27 apples
+3. They receive a shipment of 28 apples: 27 + 28 = 55 apples
+
+Therefore, the store now has 55 apples.</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Generated Knowledge Prompting -->
+        <div class="section-header" id="generated-knowledge">
+            <h2><span class="icon">💡</span> Generated Knowledge Prompting</h2>
+            <p>Generate relevant knowledge first, then use it to answer</p>
+        </div>
+
+        <div class="content-block">
+            <h2>Generated Knowledge Prompting</h2>
+            <p><strong>Generated Knowledge Prompting</strong> is a two-step technique: first, ask the model to generate relevant facts or knowledge about a topic, then use that knowledge to answer the question.</p>
+
+            <div class="prompt-anatomy">
+                <h4>Two-Step Process</h4>
+                <div class="prompt-part">
+                    <strong>Step 1: Generate Knowledge</strong><br>
+                    "Generate 5 important facts about [topic]"<br>
+                    → Model outputs facts
+                </div>
+                <div style="text-align: center; font-size: 2rem; margin: 1rem 0;">↓</div>
+                <div class="prompt-part">
+                    <strong>Step 2: Answer Using Knowledge</strong><br>
+                    "Using these facts: [facts], answer: [question]"<br>
+                    → Model outputs comprehensive answer
+                </div>
+            </div>
+
+            <h3>Concrete Example: "Is a penguin a bird?"</h3>
+
+            <div class="callout callout-example">
+                <h4>📝 Without Generated Knowledge</h4>
+                <p><strong>Prompt:</strong> "Is a penguin a bird?"</p>
+                <p><strong>Model Output:</strong> "Yes, a penguin is a bird."</p>
+                <p style="color: var(--warning-color);">Brief and correct, but lacks explanation.</p>
+            </div>
+
+            <div class="callout callout-example">
+                <h4>📝 With Generated Knowledge</h4>
+                <p><strong>Step 1 Prompt:</strong> "Generate 5 facts about penguins."</p>
+                <p><strong>Model Output (Facts):</strong></p>
+                <ul style="background: white; padding: 1rem; border-radius: 0.5rem;">
+                    <li>Penguins are flightless birds that belong to the family Spheniscidae.</li>
+                    <li>They are found almost exclusively in the Southern Hemisphere.</li>
+                    <li>Penguins have adapted to aquatic life with flipper-like wings for swimming.</li>
+                    <li>They lay eggs and are warm-blooded vertebrates.</li>
+                    <li>Penguins have feathers, beaks, and skeletons characteristic of birds.</li>
+                </ul>
+                <p><strong>Step 2 Prompt:</strong> "Using these facts: [above facts], answer: Is a penguin a bird?"</p>
+                <p><strong>Model Output:</strong></p>
+                <pre style="background: white; color: #1f2937; padding: 1rem;">Yes, a penguin is definitively a bird. Despite being flightless, penguins belong to the family Spheniscidae and possess all the key characteristics of birds: they are warm-blooded vertebrates, have feathers and beaks, lay eggs, and have a skeletal structure typical of the avian class. Their wings have evolved into flippers for swimming, an adaptation to their aquatic lifestyle, but this doesn't change their classification as birds.</pre>
+                <p style="color: var(--accent-color);">Comprehensive, well-reasoned answer with supporting evidence.</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Knowledge-Conditioned Probability</div>
+                \[ P(\text{answer} | \text{question}, \text{knowledge}) > P(\text{answer} | \text{question}) \]
+                <div class="formula-description">
+                    <p>When relevant knowledge is provided, the model can generate better answers. The knowledge acts as "context retrieval" performed by the model itself.</p>
+                </div>
+            </div>
+
+            <h4>When to Use Generated Knowledge Prompting</h4>
+            <ul>
+                <li><strong>Knowledge-intensive QA:</strong> Questions requiring specific facts or domain knowledge</li>
+                <li><strong>Fact verification:</strong> "Is X true?" tasks benefit from generating supporting/refuting evidence first</li>
+                <li><strong>Complex reasoning:</strong> Generate relevant principles or rules before applying them</li>
+            </ul>
+
+            <div class="callout callout-concept">
+                <h4>🔍 Comparison with RAG</h4>
+                <p><strong>Generated Knowledge</strong> uses the LLM itself as the knowledge base. <strong>Retrieval-Augmented Generation (RAG)</strong> retrieves knowledge from an external database (e.g., vector search over documents).</p>
+                <ul>
+                    <li><strong>Generated Knowledge:</strong> Fast, no external data needed, but limited by model's pre-training</li>
+                    <li><strong>RAG:</strong> Can access up-to-date or proprietary information, but requires infrastructure</li>
+                </ul>
+                <p>Both techniques share the same goal: provide relevant context before answering.</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Use generated knowledge prompting to answer: "Can sound travel through space?"</p>
+                <button onclick="document.getElementById('solution5').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution5" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p><strong>Step 1:</strong> "Generate 5 facts about sound and space."</p>
+                    <p><strong>Generated Facts:</strong></p>
+                    <ul>
+                        <li>Sound requires a medium (solid, liquid, or gas) to travel through.</li>
+                        <li>Sound waves are vibrations of molecules in a medium.</li>
+                        <li>Space is a near-perfect vacuum with extremely low density of particles.</li>
+                        <li>In vacuum, there are insufficient molecules for sound waves to propagate.</li>
+                        <li>Astronauts use radio waves (electromagnetic) to communicate, not sound.</li>
+                    </ul>
+                    <p><strong>Step 2:</strong> "Using these facts, answer: Can sound travel through space?"</p>
+                    <p><strong>Answer:</strong> "No, sound cannot travel through space. Sound waves require a medium of molecules to propagate, but space is a near-perfect vacuum with insufficient particle density. This is why astronauts rely on radio waves for communication, as electromagnetic waves don't require a medium."</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Visualization -->
+        <div class="section-header" id="visualization">
+            <h2><span class="icon">📊</span> Visualizations</h2>
+            <p>Trends in LLM scale and prompting technique effectiveness</p>
+        </div>
+
+        <div class="content-block">
+            <h3>LLM Scale Timeline (2018-2024)</h3>
+            <p>The exponential growth of language model parameters over time.</p>
+            <div class="chart-container">
+                <canvas id="scaleChart"></canvas>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Prompting Technique Accuracy</h3>
+                <p>Performance comparison across different reasoning tasks. CoT methods dramatically improve accuracy on complex reasoning.</p>
+                <div class="chart-container">
+                    <canvas id="techniqueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="content-block">
+                <h3>Temperature Effect on Output</h3>
+                <p>The tradeoff between diversity and coherence as temperature increases.</p>
+                <div class="chart-container">
+                    <canvas id="temperatureChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 8: Interactive Playground -->
+        <div class="section-header" id="playground">
+            <h2><span class="icon">🎮</span> Interactive Playground</h2>
+            <p>Build and analyze prompts in real-time</p>
+        </div>
+
+        <div class="content-block">
+            <h2>Prompt Engineering Playground</h2>
+            <div class="interactive-section">
+                <h3>Build Your Prompt</h3>
+
+                <div class="input-group">
+                    <label for="system-prompt">System Prompt:</label>
+                    <textarea id="system-prompt" rows="2">You are a helpful assistant.</textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="user-prompt">User Prompt:</label>
+                    <textarea id="user-prompt" rows="3">Explain quantum computing in simple terms.</textarea>
+                </div>
+
+                <div class="block-grid">
+                    <div class="input-group">
+                        <label for="technique-select">Prompting Technique:</label>
+                        <select id="technique-select">
+                            <option value="standard">Standard</option>
+                            <option value="zero-shot-cot">Zero-shot CoT</option>
+                            <option value="few-shot-cot">Few-shot CoT</option>
+                            <option value="generated-knowledge">Generated Knowledge</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="task-type">Task Type:</label>
+                        <select id="task-type">
+                            <option value="classification">Classification</option>
+                            <option value="math">Math Reasoning</option>
+                            <option value="creative">Creative Writing</option>
+                            <option value="factual">Fact-checking</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="block-grid">
+                    <div class="input-group">
+                        <label for="temperature-slider">Temperature: <span id="temp-value">0.7</span></label>
+                        <input type="range" id="temperature-slider" min="0" max="2" step="0.1" value="0.7">
+                    </div>
+                    <div class="input-group">
+                        <label for="examples-slider">Number of Examples (for few-shot): <span id="examples-value">3</span></label>
+                        <input type="range" id="examples-slider" min="0" max="5" step="1" value="3">
+                    </div>
+                </div>
+
+                <button onclick="window.buildPrompt()">Build Prompt</button>
+            </div>
+
+            <div class="result-display" id="prompt-results" style="display: none;">
+                <h4>🎯 Assembled Prompt</h4>
+                <pre id="assembled-prompt" style="background: #f8fafc; color: #1f2937; padding: 1.5rem; border-radius: 0.75rem; max-height: 400px; overflow-y: auto;"></pre>
+
+                <h4 style="margin-top: 1.5rem;">📊 Prompt Analysis</h4>
+                <div id="technique-explanation" style="background: #f0fdf4; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;"></div>
+
+                <div id="expected-output" style="background: #eff6ff; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;"></div>
+
+                <div style="margin-top: 1rem;">
+                    <strong>Estimated Token Count:</strong> <span id="token-count">0</span> tokens
+                </div>
+
+                <h4 style="margin-top: 1.5rem;">📈 Prompt Quality Score</h4>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="qualityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 9: Python Code -->
+        <div class="section-header" id="python">
+            <h2><span class="icon">🐍</span> Python Implementation</h2>
+            <p>Complete prompt engineering toolkit</p>
+        </div>
+
+        <div class="content-block auto">
+            <h3>Prompt Engineering Toolkit</h3>
+            <p>Complete, runnable Python code for building and testing prompting strategies:</p>
+
+<pre><code><span class="comment">"""
+Prompt Engineering Toolkit
+===========================
+Complete implementation of prompting strategies for LLMs.
+"""</span>
+
+<span class="keyword">from</span> typing <span class="keyword">import</span> List, Dict, Optional
+<span class="keyword">import</span> json
+
+<span class="comment"># Note: Replace with your preferred LLM API (OpenAI, Anthropic, etc.)</span>
+<span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI
+
+<span class="keyword">class</span> <span class="class-name">PromptEngineer</span>:
+    <span class="string">"""A toolkit for building and testing different prompting strategies."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, model: str = <span class="string">"gpt-4"</span>, temperature: float = <span class="number">0.7</span>):
+        <span class="string">"""
+        Args:
+            model: LLM model identifier
+            temperature: Sampling temperature (0.0-2.0)
+        """</span>
+        self.client = OpenAI()
+        self.model = model
+        self.temperature = temperature
+
+    <span class="keyword">def</span> <span class="function">_call_llm</span>(self, messages: List[Dict[str, str]]) <span class="operator">-></span> str:
+        <span class="string">"""Call the LLM API with messages."""</span>
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature
+        )
+        <span class="keyword">return</span> response.choices[<span class="number">0</span>].message.content
+
+    <span class="keyword">def</span> <span class="function">zero_shot</span>(self, task: str, system_prompt: Optional[str] = <span class="keyword">None</span>) <span class="operator">-></span> str:
+        <span class="string">"""
+        Zero-shot prompting: task with no examples.
+
+        Args:
+            task: The task description or question
+            system_prompt: Optional system message for context
+
+        Returns:
+            Model's response
+        """</span>
+        messages = []
+        <span class="keyword">if</span> system_prompt:
+            messages.append({<span class="string">"role"</span>: <span class="string">"system"</span>, <span class="string">"content"</span>: system_prompt})
+        messages.append({<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: task})
+        <span class="keyword">return</span> self._call_llm(messages)
+
+    <span class="keyword">def</span> <span class="function">few_shot</span>(self, task: str, examples: List[Dict[str, str]],
+                 system_prompt: Optional[str] = <span class="keyword">None</span>) <span class="operator">-></span> str:
+        <span class="string">"""
+        Few-shot prompting: provide examples before the task.
+
+        Args:
+            task: The task to perform
+            examples: List of {"input": ..., "output": ...} examples
+            system_prompt: Optional system message
+
+        Returns:
+            Model's response
+        """</span>
+        <span class="comment"># Build few-shot prompt</span>
+        prompt = <span class="string">""</span>
+        <span class="keyword">for</span> ex <span class="keyword">in</span> examples:
+            prompt += f<span class="string">"Input: {ex['input']}\nOutput: {ex['output']}\n\n"</span>
+        prompt += f<span class="string">"Input: {task}\nOutput:"</span>
+
+        messages = []
+        <span class="keyword">if</span> system_prompt:
+            messages.append({<span class="string">"role"</span>: <span class="string">"system"</span>, <span class="string">"content"</span>: system_prompt})
+        messages.append({<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: prompt})
+        <span class="keyword">return</span> self._call_llm(messages)
+
+    <span class="keyword">def</span> <span class="function">chain_of_thought</span>(self, task: str, examples: Optional[List[Dict]] = <span class="keyword">None</span>,
+                         zero_shot: bool = <span class="keyword">True</span>) <span class="operator">-></span> str:
+        <span class="string">"""
+        Chain-of-Thought prompting: encourage step-by-step reasoning.
+
+        Args:
+            task: The reasoning task
+            examples: Optional few-shot examples with reasoning
+            zero_shot: If True, use "Let's think step by step"
+
+        Returns:
+            Model's response with reasoning
+        """</span>
+        <span class="keyword">if</span> zero_shot:
+            <span class="comment"># Zero-shot CoT: just append the magic phrase</span>
+            prompt = f<span class="string">"{task}\n\nLet's think step by step."</span>
+            messages = [{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: prompt}]
+            <span class="keyword">return</span> self._call_llm(messages)
+        <span class="keyword">else</span>:
+            <span class="comment"># Few-shot CoT: provide examples with reasoning</span>
+            prompt = <span class="string">""</span>
+            <span class="keyword">for</span> ex <span class="keyword">in</span> examples:
+                prompt += f<span class="string">"Q: {ex['question']}\n"</span>
+                prompt += f<span class="string">"A: {ex['reasoning']}\n"</span>
+                prompt += f<span class="string">"Therefore, the answer is {ex['answer']}.\n\n"</span>
+            prompt += f<span class="string">"Q: {task}\nA:"</span>
+            messages = [{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: prompt}]
+            <span class="keyword">return</span> self._call_llm(messages)
+
+    <span class="keyword">def</span> <span class="function">self_consistency</span>(self, task: str, n_paths: int = <span class="number">5</span>) <span class="operator">-></span> str:
+        <span class="string">"""
+        Self-consistency: generate multiple reasoning paths and vote.
+
+        Args:
+            task: The reasoning task
+            n_paths: Number of reasoning paths to generate
+
+        Returns:
+            Most common answer across paths
+        """</span>
+        <span class="comment"># Generate multiple CoT responses</span>
+        responses = []
+        <span class="keyword">for</span> _ <span class="keyword">in</span> range(n_paths):
+            response = self.chain_of_thought(task, zero_shot=<span class="keyword">True</span>)
+            responses.append(response)
+
+        <span class="comment"># Extract final answers (simple heuristic: last line)</span>
+        answers = [r.strip().split(<span class="string">'\n'</span>)[-<span class="number">1</span>] <span class="keyword">for</span> r <span class="keyword">in</span> responses]
+
+        <span class="comment"># Majority vote</span>
+        <span class="keyword">from</span> collections <span class="keyword">import</span> Counter
+        most_common = Counter(answers).most_common(<span class="number">1</span>)[<span class="number">0</span>][<span class="number">0</span>]
+
+        <span class="keyword">return</span> f<span class="string">"After {n_paths} reasoning paths, the consensus answer is:\n{most_common}"</span>
+
+    <span class="keyword">def</span> <span class="function">generated_knowledge</span>(self, question: str, n_facts: int = <span class="number">5</span>) <span class="operator">-></span> str:
+        <span class="string">"""
+        Generated Knowledge prompting: generate knowledge, then answer.
+
+        Args:
+            question: The question to answer
+            n_facts: Number of facts to generate
+
+        Returns:
+            Answer based on generated knowledge
+        """</span>
+        <span class="comment"># Step 1: Generate knowledge</span>
+        knowledge_prompt = f<span class="string">"Generate {n_facts} important facts relevant to answering this question: {question}"</span>
+        knowledge = self.zero_shot(knowledge_prompt)
+
+        <span class="comment"># Step 2: Answer using knowledge</span>
+        answer_prompt = f<span class="string">"Using these facts:\n{knowledge}\n\nAnswer the following question: {question}"</span>
+        answer = self.zero_shot(answer_prompt)
+
+        <span class="keyword">return</span> f<span class="string">"Generated Knowledge:\n{knowledge}\n\nAnswer:\n{answer}"</span>
+
+
+<span class="keyword">class</span> <span class="class-name">PromptTemplate</span>:
+    <span class="string">"""Reusable prompt templates with variable substitution."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, template: str, variables: List[str]):
+        <span class="string">"""
+        Args:
+            template: Prompt template with {variable} placeholders
+            variables: List of variable names that must be provided
+        """</span>
+        self.template = template
+        self.variables = variables
+
+    <span class="keyword">def</span> <span class="function">format</span>(self, **kwargs) <span class="operator">-></span> str:
+        <span class="string">"""
+        Format the template with provided variables.
+
+        Args:
+            **kwargs: Variable values
+
+        Returns:
+            Formatted prompt
+        """</span>
+        missing = [v <span class="keyword">for</span> v <span class="keyword">in</span> self.variables <span class="keyword">if</span> v <span class="keyword">not</span> <span class="keyword">in</span> kwargs]
+        <span class="keyword">if</span> missing:
+            <span class="keyword">raise</span> ValueError(f<span class="string">"Missing variables: {missing}"</span>)
+        <span class="keyword">return</span> self.template.format(**kwargs)
+
+    <span class="keyword">def</span> <span class="function">validate</span>(self) <span class="operator">-></span> Dict[str, bool]:
+        <span class="string">"""Validate that template has all required placeholders."""</span>
+        <span class="keyword">return</span> {
+            <span class="string">"has_system_prompt"</span>: <span class="string">"system"</span> <span class="keyword">in</span> self.template.lower(),
+            <span class="string">"has_examples"</span>: <span class="string">"example"</span> <span class="keyword">in</span> self.template.lower(),
+            <span class="string">"has_output_format"</span>: <span class="string">"format"</span> <span class="keyword">in</span> self.template.lower(),
+            <span class="string">"variables_defined"</span>: len(self.variables) > <span class="number">0</span>
+        }
+
+
+<span class="comment"># Example usage</span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    engineer = PromptEngineer(model=<span class="string">"gpt-4"</span>, temperature=<span class="number">0.7</span>)
+
+    <span class="keyword">print</span>(<span class="string">"=== Zero-shot Example ==="</span>)
+    result = engineer.zero_shot(<span class="string">"Classify this review as positive or negative: 'Great movie!'"</span>)
+    <span class="keyword">print</span>(result)
+
+    <span class="keyword">print</span>(<span class="string">"\n=== Few-shot Example ==="</span>)
+    examples = [
+        {<span class="string">"input"</span>: <span class="string">"I love this!"</span>, <span class="string">"output"</span>: <span class="string">"Positive"</span>},
+        {<span class="string">"input"</span>: <span class="string">"Terrible product."</span>, <span class="string">"output"</span>: <span class="string">"Negative"</span>},
+        {<span class="string">"input"</span>: <span class="string">"It's okay."</span>, <span class="string">"output"</span>: <span class="string">"Neutral"</span>}
+    ]
+    result = engineer.few_shot(<span class="string">"Classify: 'Best purchase ever!'"</span>, examples)
+    <span class="keyword">print</span>(result)
+
+    <span class="keyword">print</span>(<span class="string">"\n=== Chain-of-Thought Example ==="</span>)
+    result = engineer.chain_of_thought(
+        <span class="string">"If a train travels 120km in 2 hours, what is its speed in m/s?"</span>
+    )
+    <span class="keyword">print</span>(result)
+
+    <span class="keyword">print</span>(<span class="string">"\n=== Generated Knowledge Example ==="</span>)
+    result = engineer.generated_knowledge(
+        <span class="string">"Why do leaves change color in autumn?"</span>
+    )
+    <span class="keyword">print</span>(result)
+
+    <span class="keyword">print</span>(<span class="string">"\n=== Prompt Template Example ==="</span>)
+    template = PromptTemplate(
+        template=<span class="string">"You are a {role}. {task}\n\nProvide your answer in {format} format."</span>,
+        variables=[<span class="string">"role"</span>, <span class="string">"task"</span>, <span class="string">"format"</span>]
+    )
+    prompt = template.format(
+        role=<span class="string">"data scientist"</span>,
+        task=<span class="string">"Explain what a p-value is"</span>,
+        format=<span class="string">"markdown"</span>
+    )
+    <span class="keyword">print</span>(prompt)</code></pre>
+        </div>
+
+        <!-- Section 10: References -->
+        <div class="section-header" id="references">
+            <h2><span class="icon">📚</span> References</h2>
+            <p>Foundational papers in LLMs and prompt engineering</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Key Publications</h3>
+
+            <ul class="references-list">
+                <li>
+                    <strong>Vaswani, A., et al. (2017).</strong>
+                    <em>"Attention Is All You Need."</em>
+                    NeurIPS 2017.
+                    <br><br>
+                    The foundational paper introducing the Transformer architecture that powers all modern LLMs. Introduced self-attention and positional encoding.
+                </li>
+
+                <li>
+                    <strong>Brown, T. B., et al. (2020).</strong>
+                    <em>"Language Models are Few-Shot Learners."</em>
+                    NeurIPS 2020 (GPT-3 paper).
+                    <br><br>
+                    Demonstrated that scaling language models to 175B parameters enables few-shot in-context learning without fine-tuning. Showed emergent abilities at scale.
+                </li>
+
+                <li>
+                    <strong>Wei, J., et al. (2022).</strong>
+                    <em>"Chain-of-Thought Prompting Elicits Reasoning in Large Language Models."</em>
+                    NeurIPS 2022.
+                    <br><br>
+                    Introduced Chain-of-Thought prompting, showing that asking models to generate intermediate reasoning steps dramatically improves performance on complex reasoning tasks.
+                </li>
+
+                <li>
+                    <strong>Liu, J., et al. (2022).</strong>
+                    <em>"Generated Knowledge Prompting for Commonsense Reasoning."</em>
+                    ACL 2022.
+                    <br><br>
+                    Demonstrated that generating relevant knowledge before answering improves performance on commonsense reasoning tasks by 10-20%.
+                </li>
+
+                <li>
+                    <strong>Wang, X., et al. (2023).</strong>
+                    <em>"Self-Consistency Improves Chain of Thought Reasoning in Language Models."</em>
+                    ICLR 2023.
+                    <br><br>
+                    Introduced self-consistency: generating multiple reasoning paths and taking a majority vote significantly improves accuracy over single-path CoT.
+                </li>
+
+                <li>
+                    <strong>Yao, S., et al. (2023).</strong>
+                    <em>"Tree of Thoughts: Deliberate Problem Solving with Large Language Models."</em>
+                    NeurIPS 2023.
+                    <br><br>
+                    Extends CoT by exploring multiple reasoning branches, enabling search and backtracking for complex problem-solving tasks.
+                </li>
+            </ul>
+
+            <div class="callout callout-concept">
+                <h4>📖 Further Reading</h4>
+                <ul>
+                    <li><strong>RLHF:</strong> Ouyang, L., et al. (2022). "Training language models to follow instructions with human feedback." NeurIPS 2022.</li>
+                    <li><strong>Constitutional AI:</strong> Bai, Y., et al. (2022). "Constitutional AI: Harmlessness from AI Feedback." Anthropic (2022).</li>
+                    <li><strong>Prompt Engineering Guide:</strong> https://www.promptingguide.ai/</li>
+                    <li><strong>OpenAI Best Practices:</strong> https://platform.openai.com/docs/guides/prompt-engineering</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
+            <p>Created for educational purposes | The future of AI is natural language</p>
+            <p style="margin-top: 1rem;">
+                <a href="ngram_educational.html" style="color: var(--primary-color); margin: 0 1rem;">N-grams</a>
+                <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">TF-IDF</a>
+                <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec</a>
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        // Global variables for charts
+        let scaleChart = null;
+        let techniqueChart = null;
+        let temperatureChart = null;
+        let qualityChart = null;
+
+        // Initialize temperature slider display
+        document.getElementById('temperature-slider').addEventListener('input', function(e) {
+            document.getElementById('temp-value').textContent = e.target.value;
+        });
+
+        document.getElementById('examples-slider').addEventListener('input', function(e) {
+            document.getElementById('examples-value').textContent = e.target.value;
+        });
+
+        // Chart 1: LLM Scale Timeline
+        function initScaleChart() {
+            const ctx = document.getElementById('scaleChart').getContext('2d');
+
+            const data = {
+                labels: ['GPT-1\n(2018)', 'BERT\n(2018)', 'GPT-2\n(2019)', 'GPT-3\n(2020)', 'PaLM\n(2022)', 'GPT-4\n(2023)', 'Llama3-405B\n(2024)'],
+                datasets: [{
+                    label: 'Parameters (billions)',
+                    data: [0.117, 0.34, 1.5, 175, 540, 1700, 405],
+                    backgroundColor: [
+                        'rgba(139, 92, 246, 0.3)',
+                        'rgba(139, 92, 246, 0.4)',
+                        'rgba(139, 92, 246, 0.5)',
+                        'rgba(139, 92, 246, 0.6)',
+                        'rgba(139, 92, 246, 0.7)',
+                        'rgba(139, 92, 246, 0.85)',
+                        'rgba(124, 58, 237, 1)'
+                    ],
+                    borderColor: 'rgba(124, 58, 237, 1)',
+                    borderWidth: 2
+                }]
+            };
+
+            scaleChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'LLM Model Scale Over Time',
+                            font: { size: 18, weight: 'bold' }
+                        },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            type: 'logarithmic',
+                            title: { display: true, text: 'Parameters (log scale)' },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 0.1) return '0.1B';
+                                    if (value === 1) return '1B';
+                                    if (value === 10) return '10B';
+                                    if (value === 100) return '100B';
+                                    if (value === 1000) return '1T';
+                                    return '';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 2: Prompting Technique Accuracy
+        function initTechniqueChart() {
+            const ctx = document.getElementById('techniqueChart').getContext('2d');
+
+            const data = {
+                labels: ['Arithmetic', 'Commonsense', 'Symbolic'],
+                datasets: [
+                    {
+                        label: 'Standard',
+                        data: [35, 52, 28],
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: '#ef4444',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Zero-shot CoT',
+                        data: [68, 71, 55],
+                        backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                        borderColor: '#f59e0b',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Few-shot CoT',
+                        data: [78, 79, 72],
+                        backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                        borderColor: '#8b5cf6',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Self-Consistency',
+                        data: [85, 83, 80],
+                        backgroundColor: 'rgba(5, 150, 105, 0.7)',
+                        borderColor: '#059669',
+                        borderWidth: 2
+                    }
+                ]
+            };
+
+            techniqueChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Prompting Technique Performance by Task Type',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Accuracy (%)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 3: Temperature Effect
+        function initTemperatureChart() {
+            const ctx = document.getElementById('temperatureChart').getContext('2d');
+
+            const tempValues = [0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0];
+
+            const data = {
+                labels: tempValues,
+                datasets: [
+                    {
+                        label: 'Output Diversity',
+                        data: [0, 15, 35, 55, 70, 80, 87, 92, 95, 97, 98],
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Output Coherence',
+                        data: [100, 98, 95, 90, 82, 72, 60, 48, 35, 25, 18],
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            };
+
+            temperatureChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Temperature vs Output Characteristics',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Relative Score' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Temperature' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Prompt Builder
+        window.buildPrompt = function() {
+            const systemPrompt = document.getElementById('system-prompt').value;
+            const userPrompt = document.getElementById('user-prompt').value;
+            const technique = document.getElementById('technique-select').value;
+            const taskType = document.getElementById('task-type').value;
+            const temperature = parseFloat(document.getElementById('temperature-slider').value);
+            const numExamples = parseInt(document.getElementById('examples-slider').value);
+
+            let assembledPrompt = '';
+            let explanation = '';
+            let expectedOutput = '';
+
+            // Build prompt based on technique
+            if (technique === 'standard') {
+                assembledPrompt = `[System]\n${systemPrompt}\n\n[User]\n${userPrompt}`;
+                explanation = '<strong>Standard Prompting:</strong> Direct instruction without examples or reasoning prompts. Relies on pre-trained knowledge.';
+                expectedOutput = '<strong>Expected Output:</strong> Direct answer based on model knowledge. Quality depends on task clarity and model capabilities.';
+            } else if (technique === 'zero-shot-cot') {
+                assembledPrompt = `[System]\n${systemPrompt}\n\n[User]\n${userPrompt}\n\nLet's think step by step.`;
+                explanation = '<strong>Zero-shot Chain-of-Thought:</strong> Appends "Let\'s think step by step" to encourage reasoning without examples.';
+                expectedOutput = '<strong>Expected Output:</strong> Step-by-step reasoning followed by final answer. Better for complex reasoning tasks.';
+            } else if (technique === 'few-shot-cot') {
+                const examples = generateExamples(taskType, numExamples);
+                assembledPrompt = `[System]\n${systemPrompt}\n\n[User]\nHere are some examples:\n\n${examples}\n\nNow solve:\n${userPrompt}`;
+                explanation = '<strong>Few-shot Chain-of-Thought:</strong> Provides examples with reasoning to establish pattern.';
+                expectedOutput = `<strong>Expected Output:</strong> Follows the pattern from ${numExamples} examples. Reasoning + answer format.`;
+            } else if (technique === 'generated-knowledge') {
+                assembledPrompt = `[System]\n${systemPrompt}\n\n[User - Step 1: Generate Knowledge]\nGenerate 5 relevant facts about: ${userPrompt}\n\n[Step 2: Answer Using Knowledge]\nUsing the facts above, provide a comprehensive answer to: ${userPrompt}`;
+                explanation = '<strong>Generated Knowledge:</strong> Two-step process: generate relevant facts, then answer using those facts.';
+                expectedOutput = '<strong>Expected Output:</strong> First a list of facts, then a detailed answer incorporating those facts.';
+            }
+
+            // Display assembled prompt
+            document.getElementById('assembled-prompt').textContent = assembledPrompt;
+            document.getElementById('technique-explanation').innerHTML = explanation;
+            document.getElementById('expected-output').innerHTML = expectedOutput;
+
+            // Estimate token count (rough: 1 word ≈ 1.3 tokens)
+            const wordCount = assembledPrompt.split(/\s+/).length;
+            const tokenCount = Math.round(wordCount * 1.3);
+            document.getElementById('token-count').textContent = tokenCount;
+
+            // Calculate prompt quality score
+            const qualityScore = calculateQualityScore(assembledPrompt, technique, systemPrompt, numExamples);
+            updateQualityChart(qualityScore);
+
+            document.getElementById('prompt-results').style.display = 'block';
+        };
+
+        function generateExamples(taskType, numExamples) {
+            const exampleSets = {
+                'classification': [
+                    'Input: "This movie was amazing!"\nReasoning: The word "amazing" is a strong positive sentiment indicator.\nOutput: Positive',
+                    'Input: "Worst experience ever."\nReasoning: "Worst" and "ever" together indicate extreme negative sentiment.\nOutput: Negative',
+                    'Input: "It was okay."\nReasoning: "Okay" is a neutral term with no strong sentiment indicators.\nOutput: Neutral'
+                ],
+                'math': [
+                    'Q: If I have 5 apples and buy 3 more, how many do I have?\nReasoning: Start with 5, add 3: 5 + 3 = 8\nAnswer: 8 apples',
+                    'Q: A train travels 60 km in 30 minutes. What is its speed in km/h?\nReasoning: 30 minutes = 0.5 hours. Speed = 60 / 0.5 = 120\nAnswer: 120 km/h',
+                    'Q: What is 15% of 200?\nReasoning: 15% = 0.15. 200 × 0.15 = 30\nAnswer: 30'
+                ],
+                'creative': [
+                    'Prompt: "Write about a sunset"\nApproach: Use sensory details and metaphors\nOutput: "The sun melted into the horizon like honey..."',
+                    'Prompt: "Describe a robot"\nApproach: Mix technical and emotional elements\nOutput: "Chrome joints whispered as it moved, eyes glowing with digital warmth..."',
+                    'Prompt: "A mysterious door"\nApproach: Build suspense and intrigue\nOutput: "The door stood alone in the forest, unmarked, humming softly..."'
+                ],
+                'factual': [
+                    'Claim: "Water boils at 100°C at sea level"\nAnalysis: This is a well-established physical constant.\nVerdict: True',
+                    'Claim: "The Great Wall is visible from space"\nAnalysis: This is a common myth; astronauts report it\'s not visible.\nVerdict: False',
+                    'Claim: "Humans have 46 chromosomes"\nAnalysis: Standard human karyotype is 46 (23 pairs).\nVerdict: True'
+                ]
+            };
+
+            const examples = exampleSets[taskType] || exampleSets['classification'];
+            return examples.slice(0, numExamples).join('\n\n');
+        }
+
+        function calculateQualityScore(prompt, technique, systemPrompt, numExamples) {
+            const scores = {
+                specificity: 0,
+                structure: 0,
+                context: 0,
+                examples: 0
+            };
+
+            // Specificity: length and detail
+            const wordCount = prompt.split(/\s+/).length;
+            scores.specificity = Math.min(100, (wordCount / 100) * 100);
+
+            // Structure: has sections, formatting
+            if (prompt.includes('[') && prompt.includes(']')) scores.structure += 40;
+            if (prompt.includes('\n\n')) scores.structure += 30;
+            if (technique !== 'standard') scores.structure += 30;
+
+            // Context: system prompt quality
+            if (systemPrompt && systemPrompt.length > 20) scores.context = 100;
+            else if (systemPrompt && systemPrompt.length > 10) scores.context = 60;
+            else scores.context = 20;
+
+            // Examples: based on technique and count
+            if (technique === 'few-shot-cot') {
+                scores.examples = Math.min(100, numExamples * 25);
+            } else if (technique === 'zero-shot-cot' || technique === 'generated-knowledge') {
+                scores.examples = 50;
+            } else {
+                scores.examples = 0;
+            }
+
+            return scores;
+        }
+
+        function updateQualityChart(scores) {
+            const ctx = document.getElementById('qualityChart').getContext('2d');
+
+            if (qualityChart) qualityChart.destroy();
+
+            const data = {
+                labels: ['Specificity', 'Structure', 'Context', 'Examples'],
+                datasets: [{
+                    label: 'Quality Score',
+                    data: [scores.specificity, scores.structure, scores.context, scores.examples],
+                    backgroundColor: [
+                        'rgba(139, 92, 246, 0.7)',
+                        'rgba(8, 145, 178, 0.7)',
+                        'rgba(5, 150, 105, 0.7)',
+                        'rgba(245, 158, 11, 0.7)'
+                    ],
+                    borderColor: [
+                        '#8b5cf6',
+                        '#0891b2',
+                        '#059669',
+                        '#f59e0b'
+                    ],
+                    borderWidth: 2
+                }]
+            };
+
+            qualityChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Prompt Quality Breakdown',
+                            font: { size: 14, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Score (0-100)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initScaleChart();
+            initTechniqueChart();
+            initTemperatureChart();
+        });
+    </script>
+
+    <!-- Home Button -->
+    <a href="nlp_guide_index.html" class="home-btn" title="Back to Home">🏠</a>
+</body>
+</html>
