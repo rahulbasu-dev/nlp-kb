@@ -771,6 +771,7 @@ tr:last-child td {
         .path-step:nth-child(3) .path-step-number { border-color: #059669; color: #059669; }
         .path-step:nth-child(4) .path-step-number { border-color: #d97706; color: #d97706; }
         .path-step:nth-child(5) .path-step-number { border-color: #dc2626; color: #dc2626; }
+        .path-step:nth-child(6) .path-step-number { border-color: #e11d48; color: #e11d48; }
 
         .path-step h4 {
             font-size: 1rem;
@@ -1126,6 +1127,10 @@ tr:last-child td {
                         <span class="icon">📊</span>
                         <span>TF-IDF</span>
                     </a>
+                    <a href="ngram_educational.html" class="sidebar-link">
+                        <span class="icon">📖</span>
+                        <span>N-gram LMs</span>
+                    </a>
                 </div>
 
                 <div class="sidebar-section">
@@ -1180,21 +1185,26 @@ tr:last-child td {
                 </div>
                 <div class="path-step">
                     <div class="path-step-number">2</div>
+                    <h4>N-gram LMs</h4>
+                    <p>Language modeling basics</p>
+                </div>
+                <div class="path-step">
+                    <div class="path-step-number">3</div>
                     <h4>Word2Vec</h4>
                     <p>Neural embeddings overview</p>
                 </div>
                 <div class="path-step">
-                    <div class="path-step-number">3</div>
+                    <div class="path-step-number">4</div>
                     <h4>SGNS</h4>
                     <p>Skip-gram deep dive</p>
                 </div>
                 <div class="path-step">
-                    <div class="path-step-number">4</div>
+                    <div class="path-step-number">5</div>
                     <h4>CBOW</h4>
                     <p>Alternative architecture</p>
                 </div>
                 <div class="path-step">
-                    <div class="path-step-number">5</div>
+                    <div class="path-step-number">6</div>
                     <h4>GloVe</h4>
                     <p>Global statistics approach</p>
                 </div>
@@ -1308,6 +1318,27 @@ tr:last-child td {
                         <span class="feature-tag">Matrix Factorization</span>
                     </div>
                     <a href="glove_educational.html" class="topic-card-link">
+                        Start Learning <span>→</span>
+                    </a>
+                </div>
+            </article>
+
+            <!-- N-gram Language Models -->
+            <article class="topic-card">
+                <div class="topic-card-header" style="background: linear-gradient(135deg, #0891b2, #0e7490);">
+                    <h3>N-gram LMs</h3>
+                    <div class="subtitle">N-gram Language Modeling</div>
+                    <span class="icon">📖</span>
+                </div>
+                <div class="topic-card-body">
+                    <p>Learn how language models predict the next word using n-gram statistics. Covers smoothing techniques, backoff strategies, and perplexity evaluation.</p>
+                    <div class="topic-card-features">
+                        <span class="feature-tag">Markov Assumption</span>
+                        <span class="feature-tag">Smoothing</span>
+                        <span class="feature-tag">Perplexity</span>
+                        <span class="feature-tag">Backoff</span>
+                    </div>
+                    <a href="ngram_educational.html" class="topic-card-link">
                         Start Learning <span>→</span>
                     </a>
                 </div>

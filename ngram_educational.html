@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive educational guide to N-gram Language Models for classroom use">
+    <title>Understanding N-gram Language Models: A Complete Guide</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #0891b2;
+            --primary-dark: #0e7490;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container - Wider Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks - Consistent Sizing */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-block.half {
+            min-height: calc(var(--block-min-height) / 2);
+        }
+
+        .content-block.auto {
+            min-height: auto;
+        }
+
+        /* Grid Layout for Side-by-Side Blocks */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .block-grid .content-block {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .block-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .icon {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #e0f2fe;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Canvas for heatmap */
+        canvas.heatmap {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Try It Yourself Box */
+        .try-it-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px dashed var(--warning-color);
+            border-radius: 1rem;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .try-it-box h4 {
+            color: var(--warning-color);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .try-it-box .solution {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .try-it-box .solution.show {
+            display: block;
+        }
+
+        .try-it-box button {
+            background: var(--warning-color);
+            margin-top: 1rem;
+        }
+
+        .try-it-box button:hover {
+            background: #b45309;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .content-block {
+                padding: 1.5rem;
+                min-height: auto;
+            }
+
+            header {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+        }
+
+        /* References Section */
+        .references-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .references-list li {
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            background: var(--bg-color);
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .references-list li:hover {
+            background: #e0f2fe;
+        }
+
+        /* Home Button */
+        .home-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 999;
+            text-decoration: none;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">N-gram LM Guide</div>
+            <ul>
+                <li><a href="#intuition">Intuition</a></li>
+                <li><a href="#math">N-gram Math</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#smoothing">Smoothing</a></li>
+                <li><a href="#backoff">Backoff &amp; Web</a></li>
+                <li><a href="#perplexity">Perplexity</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#playground">Playground</a></li>
+                <li><a href="#python">Python</a></li>
+                <li><a href="#references">References</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Header -->
+        <header>
+            <h1>Understanding N-gram Language Models</h1>
+            <p>N-gram models predict the next word based on the previous N-1 words, powering everything from autocomplete to text generation before the neural era.</p>
+            <div class="subtitle">Probabilistic Sequence Modeling</div>
+        </header>
+
+        <!-- Section 1: Intuition -->
+        <div class="section-header" id="intuition">
+            <h2><span class="icon">💡</span> Intuition</h2>
+            <p>Understanding N-grams through everyday examples</p>
+        </div>
+
+        <div class="content-block">
+            <h3>What is an N-gram Language Model?</h3>
+            <p>An <strong>N-gram language model</strong> predicts the next word in a sequence based on the previous <span class="highlight">N-1 words</span>. It's a statistical approach that learns patterns from text data.</p>
+
+            <div class="callout callout-analogy">
+                <h4>📱 The Autocomplete Analogy</h4>
+                <p>When you type on your phone keyboard and it suggests the next word, that's an N-gram model at work! After you type "I am", it might suggest "going" or "happy" because those sequences appeared frequently in its training data.</p>
+                <p>If millions of people typed "I am going", the model learns that <code>P(going | I am)</code> is high.</p>
+            </div>
+
+            <h3>The Markov Assumption</h3>
+            <p>N-gram models make a simplifying assumption: <strong>the next word depends only on the last N-1 words, not the entire history.</strong></p>
+
+            <div class="formula-box">
+                <div class="formula-label">Markov Assumption (Bigram Example)</div>
+                \[ P(w_k | w_1 w_2 \ldots w_{k-1}) \approx P(w_k | w_{k-1}) \]
+                <div class="formula-description">
+                    <p>Instead of considering the entire history \(w_1 \ldots w_{k-1}\), we only look at the immediately preceding word \(w_{k-1}\).</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Types of N-grams</h3>
+
+                <h4>Unigram (N=1)</h4>
+                <p>Each word is independent. \( P(w_k) \) doesn't depend on previous words.</p>
+                <p><strong>Example:</strong> \( P(\text{cat}) = \text{count}(\text{cat}) / \text{total words} \)</p>
+
+                <h4>Bigram (N=2)</h4>
+                <p>Next word depends on the previous 1 word.</p>
+                <p><strong>Example:</strong> \( P(\text{meow} | \text{cat}) \)</p>
+
+                <h4>Trigram (N=3)</h4>
+                <p>Next word depends on the previous 2 words.</p>
+                <p><strong>Example:</strong> \( P(\text{loudly} | \text{cat meow}) \)</p>
+            </div>
+
+            <div class="content-block">
+                <h3>Concrete Examples</h3>
+
+                <div class="callout callout-example">
+                    <h4>📝 Sentence Breakdown</h4>
+                    <p><strong>Sentence:</strong> "The cat sat on the mat"</p>
+
+                    <p><strong>Bigrams:</strong></p>
+                    <ul>
+                        <li>&lt;s&gt; The</li>
+                        <li>The cat</li>
+                        <li>cat sat</li>
+                        <li>sat on</li>
+                        <li>on the</li>
+                        <li>the mat</li>
+                        <li>mat &lt;/s&gt;</li>
+                    </ul>
+
+                    <p><strong>Trigrams:</strong></p>
+                    <ul>
+                        <li>&lt;s&gt; &lt;s&gt; The</li>
+                        <li>&lt;s&gt; The cat</li>
+                        <li>The cat sat</li>
+                        <li>cat sat on</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <div class="callout callout-warning">
+                <h4>⚠️ Limitation: Long-Range Dependencies</h4>
+                <p>N-gram models <strong>cannot capture long-range dependencies</strong>. Consider:</p>
+                <p><em>"The cat that the dog chased <strong>___</strong>"</em></p>
+                <p>The correct answer is <strong>"ran"</strong> (agreeing with "cat"), but a bigram model only sees "chased ___" and might predict "the" or "away". The subject-verb agreement spans too many words.</p>
+            </div>
+        </div>
+
+        <!-- Section 2: N-gram Math -->
+        <div class="section-header" id="math">
+            <h2><span class="icon">🔢</span> N-gram Mathematics</h2>
+            <p>The formal probability equations behind N-grams</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Foundation: The Chain Rule</h3>
+            <p>The probability of a sentence is the product of conditional probabilities:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Chain Rule of Probability</div>
+                \[ P(w_1 w_2 \ldots w_n) = \prod_{k=1}^{n} P(w_k | w_1 \ldots w_{k-1}) \]
+                <div class="formula-description">
+                    <p>Each word's probability depends on all words that came before it. This is exact but computationally intractable for long sequences.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>The N-gram Approximation</h3>
+
+            <div class="formula-box">
+                <div class="formula-label">Bigram Approximation (N=2)</div>
+                \[ P(w_k | w_1 \ldots w_{k-1}) \approx P(w_k | w_{k-1}) \]
+                <div class="formula-description">
+                    <p>We assume the next word depends only on the immediately previous word.</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">General N-gram Approximation</div>
+                \[ P(w_k | w_1 \ldots w_{k-1}) \approx P(w_k | w_{k-N+1} \ldots w_{k-1}) \]
+                <div class="formula-description">
+                    <p>The next word \(w_k\) depends only on the previous \(N-1\) words.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Maximum Likelihood Estimation (MLE)</h3>
+            <p>We estimate N-gram probabilities by counting occurrences in a corpus:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Bigram MLE</div>
+                \[ P(w_n | w_{n-1}) = \frac{C(w_{n-1} w_n)}{C(w_{n-1})} \]
+                <div class="formula-description">
+                    <p>Where \(C(w_{n-1} w_n)\) = count of bigram "\(w_{n-1} w_n\)"<br>
+                    and \(C(w_{n-1})\) = count of unigram "\(w_{n-1}\)"</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">General N-gram MLE</div>
+                \[ P(w_n | w_{n-N+1} \ldots w_{n-1}) = \frac{C(w_{n-N+1} \ldots w_n)}{C(w_{n-N+1} \ldots w_{n-1})} \]
+                <div class="formula-description">
+                    <p>Count how often the full N-gram appears, divided by how often the context (first N-1 words) appears.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Sentence Boundaries</h3>
+            <p>We add special tokens to handle sentence starts and ends:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Sentence Boundary Tokens</div>
+                <p>\( \langle s \rangle \) = sentence start marker<br>
+                \( \langle /s \rangle \) = sentence end marker</p>
+                <div class="formula-description">
+                    <p>For a bigram model, we pad the sentence: <code>&lt;s&gt; The cat sat &lt;/s&gt;</code></p>
+                    <p>This allows us to compute \( P(\text{The} | \langle s \rangle) \) and \( P(\langle /s \rangle | \text{sat}) \)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Numerical Examples -->
+        <div class="section-header" id="examples">
+            <h2><span class="icon">📝</span> Worked Examples</h2>
+            <p>Step-by-step calculations with a real corpus</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Example Corpus</h3>
+
+            <div class="callout callout-example">
+                <h4>📚 Training Data</h4>
+                <p><strong>Corpus:</strong> "I am Sam. Sam I am. I do not like green eggs and ham."</p>
+                <p><strong>Sentences with boundaries:</strong></p>
+                <ul>
+                    <li>&lt;s&gt; I am Sam &lt;/s&gt;</li>
+                    <li>&lt;s&gt; Sam I am &lt;/s&gt;</li>
+                    <li>&lt;s&gt; I do not like green eggs and ham &lt;/s&gt;</li>
+                </ul>
+            </div>
+
+            <h4>Step 1: Count Bigrams</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bigram</th>
+                            <th>Count</th>
+                            <th>Context Count</th>
+                            <th>Probability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>&lt;s&gt; I</td><td>2</td><td>C(&lt;s&gt;) = 3</td><td>2/3 = 0.667</td></tr>
+                        <tr><td>&lt;s&gt; Sam</td><td>1</td><td>C(&lt;s&gt;) = 3</td><td>1/3 = 0.333</td></tr>
+                        <tr><td>I am</td><td>2</td><td>C(I) = 3</td><td>2/3 = 0.667</td></tr>
+                        <tr><td>I do</td><td>1</td><td>C(I) = 3</td><td>1/3 = 0.333</td></tr>
+                        <tr><td>am Sam</td><td>1</td><td>C(am) = 2</td><td>1/2 = 0.500</td></tr>
+                        <tr><td>am &lt;/s&gt;</td><td>1</td><td>C(am) = 2</td><td>1/2 = 0.500</td></tr>
+                        <tr><td>Sam I</td><td>1</td><td>C(Sam) = 2</td><td>1/2 = 0.500</td></tr>
+                        <tr><td>Sam &lt;/s&gt;</td><td>1</td><td>C(Sam) = 2</td><td>1/2 = 0.500</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 2: Calculate Sentence Probability</h4>
+            <p>Let's compute \( P(\text{&lt;s&gt; I am Sam &lt;/s&gt;}) \) using our bigram model:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Sentence Probability Calculation</div>
+                \[ \begin{align}
+                P(\text{I am Sam}) &= P(\text{I} | \langle s \rangle) \times P(\text{am} | \text{I}) \\
+                &\quad \times P(\text{Sam} | \text{am}) \times P(\langle /s \rangle | \text{Sam}) \\
+                &= \frac{2}{3} \times \frac{2}{3} \times \frac{1}{2} \times \frac{1}{2} \\
+                &= 0.667 \times 0.667 \times 0.500 \times 0.500 \\
+                &= \mathbf{0.111}
+                \end{align} \]
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h4>Step 3: The Zero Problem</h4>
+
+            <div class="callout callout-warning">
+                <h4>⚠️ The Zero Probability Problem</h4>
+                <p>What if we try to compute \( P(\text{Sam likes eggs}) \)?</p>
+                <p>\( P(\text{likes} | \text{Sam}) = \frac{C(\text{Sam likes})}{C(\text{Sam})} = \frac{0}{2} = 0 \)</p>
+                <p><strong>Problem:</strong> The entire sentence probability becomes zero! This is too harsh—just because we never saw "Sam likes" doesn't mean it's impossible.</p>
+                <p><strong>Solution:</strong> Smoothing techniques (next section)</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Using the bigram counts above, calculate:</p>
+                <p>\( P(\text{&lt;s&gt; Sam I am &lt;/s&gt;}) \)</p>
+                <button onclick="document.getElementById('solution1').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution1" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p>\( P(\text{Sam I am}) = P(\text{Sam} | \langle s \rangle) \times P(\text{I} | \text{Sam}) \times P(\text{am} | \text{I}) \times P(\langle /s \rangle | \text{am}) \)</p>
+                    <p>\( = \frac{1}{3} \times \frac{1}{2} \times \frac{2}{3} \times \frac{1}{2} \)</p>
+                    <p>\( = 0.333 \times 0.500 \times 0.667 \times 0.500 \)</p>
+                    <p>\( = \mathbf{0.0556} \)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Smoothing -->
+        <div class="section-header" id="smoothing">
+            <h2><span class="icon">🎨</span> Smoothing Techniques</h2>
+            <p>Handling unseen N-grams to avoid zero probabilities</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Why Smoothing?</h3>
+            <p>In any finite corpus, most possible N-grams will have zero counts. Smoothing <strong>redistributes probability mass</strong> from seen to unseen events.</p>
+
+            <h3>1. Laplace Smoothing (Add-1)</h3>
+            <p>Add 1 to every count (pretend we saw every N-gram once more):</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Laplace (Add-1) Smoothing</div>
+                \[ P_{\text{Laplace}}(w_n | w_{n-1}) = \frac{C(w_{n-1} w_n) + 1}{C(w_{n-1}) + V} \]
+                <div class="formula-description">
+                    <p>Where \(V\) = vocabulary size (number of unique words)</p>
+                </div>
+            </div>
+
+            <h4>Example with Our Corpus</h4>
+            <p>Vocabulary: {I, am, Sam, do, not, like, green, eggs, and, ham, &lt;s&gt;, &lt;/s&gt;} → V = 12</p>
+
+            <div class="callout callout-example">
+                <h4>📊 Laplace Example</h4>
+                <p><strong>Before smoothing:</strong> \( P(\text{likes} | \text{Sam}) = 0/2 = 0 \)</p>
+                <p><strong>After Laplace:</strong> \( P(\text{likes} | \text{Sam}) = \frac{0 + 1}{2 + 12} = \frac{1}{14} \approx 0.071 \)</p>
+                <p><strong>Original bigram:</strong> \( P(\text{I} | \text{Sam}) = 1/2 = 0.500 \)</p>
+                <p><strong>After Laplace:</strong> \( P(\text{I} | \text{Sam}) = \frac{1 + 1}{2 + 12} = \frac{2}{14} \approx 0.143 \)</p>
+                <p style="color: var(--warning-color);"><strong>Problem:</strong> Laplace drastically reduces probabilities of seen events!</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>2. Add-k Smoothing</h3>
+            <p>A more flexible version: add a small constant k &lt; 1:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Add-k Smoothing</div>
+                \[ P_{\text{Add-k}}(w_n | w_{n-1}) = \frac{C(w_{n-1} w_n) + k}{C(w_{n-1}) + kV} \]
+                <div class="formula-description">
+                    <p>Typically k = 0.01 to 0.5. Tune k on a validation set.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-example">
+                <h4>📊 Add-k Example (k=0.1)</h4>
+                <p>\( P(\text{likes} | \text{Sam}) = \frac{0 + 0.1}{2 + 0.1 \times 12} = \frac{0.1}{3.2} \approx 0.031 \)</p>
+                <p>\( P(\text{I} | \text{Sam}) = \frac{1 + 0.1}{2 + 1.2} = \frac{1.1}{3.2} \approx 0.344 \)</p>
+                <p style="color: var(--accent-color);"><strong>Better!</strong> Less distortion than Add-1.</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>3. Interpolation</h3>
+            <p>Combine multiple N-gram orders, weighting each:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Linear Interpolation</div>
+                \[ \hat{P}(w_n | w_{n-2} w_{n-1}) = \lambda_1 P(w_n | w_{n-2} w_{n-1}) + \lambda_2 P(w_n | w_{n-1}) + \lambda_3 P(w_n) \]
+                <div class="formula-description">
+                    <p>Where \(\lambda_1 + \lambda_2 + \lambda_3 = 1\) and all \(\lambda_i \geq 0\)</p>
+                    <p>Trigram + Bigram + Unigram. If trigram is unseen, bigram/unigram provide fallback.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-example">
+                <h4>📊 Interpolation Example</h4>
+                <p>Suppose \(\lambda_1 = 0.6, \lambda_2 = 0.3, \lambda_3 = 0.1\)</p>
+                <p>If trigram = 0.5, bigram = 0.2, unigram = 0.01:</p>
+                <p>\( \hat{P} = 0.6(0.5) + 0.3(0.2) + 0.1(0.01) = 0.3 + 0.06 + 0.001 = 0.361 \)</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>If the trigram "I like cats" has never been seen (P=0), but the bigram "like cats" has P=0.15 and unigram "cats" has P=0.02, what is the interpolated probability with λ₁=0.5, λ₂=0.3, λ₃=0.2?</p>
+                <button onclick="document.getElementById('solution2').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution2" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p>\( \hat{P} = 0.5(0) + 0.3(0.15) + 0.2(0.02) \)</p>
+                    <p>\( = 0 + 0.045 + 0.004 = \mathbf{0.049} \)</p>
+                    <p>Even though the trigram is unseen, we still get a reasonable non-zero probability!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Backoff & Stupid Backoff -->
+        <div class="section-header" id="backoff">
+            <h2><span class="icon">🔄</span> Backoff &amp; Stupid Backoff</h2>
+            <p>Hierarchical fallback for large-scale models</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Katz Backoff</h3>
+            <p>Instead of always mixing N-gram orders (interpolation), <strong>backoff</strong> only uses lower orders when higher orders fail:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Katz Backoff Concept</div>
+                \[ P_{\text{BO}}(w_n | w_{n-N+1} \ldots w_{n-1}) =
+                \begin{cases}
+                P^*(w_n | w_{n-N+1} \ldots w_{n-1}) & \text{if } C(\ldots) > 0 \\
+                \alpha \cdot P_{\text{BO}}(w_n | w_{n-N+2} \ldots w_{n-1}) & \text{otherwise}
+                \end{cases}
+                \]
+                <div class="formula-description">
+                    <p>\(P^*\) = discounted probability (some mass reserved for unseen)<br>
+                    \(\alpha\) = backoff weight (ensures probabilities sum to 1)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Stupid Backoff</h3>
+            <p>A simpler, non-probabilistic variant that works well at web scale:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Stupid Backoff</div>
+                \[ S(w_i | w_{i-N+1} \ldots w_{i-1}) =
+                \begin{cases}
+                \frac{C(w_{i-N+1} \ldots w_i)}{C(w_{i-N+1} \ldots w_{i-1})} & \text{if count} > 0 \\
+                0.4 \times S(w_i | w_{i-N+2} \ldots w_{i-1}) & \text{otherwise}
+                \end{cases}
+                \]
+                <div class="formula-description">
+                    <p>Recursively back off with penalty 0.4 (empirically chosen).<br>
+                    Scores don't sum to 1, but relative ranking is preserved.</p>
+                </div>
+            </div>
+
+            <h4>Numerical Example</h4>
+            <div class="callout callout-example">
+                <h4>📊 Stupid Backoff Example</h4>
+                <p>Computing \( S(\text{eggs} | \text{green ham}) \) with trigram, bigram, unigram:</p>
+                <ul>
+                    <li><strong>Trigram:</strong> C(green ham eggs) = 0 → back off</li>
+                    <li><strong>Bigram:</strong> S(eggs | ham) = 0.4 × C(ham eggs)/C(ham) = 0.4 × (1/1) = 0.4</li>
+                    <li><strong>Result:</strong> S = 0.4</li>
+                </ul>
+                <p>If bigram also failed, we'd go to unigram: 0.4 × 0.4 × P(eggs) = 0.16 × P(eggs)</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Google Web 1T N-grams</h3>
+
+            <div class="callout callout-concept">
+                <h4>🌐 Web-Scale N-grams</h4>
+                <p>Google released the <strong>Web 1T 5-gram corpus</strong> (Brants et al., 2007) containing counts from 1 trillion words of web text:</p>
+                <ul>
+                    <li>1-grams: 13 million entries</li>
+                    <li>2-grams: 314 million entries</li>
+                    <li>3-grams: 977 million entries</li>
+                    <li>4-grams: 1.3 billion entries</li>
+                    <li>5-grams: 1.2 billion entries</li>
+                </ul>
+                <p>Stupid Backoff was designed for this scale—simple and efficient without normalizing probabilities.</p>
+            </div>
+        </div>
+
+        <!-- Section 6: Perplexity -->
+        <div class="section-header" id="perplexity">
+            <h2><span class="icon">🎯</span> Perplexity</h2>
+            <p>Evaluating language model quality</p>
+        </div>
+
+        <div class="content-block">
+            <h3>What is Perplexity?</h3>
+            <p><strong>Perplexity (PP)</strong> measures how "surprised" a model is by test data. Lower perplexity = better model.</p>
+
+            <div class="callout callout-analogy">
+                <h4>🔀 The Branching Factor Analogy</h4>
+                <p>Imagine you're in a maze. At each intersection, you have N doors to choose from. If the maze is confusing (high perplexity), you might face 100 doors. If it's simple (low perplexity), maybe only 2 doors.</p>
+                <p><strong>Perplexity = average branching factor</strong> the model faces when predicting the next word.</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Perplexity Definition</div>
+                \[ \text{PP}(W) = P(w_1 w_2 \ldots w_N)^{-1/N} \]
+                <div class="formula-description">
+                    <p>The inverse probability, normalized by sequence length N.</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Perplexity via Cross-Entropy</div>
+                \[ \text{PP}(W) = 2^{H(W)} \]
+                <div class="formula-description">
+                    <p>Where \( H(W) = -\frac{1}{N} \log_2 P(w_1 \ldots w_N) \) is the cross-entropy.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Calculating Perplexity</h3>
+
+            <div class="callout callout-example">
+                <h4>📊 Example: Perplexity of "I am Sam"</h4>
+                <p>Earlier we computed \( P(\text{I am Sam}) = 0.111 \) using a bigram model.</p>
+                <p>The sentence has N=3 words (excluding boundaries).</p>
+                <p>\[ \text{PP} = (0.111)^{-1/3} = \left(\frac{1}{0.111}\right)^{1/3} = (9.009)^{0.333} \approx \mathbf{2.08} \]</p>
+                <p>Interpretation: On average, the model has about <strong>2 equally likely choices</strong> at each word.</p>
+            </div>
+
+            <h4>Perplexity in Practice</h4>
+            <div class="callout callout-concept">
+                <h4>🎯 Typical Perplexity Values</h4>
+                <ul>
+                    <li><strong>Perfect model:</strong> PP = 1 (knows exactly what comes next)</li>
+                    <li><strong>Good N-gram model:</strong> PP = 50-200 (English text)</li>
+                    <li><strong>Bad model (random guessing):</strong> PP = V (vocabulary size, e.g., 50,000)</li>
+                    <li><strong>Neural LMs (2015):</strong> PP = 50-80</li>
+                    <li><strong>Modern transformers:</strong> PP &lt; 20</li>
+                </ul>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>A model assigns probability 0.064 to a 5-word sentence. What is its perplexity?</p>
+                <button onclick="document.getElementById('solution3').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution3" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p>\( \text{PP} = (0.064)^{-1/5} = (1/0.064)^{0.2} = (15.625)^{0.2} \)</p>
+                    <p>\( = \mathbf{2.0} \)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Visualization -->
+        <div class="section-header" id="visualization">
+            <h2><span class="icon">📊</span> Visualizations</h2>
+            <p>Interactive charts showing N-gram behavior</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Bigram Probability Heatmap</h3>
+            <p>This heatmap shows bigram probabilities \( P(w_2 | w_1) \) for the "I am Sam" corpus. Blue indicates higher probability, light red indicates zero.</p>
+            <canvas id="bigramHeatmapCanvas" width="600" height="600" class="heatmap"></canvas>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Smoothing Comparison</h3>
+                <p>Compare P(Sam|like) under different smoothing methods (MLE gives 0).</p>
+                <div class="chart-container">
+                    <canvas id="smoothingChart"></canvas>
+                </div>
+            </div>
+
+            <div class="content-block">
+                <h3>Perplexity vs N-gram Order</h3>
+                <p>Perplexity typically decreases from unigram to trigram, then levels off or increases (overfitting).</p>
+                <div class="chart-container">
+                    <canvas id="perplexityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 8: Interactive Playground -->
+        <div class="section-header" id="playground">
+            <h2><span class="icon">🎮</span> Interactive Playground</h2>
+            <p>Build your own N-gram model in real-time</p>
+        </div>
+
+        <div class="content-block">
+            <div class="interactive-section">
+                <h3>N-gram Language Model Playground</h3>
+
+                <div class="input-group">
+                    <label for="corpus-input">Training Corpus (one sentence per line or period-separated):</label>
+                    <textarea id="corpus-input" rows="4">I am Sam. Sam I am. I do not like green eggs and ham.</textarea>
+                </div>
+
+                <div class="block-grid">
+                    <div class="input-group">
+                        <label for="test-sentence">Test Sentence:</label>
+                        <input type="text" id="test-sentence" placeholder="Enter a test sentence" value="I am Sam">
+                    </div>
+                    <div class="input-group">
+                        <label for="ngram-order">N-gram Order:</label>
+                        <select id="ngram-order">
+                            <option value="1">Unigram (N=1)</option>
+                            <option value="2" selected>Bigram (N=2)</option>
+                            <option value="3">Trigram (N=3)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="smoothing-method">Smoothing Method:</label>
+                    <select id="smoothing-method">
+                        <option value="none">None (MLE)</option>
+                        <option value="laplace">Laplace (Add-1)</option>
+                        <option value="addk" selected>Add-k (k=0.1)</option>
+                        <option value="interpolation">Interpolation</option>
+                    </select>
+                </div>
+
+                <button onclick="window.analyzeNgram()">Analyze</button>
+            </div>
+
+            <div class="result-display" id="playground-results" style="display: none;">
+                <h4>Results</h4>
+                <div id="ngram-counts-table"></div>
+                <div id="probability-calculation"></div>
+                <div id="perplexity-result"></div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>Top-10 Next Word Predictions</h3>
+            <p>After training, enter a context and see the most likely next words:</p>
+            <div class="input-group">
+                <label for="context-input">Context (e.g., "I am"):</label>
+                <input type="text" id="context-input" placeholder="Enter context words" value="I am">
+                <button onclick="window.predictNextWord()" style="margin-top: 0.5rem;">Predict Next Word</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="predictionsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Section 9: Python Code -->
+        <div class="section-header" id="python">
+            <h2><span class="icon">🐍</span> Python Implementation</h2>
+            <p>Complete, runnable code for N-gram language models</p>
+        </div>
+
+        <div class="content-block auto">
+            <h3>Complete N-gram Language Model</h3>
+            <p>Copy this code into a Python file and run it directly!</p>
+
+<pre><code><span class="comment">"""
+N-gram Language Model Implementation
+=====================================
+Educational implementation with smoothing, perplexity, and generation.
+"""</span>
+
+<span class="keyword">import</span> re
+<span class="keyword">import</span> math
+<span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict, Counter
+<span class="keyword">from</span> typing <span class="keyword">import</span> List, Tuple, Dict
+<span class="keyword">import</span> random
+
+<span class="keyword">class</span> <span class="class-name">NgramLM</span>:
+    <span class="string">"""N-gram Language Model with multiple smoothing options."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, n=<span class="number">2</span>, smoothing=<span class="string">'none'</span>, k=<span class="number">1.0</span>, lambdas=<span class="keyword">None</span>):
+        <span class="string">"""
+        Args:
+            n: N-gram order (2=bigram, 3=trigram)
+            smoothing: 'none', 'laplace', 'addk', 'interpolation'
+            k: smoothing parameter for add-k
+            lambdas: weights for interpolation [λ_n, λ_n-1, ..., λ_1]
+        """</span>
+        self.n = n
+        self.smoothing = smoothing
+        self.k = k
+        self.lambdas = lambdas <span class="keyword">or</span> [<span class="number">0.6</span>, <span class="number">0.3</span>, <span class="number">0.1</span>]
+        self.ngram_counts = defaultdict(int)
+        self.context_counts = defaultdict(int)
+        self.vocab = set()
+
+    <span class="keyword">def</span> <span class="function">tokenize</span>(self, text: str) <span class="operator">-></span> List[str]:
+        <span class="string">"""Tokenize text into sentences and words."""</span>
+        <span class="comment"># Split into sentences</span>
+        sentences = re.split(r<span class="string">'[.!?]'</span>, text.lower())
+        tokens = []
+        <span class="keyword">for</span> sent <span class="keyword">in</span> sentences:
+            words = re.findall(r<span class="string">'\w+'</span>, sent)
+            <span class="keyword">if</span> words:
+                <span class="comment"># Add sentence boundaries</span>
+                tokens.extend([<span class="string">'<s>'</span>] * (self.n - <span class="number">1</span>) + words + [<span class="string">'</s>'</span>])
+        <span class="keyword">return</span> tokens
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, corpus: str) <span class="operator">-></span> <span class="keyword">None</span>:
+        <span class="string">"""Train the N-gram model on a corpus."""</span>
+        tokens = self.tokenize(corpus)
+        self.vocab = set(tokens)
+
+        <span class="comment"># Count N-grams and contexts</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(tokens) - self.n + <span class="number">1</span>):
+            ngram = tuple(tokens[i:i + self.n])
+            context = ngram[:-<span class="number">1</span>]
+            word = ngram[-<span class="number">1</span>]
+
+            self.ngram_counts[ngram] += <span class="number">1</span>
+            self.context_counts[context] += <span class="number">1</span>
+
+        <span class="comment"># Also count lower-order N-grams for interpolation</span>
+        <span class="keyword">if</span> self.smoothing == <span class="string">'interpolation'</span>:
+            <span class="keyword">for</span> order <span class="keyword">in</span> range(<span class="number">1</span>, self.n):
+                <span class="keyword">for</span> i <span class="keyword">in</span> range(len(tokens) - order + <span class="number">1</span>):
+                    ngram = tuple(tokens[i:i + order])
+                    <span class="keyword">if</span> len(ngram) > <span class="number">1</span>:
+                        context = ngram[:-<span class="number">1</span>]
+                        self.context_counts[context] = self.context_counts.get(context, <span class="number">0</span>) + <span class="number">1</span>
+
+    <span class="keyword">def</span> <span class="function">prob</span>(self, word: str, context: tuple) <span class="operator">-></span> float:
+        <span class="string">"""Calculate P(word | context) with smoothing."""</span>
+        V = len(self.vocab)
+        ngram = context + (word,)
+
+        <span class="keyword">if</span> self.smoothing == <span class="string">'none'</span>:
+            <span class="keyword">if</span> self.context_counts[context] == <span class="number">0</span>:
+                <span class="keyword">return</span> <span class="number">0.0</span>
+            <span class="keyword">return</span> self.ngram_counts[ngram] / self.context_counts[context]
+
+        <span class="keyword">elif</span> self.smoothing == <span class="string">'laplace'</span>:
+            <span class="keyword">return</span> (self.ngram_counts[ngram] + <span class="number">1</span>) / (self.context_counts[context] + V)
+
+        <span class="keyword">elif</span> self.smoothing == <span class="string">'addk'</span>:
+            <span class="keyword">return</span> (self.ngram_counts[ngram] + self.k) / (self.context_counts[context] + self.k * V)
+
+        <span class="keyword">elif</span> self.smoothing == <span class="string">'interpolation'</span>:
+            <span class="comment"># Linear interpolation</span>
+            prob = <span class="number">0.0</span>
+            <span class="keyword">for</span> i, lambda_i <span class="keyword">in</span> enumerate(self.lambdas):
+                order = self.n - i
+                <span class="keyword">if</span> order == <span class="number">1</span>:
+                    <span class="comment"># Unigram</span>
+                    total = sum(self.context_counts.values())
+                    prob += lambda_i * (self.ngram_counts[(word,)] / total <span class="keyword">if</span> total > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0</span>)
+                <span class="keyword">else</span>:
+                    sub_context = context[-(order-<span class="number">1</span>):] <span class="keyword">if</span> len(context) >= order-<span class="number">1</span> <span class="keyword">else</span> context
+                    sub_ngram = sub_context + (word,)
+                    <span class="keyword">if</span> self.context_counts[sub_context] > <span class="number">0</span>:
+                        prob += lambda_i * (self.ngram_counts[sub_ngram] / self.context_counts[sub_context])
+            <span class="keyword">return</span> prob
+
+        <span class="keyword">return</span> <span class="number">0.0</span>
+
+    <span class="keyword">def</span> <span class="function">perplexity</span>(self, sentence: str) <span class="operator">-></span> float:
+        <span class="string">"""Calculate perplexity of a sentence."""</span>
+        tokens = self.tokenize(sentence)
+        log_prob = <span class="number">0.0</span>
+        count = <span class="number">0</span>
+
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.n - <span class="number">1</span>, len(tokens)):
+            context = tuple(tokens[i - self.n + <span class="number">1</span>:i])
+            word = tokens[i]
+            p = self.prob(word, context)
+            <span class="keyword">if</span> p > <span class="number">0</span>:
+                log_prob += math.log2(p)
+            <span class="keyword">else</span>:
+                log_prob += -<span class="number">20</span>  <span class="comment"># Penalty for zero prob</span>
+            count += <span class="number">1</span>
+
+        <span class="keyword">return</span> <span class="number">2</span> ** (-log_prob / count) <span class="keyword">if</span> count > <span class="number">0</span> <span class="keyword">else</span> float(<span class="string">'inf'</span>)
+
+    <span class="keyword">def</span> <span class="function">generate</span>(self, context: tuple, max_words: int = <span class="number">10</span>) <span class="operator">-></span> str:
+        <span class="string">"""Generate text given a starting context."""</span>
+        result = list(context)
+
+        <span class="keyword">for</span> _ <span class="keyword">in</span> range(max_words):
+            candidates = [(w, self.prob(w, tuple(result[-(self.n-<span class="number">1</span>):])))
+                         <span class="keyword">for</span> w <span class="keyword">in</span> self.vocab <span class="keyword">if</span> w != <span class="string">'<s>'</span>]
+            candidates = [(w, p) <span class="keyword">for</span> w, p <span class="keyword">in</span> candidates <span class="keyword">if</span> p > <span class="number">0</span>]
+
+            <span class="keyword">if</span> <span class="keyword">not</span> candidates:
+                <span class="keyword">break</span>
+
+            <span class="comment"># Sample proportional to probability</span>
+            words, probs = zip(*candidates)
+            total = sum(probs)
+            probs = [p/total <span class="keyword">for</span> p <span class="keyword">in</span> probs]
+            word = random.choices(words, probs)[<span class="number">0</span>]
+
+            <span class="keyword">if</span> word == <span class="string">'</s>'</span>:
+                <span class="keyword">break</span>
+            result.append(word)
+
+        <span class="keyword">return</span> <span class="string">' '</span>.join(result)
+
+
+<span class="keyword">class</span> <span class="class-name">StupidBackoff</span>:
+    <span class="string">"""Stupid Backoff for large-scale N-gram models."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, max_n=<span class="number">3</span>, alpha=<span class="number">0.4</span>):
+        self.max_n = max_n
+        self.alpha = alpha
+        self.ngram_counts = defaultdict(int)
+        self.context_counts = defaultdict(int)
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, corpus: str) <span class="operator">-></span> <span class="keyword">None</span>:
+        tokens = re.findall(r<span class="string">'\w+'</span>, corpus.lower())
+
+        <span class="comment"># Count all N-grams from 1 to max_n</span>
+        <span class="keyword">for</span> n <span class="keyword">in</span> range(<span class="number">1</span>, self.max_n + <span class="number">1</span>):
+            <span class="keyword">for</span> i <span class="keyword">in</span> range(len(tokens) - n + <span class="number">1</span>):
+                ngram = tuple(tokens[i:i + n])
+                self.ngram_counts[ngram] += <span class="number">1</span>
+                <span class="keyword">if</span> n > <span class="number">1</span>:
+                    context = ngram[:-<span class="number">1</span>]
+                    self.context_counts[context] += <span class="number">1</span>
+
+    <span class="keyword">def</span> <span class="function">score</span>(self, word: str, context: tuple) <span class="operator">-></span> float:
+        <span class="string">"""Calculate Stupid Backoff score (not a probability)."""</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> context:
+            <span class="comment"># Unigram</span>
+            <span class="keyword">return</span> self.ngram_counts[(word,)] / sum(self.ngram_counts.values())
+
+        ngram = context + (word,)
+        <span class="keyword">if</span> self.ngram_counts[ngram] > <span class="number">0</span>:
+            <span class="keyword">return</span> self.ngram_counts[ngram] / self.context_counts[context]
+        <span class="keyword">else</span>:
+            <span class="comment"># Back off</span>
+            <span class="keyword">return</span> self.alpha * self.score(word, context[<span class="number">1</span>:])
+
+
+<span class="comment"># Example usage</span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    corpus = <span class="string">"I am Sam. Sam I am. I do not like green eggs and ham."</span>
+
+    <span class="keyword">print</span>(<span class="string">"=== Bigram Model with Add-k Smoothing ==="</span>)
+    model = NgramLM(n=<span class="number">2</span>, smoothing=<span class="string">'addk'</span>, k=<span class="number">0.1</span>)
+    model.train(corpus)
+
+    test_sentence = <span class="string">"I am Sam"</span>
+    pp = model.perplexity(test_sentence)
+    <span class="keyword">print</span>(f<span class="string">"Perplexity of '{test_sentence}': {pp:.2f}"</span>)
+
+    <span class="keyword">print</span>(<span class="string">"\n=== Next Word Predictions after 'I am' ==="</span>)
+    context = (<span class="string">'i'</span>, <span class="string">'am'</span>)
+    predictions = [(w, model.prob(w, context)) <span class="keyword">for</span> w <span class="keyword">in</span> model.vocab <span class="keyword">if</span> w != <span class="string">'<s>'</span>]
+    predictions.sort(key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)
+    <span class="keyword">for</span> w, p <span class="keyword">in</span> predictions[:<span class="number">5</span>]:
+        <span class="keyword">print</span>(f<span class="string">"  {w}: {p:.4f}"</span>)
+
+    <span class="keyword">print</span>(<span class="string">"\n=== Text Generation ==="</span>)
+    generated = model.generate((<span class="string">'<s>'</span>, <span class="string">'i'</span>), max_words=<span class="number">10</span>)
+    <span class="keyword">print</span>(f<span class="string">"Generated: {generated}"</span>)
+
+    <span class="keyword">print</span>(<span class="string">"\n=== Stupid Backoff ==="</span>)
+    backoff = StupidBackoff(max_n=<span class="number">3</span>, alpha=<span class="number">0.4</span>)
+    backoff.train(corpus)
+    score = backoff.score(<span class="string">'sam'</span>, (<span class="string">'i'</span>, <span class="string">'am'</span>))
+    <span class="keyword">print</span>(f<span class="string">"Score('sam' | 'i am'): {score:.4f}"</span>)</code></pre>
+        </div>
+
+        <!-- Section 10: References -->
+        <div class="section-header" id="references">
+            <h2><span class="icon">📚</span> References</h2>
+            <p>Key works in statistical language modeling</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Primary Sources</h3>
+
+            <ul class="references-list">
+                <li>
+                    <strong>Jurafsky, D., & Martin, J. H. (2024).</strong>
+                    <em>Speech and Language Processing (3rd ed.), Chapter 3: N-gram Language Models.</em>
+                    Draft available at: https://web.stanford.edu/~jurafsky/slp3/
+                    <br><br>
+                    The definitive textbook on N-gram models, covering MLE, smoothing, backoff, and evaluation in depth.
+                </li>
+
+                <li>
+                    <strong>Shannon, C. E. (1951).</strong>
+                    <em>"Prediction and Entropy of Printed English."</em>
+                    Bell System Technical Journal, 30(1), 50-64.
+                    <br><br>
+                    Shannon's groundbreaking work applying information theory to language, introducing perplexity and demonstrating that English has about 1-1.5 bits per character of entropy.
+                </li>
+
+                <li>
+                    <strong>Chen, S. F., & Goodman, J. (1999).</strong>
+                    <em>"An Empirical Study of Smoothing Techniques for Language Modeling."</em>
+                    Computer Speech & Language, 13(4), 359-394.
+                    <br><br>
+                    Comprehensive empirical comparison of smoothing methods (Laplace, Katz backoff, interpolation, Kneser-Ney). Shows that Kneser-Ney and modified Kneser-Ney perform best.
+                </li>
+
+                <li>
+                    <strong>Brants, T., Popat, A. C., Xu, P., Och, F. J., & Dean, J. (2007).</strong>
+                    <em>"Large Language Models in Machine Translation."</em>
+                    Proceedings of EMNLP-CoNLL, 858-867.
+                    <br><br>
+                    Introduced Stupid Backoff and demonstrated that scaling N-gram models to trillions of tokens improves translation quality. Released the Google Web 1T 5-gram corpus.
+                </li>
+            </ul>
+
+            <div class="callout callout-concept">
+                <h4>📖 Further Reading</h4>
+                <ul>
+                    <li><strong>Katz Backoff:</strong> Katz, S. (1987). "Estimation of probabilities from sparse data for the language model component of a speech recognizer." IEEE Transactions on Acoustics, Speech, and Signal Processing.</li>
+                    <li><strong>Kneser-Ney Smoothing:</strong> Kneser, R., & Ney, H. (1995). "Improved backing-off for M-gram language modeling." ICASSP.</li>
+                    <li><strong>Neural LMs:</strong> Bengio, Y., et al. (2003). "A Neural Probabilistic Language Model." JMLR 3:1137-1155.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 3rem; color: var(--text-light);">
+            <p>Created for educational purposes | N-gram models powered NLP for decades before neural networks</p>
+            <p style="margin-top: 1rem;">
+                <a href="tfidf_educational.html" style="color: var(--primary-color); margin: 0 1rem;">TF-IDF</a>
+                <a href="word2vec_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Word2Vec</a>
+                <a href="transformer_educational.html" style="color: var(--primary-color); margin: 0 1rem;">Transformers</a>
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        // Global variables for charts
+        let smoothingChart = null;
+        let perplexityChart = null;
+        let predictionsChart = null;
+        let globalModel = null;
+
+        // Bigram heatmap drawing
+        function drawBigramHeatmap() {
+            const canvas = document.getElementById('bigramHeatmapCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Corpus: "I am Sam. Sam I am. I do not like green eggs and ham."
+            const vocab = ['<s>', 'i', 'am', 'sam', '</s>', 'do', 'not', 'like', 'green', 'eggs', 'and', 'ham'];
+
+            // Bigram counts (simplified for visualization)
+            const bigrams = {
+                '<s>,i': 2, '<s>,sam': 1, 'i,am': 2, 'i,do': 1,
+                'am,sam': 1, 'am,</s>': 1, 'sam,i': 1, 'sam,</s>': 1,
+                'do,not': 1, 'not,like': 1, 'like,green': 1, 'green,eggs': 1,
+                'eggs,and': 1, 'and,ham': 1, 'ham,</s>': 1
+            };
+
+            // Context counts
+            const contexts = {'<s>': 3, 'i': 3, 'am': 2, 'sam': 2, 'do': 1, 'not': 1, 'like': 1, 'green': 1, 'eggs': 1, 'and': 1, 'ham': 1};
+
+            const cellSize = 50;
+            const padding = 80;
+            canvas.width = vocab.length * cellSize + padding;
+            canvas.height = vocab.length * cellSize + padding;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw labels
+            ctx.font = '12px sans-serif';
+            ctx.fillStyle = '#1f2937';
+            for (let i = 0; i < vocab.length; i++) {
+                // Row labels (first word)
+                ctx.fillText(vocab[i], 10, padding + i * cellSize + cellSize/2);
+                // Column labels (second word)
+                ctx.save();
+                ctx.translate(padding + i * cellSize + cellSize/2, padding - 10);
+                ctx.rotate(-Math.PI / 4);
+                ctx.fillText(vocab[i], 0, 0);
+                ctx.restore();
+            }
+
+            // Draw cells
+            for (let i = 0; i < vocab.length; i++) {
+                for (let j = 0; j < vocab.length; j++) {
+                    const key = `${vocab[i]},${vocab[j]}`;
+                    const count = bigrams[key] || 0;
+                    const contextCount = contexts[vocab[i]] || 1;
+                    const prob = count / contextCount;
+
+                    const x = padding + j * cellSize;
+                    const y = padding + i * cellSize;
+
+                    // Color: blue for high prob, light red for zero
+                    if (prob === 0) {
+                        ctx.fillStyle = '#fee2e2';
+                    } else {
+                        const intensity = Math.min(prob * 2, 1);
+                        const blue = Math.floor(255 * intensity);
+                        ctx.fillStyle = `rgba(8, 145, 178, ${intensity})`;
+                    }
+
+                    ctx.fillRect(x, y, cellSize, cellSize);
+                    ctx.strokeStyle = '#e5e7eb';
+                    ctx.strokeRect(x, y, cellSize, cellSize);
+
+                    // Draw probability
+                    if (prob > 0) {
+                        ctx.fillStyle = prob > 0.3 ? 'white' : '#1f2937';
+                        ctx.font = '10px sans-serif';
+                        ctx.fillText(prob.toFixed(2), x + 8, y + cellSize/2);
+                    }
+                }
+            }
+        }
+
+        // Smoothing comparison chart
+        function initSmoothingChart() {
+            const ctx = document.getElementById('smoothingChart').getContext('2d');
+
+            // P(Sam|like) under different methods
+            const data = {
+                labels: ['MLE (No Smoothing)', 'Laplace (Add-1)', 'Add-k (k=0.1)'],
+                datasets: [{
+                    label: 'P(Sam|like)',
+                    data: [0, 0.071, 0.031],
+                    backgroundColor: ['rgba(239,68,68,0.7)', 'rgba(245,158,11,0.7)', 'rgba(5,150,105,0.7)'],
+                    borderColor: ['#ef4444', '#f59e0b', '#059669'],
+                    borderWidth: 2
+                }]
+            };
+
+            smoothingChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Smoothing Effect on Unseen Bigram', font: { size: 16 } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 0.1 }
+                    }
+                }
+            });
+        }
+
+        // Perplexity vs N-gram order chart
+        function initPerplexityChart() {
+            const ctx = document.getElementById('perplexityChart').getContext('2d');
+
+            // Typical pattern: PP decreases with order, then levels off
+            const data = {
+                labels: ['Unigram', 'Bigram', 'Trigram', '4-gram', '5-gram'],
+                datasets: [{
+                    label: 'Perplexity',
+                    data: [250, 120, 80, 75, 78],
+                    borderColor: '#0891b2',
+                    backgroundColor: 'rgba(8,145,178,0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            };
+
+            perplexityChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Perplexity by N-gram Order (Typical)', font: { size: 16 } }
+                    },
+                    scales: {
+                        y: { beginAtZero: false, title: { display: true, text: 'Perplexity (lower = better)' } }
+                    }
+                }
+            });
+        }
+
+        // N-gram model implementation in JavaScript
+        class NgramModelJS {
+            constructor(n, smoothing, k) {
+                this.n = n;
+                this.smoothing = smoothing;
+                this.k = k || 0.1;
+                this.ngramCounts = {};
+                this.contextCounts = {};
+                this.vocab = new Set();
+            }
+
+            tokenize(text) {
+                const sentences = text.toLowerCase().split(/[.!?]+/).filter(s => s.trim());
+                const tokens = [];
+                for (const sent of sentences) {
+                    const words = sent.match(/\w+/g) || [];
+                    if (words.length > 0) {
+                        for (let i = 0; i < this.n - 1; i++) tokens.push('<s>');
+                        tokens.push(...words, '</s>');
+                    }
+                }
+                return tokens;
+            }
+
+            train(corpus) {
+                const tokens = this.tokenize(corpus);
+                this.vocab = new Set(tokens);
+
+                for (let i = 0; i < tokens.length - this.n + 1; i++) {
+                    const ngram = tokens.slice(i, i + this.n).join(' ');
+                    const context = tokens.slice(i, i + this.n - 1).join(' ');
+
+                    this.ngramCounts[ngram] = (this.ngramCounts[ngram] || 0) + 1;
+                    this.contextCounts[context] = (this.contextCounts[context] || 0) + 1;
+                }
+            }
+
+            prob(word, context) {
+                const ngram = (context ? context + ' ' + word : word);
+                const count = this.ngramCounts[ngram] || 0;
+                const contextCount = this.contextCounts[context] || 0;
+                const V = this.vocab.size;
+
+                if (this.smoothing === 'none') {
+                    return contextCount === 0 ? 0 : count / contextCount;
+                } else if (this.smoothing === 'laplace') {
+                    return (count + 1) / (contextCount + V);
+                } else if (this.smoothing === 'addk') {
+                    return (count + this.k) / (contextCount + this.k * V);
+                }
+                return 0;
+            }
+
+            sentenceProbability(sentence) {
+                const tokens = this.tokenize(sentence);
+                let prob = 1.0;
+                const steps = [];
+
+                for (let i = this.n - 1; i < tokens.length; i++) {
+                    const context = tokens.slice(i - this.n + 1, i).join(' ');
+                    const word = tokens[i];
+                    const p = this.prob(word, context);
+                    prob *= p;
+                    steps.push({ context, word, prob: p });
+                }
+
+                return { probability: prob, steps };
+            }
+
+            perplexity(sentence) {
+                const result = this.sentenceProbability(sentence);
+                if (result.probability === 0) return Infinity;
+                const N = result.steps.length;
+                return Math.pow(1 / result.probability, 1 / N);
+            }
+
+            getTopPredictions(context, topK = 10) {
+                const predictions = [];
+                for (const word of this.vocab) {
+                    if (word !== '<s>') {
+                        predictions.push({ word, prob: this.prob(word, context) });
+                    }
+                }
+                predictions.sort((a, b) => b.prob - a.prob);
+                return predictions.slice(0, topK);
+            }
+        }
+
+        // Analyze button handler
+        window.analyzeNgram = function() {
+            const corpus = document.getElementById('corpus-input').value;
+            const testSentence = document.getElementById('test-sentence').value;
+            const n = parseInt(document.getElementById('ngram-order').value);
+            const smoothing = document.getElementById('smoothing-method').value;
+
+            const model = new NgramModelJS(n, smoothing, 0.1);
+            model.train(corpus);
+            globalModel = model;
+
+            const result = model.sentenceProbability(testSentence);
+            const pp = model.perplexity(testSentence);
+
+            // Display results
+            document.getElementById('playground-results').style.display = 'block';
+
+            // N-gram counts table
+            let countsHTML = '<h4>Sample N-gram Counts</h4><div class="table-container"><table><thead><tr><th>N-gram</th><th>Count</th></tr></thead><tbody>';
+            const topNgrams = Object.entries(model.ngramCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            for (const [ngram, count] of topNgrams) {
+                countsHTML += `<tr><td>${ngram}</td><td>${count}</td></tr>`;
+            }
+            countsHTML += '</tbody></table></div>';
+            document.getElementById('ngram-counts-table').innerHTML = countsHTML;
+
+            // Probability calculation
+            let calcHTML = '<h4>Step-by-Step Probability</h4><ul>';
+            for (const step of result.steps) {
+                calcHTML += `<li>P(${step.word} | ${step.context}) = <strong>${step.prob.toFixed(4)}</strong></li>`;
+            }
+            calcHTML += `</ul><p><strong>Total Probability:</strong> ${result.probability.toExponential(4)}</p>`;
+            document.getElementById('probability-calculation').innerHTML = calcHTML;
+
+            // Perplexity
+            document.getElementById('perplexity-result').innerHTML = `<h4>Perplexity</h4><p><strong>${pp.toFixed(2)}</strong></p>`;
+        };
+
+        // Predict next word handler
+        window.predictNextWord = function() {
+            if (!globalModel) {
+                alert('Please analyze a corpus first!');
+                return;
+            }
+
+            const contextInput = document.getElementById('context-input').value.toLowerCase().trim();
+            const predictions = globalModel.getTopPredictions(contextInput, 10);
+
+            const labels = predictions.map(p => p.word);
+            const data = predictions.map(p => p.prob);
+
+            if (predictionsChart) predictionsChart.destroy();
+
+            const ctx = document.getElementById('predictionsChart').getContext('2d');
+            predictionsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Probability',
+                        data,
+                        backgroundColor: 'rgba(8,145,178,0.7)',
+                        borderColor: '#0891b2',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: `Top Predictions after "${contextInput}"`, font: { size: 16 } }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+        };
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            drawBigramHeatmap();
+            initSmoothingChart();
+            initPerplexityChart();
+
+            // Auto-run playground
+            setTimeout(() => {
+                window.analyzeNgram();
+            }, 500);
+        });
+    </script>
+
+    <!-- Home Button -->
+    <a href="nlp_guide_index.html" class="home-btn" title="Back to Home">🏠</a>
+</body>
+</html>
