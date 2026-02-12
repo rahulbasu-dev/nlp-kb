@@ -690,9 +690,9 @@
                 <h3> ✏️ Try This!</h3>
                 <p>Click the buttons below to see which problems can be solved with a single line:</p>
                 <div style="margin: 1rem 0;">
-                    <button class="btn-primary" onclick="showProblem('AND')">Show AND (Linearly Separable)</button>
-                    <button class="btn-primary" onclick="showProblem('OR')">Show OR (Linearly Separable)</button>
-                    <button class="btn-secondary" onclick="showProblem('XOR')">Show XOR (NOT Linearly Separable)</button>
+                    <button class="btn-primary" onclick="showProblem('AND')" title="Display the AND gate truth table — a linearly separable problem">Show AND (Linearly Separable)</button>
+                    <button class="btn-primary" onclick="showProblem('OR')" title="Display the OR gate truth table — a linearly separable problem">Show OR (Linearly Separable)</button>
+                    <button class="btn-secondary" onclick="showProblem('XOR')" title="Display the XOR gate truth table — not linearly separable, requires a hidden layer">Show XOR (NOT Linearly Separable)</button>
                 </div>
                 <p><strong>Observe:</strong> Can you draw one straight line that separates all green points from all red points?</p>
             </div>
@@ -777,7 +777,7 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
                         <div class="slider-group">
                             <label>Activation Function:</label>
-                            <select id="activationSelect" onchange="updateActivationViz()" style="width: 100%; padding: 0.5rem; border-radius: 5px; border: 2px solid var(--border-color); font-size: 1rem;">
+                            <select id="activationSelect" onchange="updateActivationViz()" title="Choose an activation function to visualize its curve and derivative" style="width: 100%; padding: 0.5rem; border-radius: 5px; border: 2px solid var(--border-color); font-size: 1rem;">
                                 <option value="sigmoid">Sigmoid</option>
                                 <option value="tanh">Tanh</option>
                                 <option value="relu">ReLU</option>
@@ -787,7 +787,7 @@
                         <div class="slider-group">
                             <label>Input Value: <span id="activationInputValue">0.0</span></label>
                             <input type="range" id="activationInputSlider" min="-5" max="5" step="0.1" value="0"
-                                   oninput="updateActivationViz()">
+                                   oninput="updateActivationViz()" title="Slide to change the input value and see the activation output">
                         </div>
                         <div class="slider-group">
                             <label>Output: <span id="activationOutputValue">0.500</span></label>
@@ -973,10 +973,10 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="playForwardAnimation()">▶ Play Animation</button>
-                    <button class="btn-secondary" onclick="pauseForwardAnimation()">⏸ Pause</button>
-                    <button class="btn-secondary" onclick="resetForwardAnimation()">⟲ Reset</button>
-                    <button class="btn-success" onclick="stepForwardAnimation()">Step Forward</button>
+                    <button class="btn-primary" onclick="playForwardAnimation()" title="Play the forward propagation animation continuously">▶ Play Animation</button>
+                    <button class="btn-secondary" onclick="pauseForwardAnimation()" title="Pause the running animation">⏸ Pause</button>
+                    <button class="btn-secondary" onclick="resetForwardAnimation()" title="Reset the animation to the beginning">⟲ Reset</button>
+                    <button class="btn-success" onclick="stepForwardAnimation()" title="Advance the animation by one step">Step Forward</button>
                 </div>
 
                 <div class="control-panel">
@@ -984,17 +984,17 @@
                     <div class="slider-group">
                         <label>Input 1: <span id="input1Value">1.0</span></label>
                         <input type="range" id="input1Slider" min="-2" max="2" step="0.1" value="1.0"
-                               oninput="updateForwardPass()">
+                               oninput="updateForwardPass()" title="Adjust the first network input value">
                     </div>
                     <div class="slider-group">
                         <label>Input 2: <span id="input2Value">0.5</span></label>
                         <input type="range" id="input2Slider" min="-2" max="2" step="0.1" value="0.5"
-                               oninput="updateForwardPass()">
+                               oninput="updateForwardPass()" title="Adjust the second network input value">
                     </div>
                     <div class="slider-group">
                         <label>Animation Speed: <span id="animSpeedValue">Normal</span></label>
                         <input type="range" id="animSpeedSlider" min="0.5" max="2" step="0.5" value="1"
-                               oninput="updateAnimationSpeed()">
+                               oninput="updateAnimationSpeed()" title="Control how fast the animation plays">
                     </div>
                 </div>
 
@@ -1128,10 +1128,10 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="stepForward()">1. Forward</button>
-                    <button class="btn-primary" onclick="stepBackward()">2. Backward</button>
-                    <button class="btn-success" onclick="stepUpdate()">3. Update</button>
-                    <button class="btn-secondary" onclick="trainEpoch()">Train 1 Epoch</button>
+                    <button class="btn-primary" onclick="stepForward()" title="Run the forward pass to compute predictions">1. Forward</button>
+                    <button class="btn-primary" onclick="stepBackward()" title="Run backpropagation to compute gradients">2. Backward</button>
+                    <button class="btn-success" onclick="stepUpdate()" title="Update weights using the computed gradients">3. Update</button>
+                    <button class="btn-secondary" onclick="trainEpoch()" title="Run one full training epoch (all samples)">Train 1 Epoch</button>
                 </div>
 
                 <div class="value-display" id="trainingValues">
@@ -1232,8 +1232,8 @@
                 <div class="control-panel">
                     <div class="slider-group">
                         <label>Layer Sizes (comma-separated): <span id="layerDisplay">[2, 4, 1]</span></label>
-                        <input type="text" id="layerInput" value="2, 4, 1" placeholder="e.g., 2, 4, 1">
-                        <button class="btn-primary" onclick="updateNetwork()">Update Network</button>
+                        <input type="text" id="layerInput" value="2, 4, 1" placeholder="e.g., 2, 4, 1" title="Enter layer sizes separated by commas (e.g., 2, 4, 1)">
+                        <button class="btn-primary" onclick="updateNetwork()" title="Rebuild the network visualization with the specified layer sizes">Update Network</button>
                     </div>
                 </div>
 
@@ -1276,11 +1276,11 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="animateGradientDescent()" id="gdAnimateBtn">🚀 Animate Gradient Descent</button>
-                    <button class="btn-secondary" onclick="resetGradientDescent()">↺ Reset</button>
+                    <button class="btn-primary" onclick="animateGradientDescent()" id="gdAnimateBtn" title="Start animating gradient descent steps on the loss surface">🚀 Animate Gradient Descent</button>
+                    <button class="btn-secondary" onclick="resetGradientDescent()" title="Reset weights to the starting position and clear the path">↺ Reset</button>
                     <div class="slider-group" style="display: inline-block; margin-left: 1rem;">
                         <label>Learning Rate: <span id="lrValue">0.1</span></label>
-                        <input type="range" id="learningRateSlider" min="0.01" max="0.5" step="0.01" value="0.1" oninput="updateLearningRate()">
+                        <input type="range" id="learningRateSlider" min="0.01" max="0.5" step="0.01" value="0.1" oninput="updateLearningRate()" title="Adjust the learning rate — higher values take bigger steps">
                     </div>
                 </div>
 
@@ -1333,9 +1333,9 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="startTraining()" id="trainBtn">Start Training</button>
-                    <button class="btn-secondary" onclick="pauseTraining()" id="pauseBtn" disabled>Pause</button>
-                    <button class="btn-secondary" onclick="resetTraining()">Reset</button>
+                    <button class="btn-primary" onclick="startTraining()" id="trainBtn" title="Begin training the network and plot the loss curve">Start Training</button>
+                    <button class="btn-secondary" onclick="pauseTraining()" id="pauseBtn" disabled title="Pause the training loop">Pause</button>
+                    <button class="btn-secondary" onclick="resetTraining()" title="Reset training progress and clear the loss chart">Reset</button>
                     <span id="epochDisplay" style="margin-left: 1rem; font-weight: bold;">Epoch: 0 / 1000</span>
                 </div>
 
@@ -1365,17 +1365,17 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-success" onclick="fullStepForward()">▶️ Forward Pass</button>
-                    <button class="btn-primary" onclick="fullStepBackward()">◀️ Backward Pass</button>
-                    <button class="btn-secondary" onclick="fullStepUpdate()">🔄 Update Weights</button>
-                    <button class="btn-secondary" onclick="resetAnimation()">↺ Reset</button>
+                    <button class="btn-success" onclick="fullStepForward()" title="Compute forward pass through the entire network">▶️ Forward Pass</button>
+                    <button class="btn-primary" onclick="fullStepBackward()" title="Compute backward pass to calculate all gradients">◀️ Backward Pass</button>
+                    <button class="btn-secondary" onclick="fullStepUpdate()" title="Apply gradient updates to all weights">🔄 Update Weights</button>
+                    <button class="btn-secondary" onclick="resetAnimation()" title="Reset the network to its initial random state">↺ Reset</button>
                     <span id="animationStatus" style="margin-left: 1rem; font-weight: bold; color: var(--primary-color);"></span>
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="runFullCycle()">🔁 1 Complete Cycle</button>
-                    <button class="btn-secondary" onclick="fastForward(10)">⚡ +10 Steps</button>
-                    <button class="btn-secondary" onclick="fastForward(100)">⚡⚡ +100 Steps</button>
+                    <button class="btn-primary" onclick="runFullCycle()" title="Run one complete forward-backward-update cycle">🔁 1 Complete Cycle</button>
+                    <button class="btn-secondary" onclick="fastForward(10)" title="Quickly run 10 training cycles">⚡ +10 Steps</button>
+                    <button class="btn-secondary" onclick="fastForward(100)" title="Quickly run 100 training cycles">⚡⚡ +100 Steps</button>
                 </div>
 
                 <div class="value-display" style="background: #fef3c7;">
@@ -1527,7 +1527,7 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
                         <div class="slider-group">
                             <label>Activation Function:</label>
-                            <select id="playgroundActivation" onchange="updatePlaygroundParams()" style="width: 100%; padding: 0.5rem; border-radius: 5px; border: 2px solid var(--border-color); font-size: 1rem;">
+                            <select id="playgroundActivation" onchange="updatePlaygroundParams()" title="Choose the activation function for the playground network" style="width: 100%; padding: 0.5rem; border-radius: 5px; border: 2px solid var(--border-color); font-size: 1rem;">
                                 <option value="sigmoid">Sigmoid</option>
                                 <option value="tanh">Tanh</option>
                                 <option value="relu">ReLU</option>
@@ -1536,12 +1536,12 @@
                         </div>
                         <div class="slider-group">
                             <label>Learning Rate: <span id="lrValue">0.1</span></label>
-                            <input type="range" id="lrSlider" min="0.01" max="1" step="0.01" value="0.1"
+                            <input type="range" id="lrSlider" min="0.01" max="1" step="0.01" value="0.1" title="Set the learning rate for playground training"
                                    oninput="updatePlaygroundParams()">
                         </div>
                         <div class="slider-group">
                             <label>Hidden Neurons: <span id="hiddenValue">4</span></label>
-                            <input type="range" id="hiddenSlider" min="2" max="8" step="1" value="4"
+                            <input type="range" id="hiddenSlider" min="2" max="8" step="1" value="4" title="Set the number of neurons in the hidden layer"
                                    oninput="updatePlaygroundParams()">
                         </div>
                         <div class="slider-group">
@@ -1551,10 +1551,10 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="trainPlayground(1)">Train 1 Epoch</button>
-                    <button class="btn-primary" onclick="trainPlayground(10)">Train 10 Epochs</button>
-                    <button class="btn-success" onclick="trainPlayground(100)">Train 100 Epochs</button>
-                    <button class="btn-secondary" onclick="resetPlayground()">Reset Network</button>
+                    <button class="btn-primary" onclick="trainPlayground(1)" title="Train the playground network for 1 epoch">Train 1 Epoch</button>
+                    <button class="btn-primary" onclick="trainPlayground(10)" title="Train the playground network for 10 epochs">Train 10 Epochs</button>
+                    <button class="btn-success" onclick="trainPlayground(100)" title="Train the playground network for 100 epochs">Train 100 Epochs</button>
+                    <button class="btn-secondary" onclick="resetPlayground()" title="Reset the playground network with new random weights">Reset Network</button>
                 </div>
 
                 <div class="value-display" id="playgroundMetrics">
@@ -1728,6 +1728,11 @@
         </section>
     </main>
 
+    <footer style="text-align: center; padding: 3rem; color: #6b7280;">
+        <p>Created for educational purposes | Neural networks are the foundation of modern deep learning</p>
+        <p style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; font-size: 0.85rem; color: #6b7280;">Conceived and curated by <strong>Rahul Basu</strong>, with inputs from acknowledged resources and the research community.</p>
+    </footer>
+
     <!-- Home Button -->
     <a href="nlp_guide_index.html" class="home-btn" title="Back to Home">🏠</a>
 
@@ -1761,8 +1766,8 @@
             };
 
             const problem = problems[type];
-            const padding = 100;
-            const scale = 600;
+            const padding = 80;
+            const scale = Math.min(canvas.width, canvas.height) - 2 * padding;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -3029,13 +3034,14 @@
             document.getElementById('lrValue').textContent = lr.toFixed(2);
             if (!gradientDescentState.isAnimating) {
                 updateGradientDescentDisplay();
+                drawGradientDescent();
             }
         }
 
         function animateGradientDescent() {
             if (gradientDescentState.isAnimating) return;
             gradientDescentState.isAnimating = true;
-            gradientDescentState.animationId = requestAnimationFrame(stepGradientDescent);
+            gradientDescentState.animationId = setTimeout(stepGradientDescent, 200);
             document.getElementById('gdAnimateBtn').textContent = '⏸ Pause';
             document.getElementById('gdAnimateBtn').onclick = pauseGradientDescent;
         }
@@ -3043,7 +3049,7 @@
         function pauseGradientDescent() {
             gradientDescentState.isAnimating = false;
             if (gradientDescentState.animationId) {
-                cancelAnimationFrame(gradientDescentState.animationId);
+                clearTimeout(gradientDescentState.animationId);
             }
             document.getElementById('gdAnimateBtn').textContent = '🚀 Animate Gradient Descent';
             document.getElementById('gdAnimateBtn').onclick = animateGradientDescent;
@@ -3052,12 +3058,16 @@
         function resetGradientDescent() {
             gradientDescentState.isAnimating = false;
             if (gradientDescentState.animationId) {
-                cancelAnimationFrame(gradientDescentState.animationId);
+                clearTimeout(gradientDescentState.animationId);
             }
             gradientDescentState.w1 = 2.5;
             gradientDescentState.w2 = 2.5;
             gradientDescentState.step = 0;
-            gradientDescentState.path = [];
+            gradientDescentState.path = [{
+                w1: 2.5,
+                w2: 2.5,
+                loss: lossFunction(2.5, 2.5)
+            }];
             updateLearningRate();
             drawGradientDescent();
             updateGradientDescentDisplay();
@@ -3083,7 +3093,7 @@
             updateGradientDescentDisplay();
 
             if (gradientDescentState.isAnimating) {
-                gradientDescentState.animationId = requestAnimationFrame(stepGradientDescent);
+                gradientDescentState.animationId = setTimeout(stepGradientDescent, 200);
             }
         }
 
@@ -3104,22 +3114,48 @@
             const maxVal = 3;
             const range = 2 * maxVal;
 
-            // Draw surface grid
-            gdCtx3D.strokeStyle = '#e5e7eb';
-            gdCtx3D.lineWidth = 1;
+            // Draw color-filled 3D surface
+            const gridRes = 20;
+            const maxLoss = lossFunction(maxVal, maxVal);
 
-            for (let i = 0; i <= 10; i++) {
-                const x = (i / 10) * range - maxVal;
-                gdCtx3D.beginPath();
-                for (let j = 0; j <= 10; j++) {
-                    const z = (j / 10) * range - maxVal;
-                    const y = 100 - lossFunction(x, z) * 15;
-                    const canvasX = centerX + (x - z) * scale * 0.5;
-                    const canvasY = centerY - y + (x + z) * scale * 0.2;
-                    if (j === 0) gdCtx3D.moveTo(canvasX, canvasY);
-                    else gdCtx3D.lineTo(canvasX, canvasY);
+            // Draw from back to front for proper overlap
+            for (let i = 0; i < gridRes; i++) {
+                for (let j = 0; j < gridRes; j++) {
+                    const x0 = (i / gridRes) * range - maxVal;
+                    const z0 = (j / gridRes) * range - maxVal;
+                    const x1 = ((i + 1) / gridRes) * range - maxVal;
+                    const z1 = ((j + 1) / gridRes) * range - maxVal;
+
+                    const corners = [
+                        [x0, z0], [x1, z0], [x1, z1], [x0, z1]
+                    ];
+
+                    const projCorners = corners.map(([cx, cz]) => {
+                        const cy = 100 - lossFunction(cx, cz) * 15;
+                        return [
+                            centerX + (cx - cz) * scale * 0.5,
+                            centerY - cy + (cx + cz) * scale * 0.2
+                        ];
+                    });
+
+                    const avgLoss = corners.reduce((s, [cx, cz]) => s + lossFunction(cx, cz), 0) / 4;
+                    const t = Math.min(avgLoss / maxLoss, 1);
+                    const r = Math.round(59 + t * 180);
+                    const g = Math.round(130 - t * 80);
+                    const b = Math.round(246 - t * 180);
+
+                    gdCtx3D.beginPath();
+                    gdCtx3D.moveTo(projCorners[0][0], projCorners[0][1]);
+                    for (let k = 1; k < 4; k++) {
+                        gdCtx3D.lineTo(projCorners[k][0], projCorners[k][1]);
+                    }
+                    gdCtx3D.closePath();
+                    gdCtx3D.fillStyle = `rgb(${r},${g},${b})`;
+                    gdCtx3D.fill();
+                    gdCtx3D.strokeStyle = `rgba(0,0,0,0.1)`;
+                    gdCtx3D.lineWidth = 0.5;
+                    gdCtx3D.stroke();
                 }
-                gdCtx3D.stroke();
             }
 
             // Draw contour plot
@@ -3129,17 +3165,25 @@
             const contourCenterY = contourHeight / 2;
             const contourScale = 60;
 
-            // Draw contour lines
+            // Draw contour lines (proper ellipses for loss = 0.5*(w1²+w2²)+0.1*w1*w2)
+            // Hessian eigenvalues: 1.1 (along [1,1]/√2) and 0.9 (along [1,-1]/√2)
+            // Contour at level L: rotated ellipse with semi-axes sqrt(2L/1.1) and sqrt(2L/0.9), rotated 45°
             gdCtxContour.lineWidth = 1;
+            const rot = Math.PI / 4; // 45° rotation
             for (let level = 0.1; level <= 5; level += 0.5) {
-                gdCtxContour.strokeStyle = '#2563eb';
+                const t = Math.min(level / 5, 1);
+                gdCtxContour.strokeStyle = `rgba(37, 99, 235, ${0.3 + 0.7 * (1 - t)})`;
                 gdCtxContour.beginPath();
-                for (let angle = 0; angle < Math.PI * 2; angle += 0.05) {
-                    // Approximate ellipse for contour
-                    const a = Math.sqrt(level * 2);
-                    const x = a * Math.cos(angle);
-                    const z = a * Math.sin(angle);
-                    gdCtxContour.lineTo(contourCenterX + x * contourScale, contourCenterY + z * contourScale);
+                const a = Math.sqrt(2 * level / 1.1);
+                const b = Math.sqrt(2 * level / 0.9);
+                for (let angle = 0; angle <= Math.PI * 2 + 0.05; angle += 0.05) {
+                    const ex = a * Math.cos(angle);
+                    const ey = b * Math.sin(angle);
+                    // Rotate by 45°
+                    const x = ex * Math.cos(rot) - ey * Math.sin(rot);
+                    const z = ex * Math.sin(rot) + ey * Math.cos(rot);
+                    if (angle === 0) gdCtxContour.moveTo(contourCenterX + x * contourScale, contourCenterY + z * contourScale);
+                    else gdCtxContour.lineTo(contourCenterX + x * contourScale, contourCenterY + z * contourScale);
                 }
                 gdCtxContour.stroke();
             }
