@@ -25,15 +25,15 @@ from training_dynamics import (
     create_similarity_heatmap_evolution
 )
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = 'nlp-classroom-2026'
-app.config['VISUALIZATIONS_FOLDER'] = 'static/visualizations'
-app.config['STATIC_FOLDER'] = 'static'
+app.config['VISUALIZATIONS_FOLDER'] = '../static/visualizations'
+app.config['STATIC_FOLDER'] = '../static'
 
 # Ensure static directories exist
-os.makedirs('static/visualizations', exist_ok=True)
-os.makedirs('static/css', exist_ok=True)
-os.makedirs('static/js', exist_ok=True)
+os.makedirs('../static/visualizations', exist_ok=True)
+os.makedirs('../static/css', exist_ok=True)
+os.makedirs('../static/js', exist_ok=True)
 
 # ============================================================================
 # ROUTE: Home Page
@@ -200,7 +200,7 @@ def visualizations_gallery():
 @app.route('/visualization/<filename>')
 def view_visualization(filename):
     """View individual visualization."""
-    return send_from_directory('static/visualizations', filename)
+    return send_from_directory('../static/visualizations', filename)
 
 # ============================================================================
 # ROUTE: Code Examples
@@ -843,7 +843,7 @@ def classroom_lesson(lesson_type):
 def api_generate_visualizations():
     """API to regenerate all visualizations."""
     try:
-        subprocess.run([sys.executable, 'sgns_visualization.py'], check=True, capture_output=True)
+        subprocess.run([sys.executable, 'sgns_visualization.py'], check=True, capture_output=True, cwd=os.path.dirname(__file__))
         return jsonify({'status': 'success', 'message': 'Visualizations generated successfully'})
     except subprocess.CalledProcessError as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -851,7 +851,7 @@ def api_generate_visualizations():
 @app.route('/api/available-visualizations')
 def api_available_visualizations():
     """Get list of available visualization files."""
-    viz_files = sorted([f for f in os.listdir('.') if f.endswith('.png') and f[0].isdigit()])
+    viz_files = sorted([f for f in os.listdir(os.path.join(os.path.dirname(__file__), '..', 'images')) if f.endswith('.png') and f[0].isdigit()])
     return jsonify({'visualizations': viz_files})
 
 # ============================================================================
