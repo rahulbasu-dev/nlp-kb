@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive educational guide to POS Tagging, Markov Chains, and Hidden Markov Models">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>POS Tagging, Markov Chains &amp; Hidden Markov Models: A Complete Guide</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #10b981;
+            --primary-dark: #059669;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container - Wider Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks - Consistent Sizing */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-block.half {
+            min-height: calc(var(--block-min-height) / 2);
+        }
+
+        .content-block.auto {
+            min-height: auto;
+        }
+
+        /* Grid Layout for Side-by-Side Blocks */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .block-grid .content-block {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .block-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .icon {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #d1fae5;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Canvas for heatmap */
+        canvas.heatmap {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Try It Yourself Box */
+        .try-it-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px dashed var(--warning-color);
+            border-radius: 1rem;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .try-it-box h4 {
+            color: var(--warning-color);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .try-it-box .solution {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .try-it-box .solution.show {
+            display: block;
+        }
+
+        .try-it-box button {
+            background: var(--warning-color);
+            margin-top: 1rem;
+        }
+
+        .try-it-box button:hover {
+            background: #b45309;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .content-block {
+                padding: 1.5rem;
+                min-height: auto;
+            }
+
+            header {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+        }
+
+        /* References Section */
+        .references-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .references-list li {
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            background: var(--bg-color);
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .references-list li:hover {
+            background: #d1fae5;
+        }
+
+        /* Home Button */
+        .home-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 999;
+            text-decoration: none;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+
+        /* Feedback Button */
+        .feedback-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            z-index: 998;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .feedback-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+        .feedback-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+        .feedback-overlay.active { display: flex; }
+        .feedback-modal {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .feedback-modal h3 {
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+            font-size: 1.35rem;
+        }
+        .feedback-modal label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+        .feedback-modal select,
+        .feedback-modal input,
+        .feedback-modal textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .feedback-modal select:focus,
+        .feedback-modal input:focus,
+        .feedback-modal textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+        .feedback-modal textarea { min-height: 120px; resize: vertical; }
+        .feedback-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+        .feedback-actions button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        .feedback-submit {
+            background: #4f46e5;
+            color: white;
+            border: none;
+        }
+        .feedback-submit:hover { background: #4338ca; }
+        .feedback-cancel {
+            background: white;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+        .feedback-cancel:hover { background: #f9fafb; }
+
+        /* Tag display styling */
+        .tagged-word {
+            display: inline-block;
+            margin: 0.25rem;
+            padding: 0.3rem 0.6rem;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .tagged-word .tag {
+            color: var(--primary-dark);
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        /* Trellis table */
+        .trellis-table {
+            font-size: 0.85rem;
+        }
+        .trellis-table td, .trellis-table th {
+            padding: 0.5rem 0.75rem;
+            text-align: center;
+        }
+        .trellis-table .best-path {
+            background: #d1fae5;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">POS Tagging Guide</div>
+            <ul>
+                <li><a href="#intro">Intuition</a></li>
+                <li><a href="#classes">Word Classes</a></li>
+                <li><a href="#penn">Penn Treebank</a></li>
+                <li><a href="#markov">Markov Chains</a></li>
+                <li><a href="#hmm">HMM</a></li>
+                <li><a href="#viterbi">HMM POS Tagging</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#playground">Playground</a></li>
+                <li><a href="#python">Python</a></li>
+                <li><a href="#references">References</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Header -->
+        <header>
+            <h1>POS Tagging, Markov Chains &amp; HMMs</h1>
+            <p>Part-of-speech tagging assigns grammatical labels to words in a sentence. Hidden Markov Models provide an elegant probabilistic framework for this fundamental NLP task.</p>
+            <div class="subtitle">Sequence Labeling with Probabilistic Models</div>
+        </header>
+
+        <!-- ============================================================ -->
+        <!-- Section 1: Intuition -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="intro">
+            <h2><span class="icon">💡</span> Intuition</h2>
+            <p>Why labeling words with their grammatical roles matters</p>
+        </div>
+
+        <div class="content-block">
+            <h3>What is Part-of-Speech Tagging?</h3>
+            <p><strong>Part-of-speech (POS) tagging</strong> is the task of assigning a grammatical category&mdash;such as noun, verb, adjective, or preposition&mdash;to each word in a sentence. It is one of the oldest and most fundamental tasks in Natural Language Processing.</p>
+
+            <p>Given a sentence like <em>"The cat sat on the mat"</em>, a POS tagger would produce:</p>
+            <div style="text-align:center; margin:1rem 0;">
+                <span class="tagged-word">The <span class="tag">/DT</span></span>
+                <span class="tagged-word">cat <span class="tag">/NN</span></span>
+                <span class="tagged-word">sat <span class="tag">/VBD</span></span>
+                <span class="tagged-word">on <span class="tag">/IN</span></span>
+                <span class="tagged-word">the <span class="tag">/DT</span></span>
+                <span class="tagged-word">mat <span class="tag">/NN</span></span>
+            </div>
+
+            <h3>Why Does POS Tagging Matter?</h3>
+            <ul>
+                <li><strong>Parsing:</strong> Knowing that a word is a noun vs. a verb is essential for building parse trees.</li>
+                <li><strong>Named Entity Recognition:</strong> Proper nouns (NNP) are strong signals for entity detection.</li>
+                <li><strong>Information Retrieval:</strong> Filtering by POS improves search relevance.</li>
+                <li><strong>Machine Translation:</strong> Word order and agreement rules depend on parts of speech.</li>
+                <li><strong>Text-to-Speech:</strong> Pronunciation of words like "record" depends on whether it is a noun or verb.</li>
+            </ul>
+
+            <h3>The Ambiguity Problem</h3>
+            <p>Many English words can serve as multiple parts of speech. This <span class="highlight">lexical ambiguity</span> is the core challenge:</p>
+            <ul>
+                <li><strong>"book"</strong> &mdash; <em>Noun:</em> "I read a <strong>book</strong>." vs. <em>Verb:</em> "Please <strong>book</strong> the flight."</li>
+                <li><strong>"can"</strong> &mdash; <em>Modal verb:</em> "I <strong>can</strong> swim." vs. <em>Noun:</em> "Open the <strong>can</strong>."</li>
+                <li><strong>"run"</strong> &mdash; <em>Verb:</em> "I <strong>run</strong> daily." vs. <em>Noun:</em> "a <strong>run</strong> in the park."</li>
+                <li><strong>"back"</strong> &mdash; <em>Noun, verb, adjective, or adverb</em> depending on context.</li>
+            </ul>
+
+            <div class="callout callout-analogy">
+                <h4>🔍 The Context Clues Analogy</h4>
+                <p>Imagine you hear the word "bank" in isolation&mdash;you cannot tell if it means a financial institution or a river bank. But in context, "I deposited money at the <strong>bank</strong>," the surrounding words resolve the ambiguity instantly. POS taggers work the same way: they use <strong>context</strong>&mdash;especially the tags of neighboring words&mdash;to disambiguate.</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Consider the sentence: <strong>"The fish can swim."</strong></p>
+                <p>How many words are ambiguous (could be more than one POS)? Which ones, and what are the possible POS tags?</p>
+                <button onclick="document.getElementById('solution1').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution1" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <ul>
+                        <li><strong>"fish"</strong> &mdash; Can be a <em>Noun</em> (NN: "I caught a fish") or a <em>Verb</em> (VB: "I like to fish"). Here it is a <strong>Noun</strong>.</li>
+                        <li><strong>"can"</strong> &mdash; Can be a <em>Modal verb</em> (MD: "I can swim") or a <em>Noun</em> (NN: "a can of beans"). Here it is a <strong>Modal verb</strong>.</li>
+                        <li><strong>"swim"</strong> &mdash; Can be a <em>Verb</em> (VB: "I swim") or a <em>Noun</em> (NN: "a nice swim"). Here it is a <strong>Verb</strong>.</li>
+                    </ul>
+                    <p>Three out of four content words are ambiguous! Context (especially the preceding modal "can") tells us "swim" is a verb here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 2: Word Classes -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="classes">
+            <h2><span class="icon">📦</span> Word Classes</h2>
+            <p>Open and closed class categories in English</p>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block">
+                <h3>Open Classes</h3>
+                <p>Open classes are <strong>productive</strong>&mdash;new words are regularly added to the language.</p>
+
+                <h4>Nouns (NN)</h4>
+                <p>People, places, things, concepts. The largest open class.</p>
+                <p><em>Examples:</em> dog, city, freedom, algorithm, blockchain</p>
+
+                <h4>Verbs (VB)</h4>
+                <p>Actions, states, occurrences. Inflect for tense, aspect, mood.</p>
+                <p><em>Examples:</em> run, think, optimize, containerize</p>
+
+                <h4>Adjectives (JJ)</h4>
+                <p>Modify nouns, describing properties.</p>
+                <p><em>Examples:</em> big, red, computational, scalable</p>
+
+                <h4>Adverbs (RB)</h4>
+                <p>Modify verbs, adjectives, or other adverbs.</p>
+                <p><em>Examples:</em> quickly, very, efficiently, surprisingly</p>
+            </div>
+
+            <div class="content-block">
+                <h3>Closed Classes</h3>
+                <p>Closed classes have a <strong>fixed membership</strong>&mdash;new words are rarely added.</p>
+
+                <h4>Determiners (DT)</h4>
+                <p>Introduce noun phrases: <em>the, a, an, this, that, every</em></p>
+
+                <h4>Pronouns (PRP)</h4>
+                <p>Stand in for nouns: <em>I, you, he, she, it, they, we</em></p>
+
+                <h4>Prepositions (IN)</h4>
+                <p>Express spatial or temporal relations: <em>in, on, at, by, with, from</em></p>
+
+                <h4>Conjunctions (CC)</h4>
+                <p>Connect words or clauses: <em>and, but, or, nor, for, yet, so</em></p>
+
+                <h4>Modals (MD)</h4>
+                <p>Auxiliary verbs expressing possibility, necessity: <em>can, could, will, would, shall, should, may, might, must</em></p>
+
+                <h4>Particles (RP)</h4>
+                <p>Small words in phrasal verbs: <em>up</em> in "give <strong>up</strong>", <em>off</em> in "turn <strong>off</strong>"</p>
+            </div>
+        </div>
+
+        <div class="content-block auto">
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Classify each word in the sentence: <strong>"She quickly opened the heavy door and walked in."</strong></p>
+                <button onclick="document.getElementById('solution2').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution2" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <ul>
+                        <li><strong>She</strong> &mdash; Pronoun (PRP)</li>
+                        <li><strong>quickly</strong> &mdash; Adverb (RB)</li>
+                        <li><strong>opened</strong> &mdash; Verb (VBD)</li>
+                        <li><strong>the</strong> &mdash; Determiner (DT)</li>
+                        <li><strong>heavy</strong> &mdash; Adjective (JJ)</li>
+                        <li><strong>door</strong> &mdash; Noun (NN)</li>
+                        <li><strong>and</strong> &mdash; Conjunction (CC)</li>
+                        <li><strong>walked</strong> &mdash; Verb (VBD)</li>
+                        <li><strong>in</strong> &mdash; Particle/Preposition (IN/RP)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 3: Penn Treebank Tagset -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="penn">
+            <h2><span class="icon">🏷️</span> The Penn Treebank Tagset</h2>
+            <p>The standard 45-tag system used across NLP research</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Overview</h3>
+            <p>The <strong>Penn Treebank tagset</strong> (Marcus et al., 1993) defines 45 POS tags and has become the de facto standard for English POS tagging. It was developed at the University of Pennsylvania as part of the Penn Treebank project, which annotated over 4.5 million words of American English.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Tag</th><th>Description</th><th>Example</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>CC</td><td>Coordinating conjunction</td><td>and, but, or</td></tr>
+                        <tr><td>CD</td><td>Cardinal number</td><td>one, 3, 42</td></tr>
+                        <tr><td>DT</td><td>Determiner</td><td>the, a, these</td></tr>
+                        <tr><td>EX</td><td>Existential <em>there</em></td><td><em>There</em> is a cat</td></tr>
+                        <tr><td>FW</td><td>Foreign word</td><td>coup d'etat, tsunami</td></tr>
+                        <tr><td>IN</td><td>Preposition or subordinating conjunction</td><td>in, of, like, that</td></tr>
+                        <tr><td>JJ</td><td>Adjective</td><td>big, green, computational</td></tr>
+                        <tr><td>JJR</td><td>Adjective, comparative</td><td>bigger, faster</td></tr>
+                        <tr><td>JJS</td><td>Adjective, superlative</td><td>biggest, fastest</td></tr>
+                        <tr><td>LS</td><td>List item marker</td><td>1), a), *</td></tr>
+                        <tr><td>MD</td><td>Modal</td><td>can, will, might</td></tr>
+                        <tr><td>NN</td><td>Noun, singular or mass</td><td>dog, music, city</td></tr>
+                        <tr><td>NNS</td><td>Noun, plural</td><td>dogs, cities</td></tr>
+                        <tr><td>NNP</td><td>Proper noun, singular</td><td>London, Mary</td></tr>
+                        <tr><td>NNPS</td><td>Proper noun, plural</td><td>Americans, Vikings</td></tr>
+                        <tr><td>PDT</td><td>Predeterminer</td><td><em>all</em> the children</td></tr>
+                        <tr><td>POS</td><td>Possessive ending</td><td>'s</td></tr>
+                        <tr><td>PRP</td><td>Personal pronoun</td><td>I, he, she, it</td></tr>
+                        <tr><td>PRP$</td><td>Possessive pronoun</td><td>my, his, her, its</td></tr>
+                        <tr><td>RB</td><td>Adverb</td><td>quickly, never, here</td></tr>
+                        <tr><td>RBR</td><td>Adverb, comparative</td><td>faster, harder</td></tr>
+                        <tr><td>RBS</td><td>Adverb, superlative</td><td>fastest, hardest</td></tr>
+                        <tr><td>RP</td><td>Particle</td><td>up, off, out</td></tr>
+                        <tr><td>SYM</td><td>Symbol</td><td>%, @, +</td></tr>
+                        <tr><td>TO</td><td><em>to</em></td><td>to go, to him</td></tr>
+                        <tr><td>UH</td><td>Interjection</td><td>uh, oh, please</td></tr>
+                        <tr><td>VB</td><td>Verb, base form</td><td>eat, run, go</td></tr>
+                        <tr><td>VBD</td><td>Verb, past tense</td><td>ate, ran, went</td></tr>
+                        <tr><td>VBG</td><td>Verb, gerund or present participle</td><td>eating, running</td></tr>
+                        <tr><td>VBN</td><td>Verb, past participle</td><td>eaten, run, gone</td></tr>
+                        <tr><td>VBP</td><td>Verb, non-3rd person singular present</td><td>eat, run</td></tr>
+                        <tr><td>VBZ</td><td>Verb, 3rd person singular present</td><td>eats, runs</td></tr>
+                        <tr><td>WDT</td><td>Wh-determiner</td><td>which, that</td></tr>
+                        <tr><td>WP</td><td>Wh-pronoun</td><td>who, what, whom</td></tr>
+                        <tr><td>WP$</td><td>Possessive wh-pronoun</td><td>whose</td></tr>
+                        <tr><td>WRB</td><td>Wh-adverb</td><td>where, when, how</td></tr>
+                        <tr><td>$</td><td>Dollar sign</td><td>$, US$</td></tr>
+                        <tr><td>#</td><td>Pound sign</td><td>#</td></tr>
+                        <tr><td>``</td><td>Opening quotation mark</td><td>"</td></tr>
+                        <tr><td>''</td><td>Closing quotation mark</td><td>"</td></tr>
+                        <tr><td>(</td><td>Opening parenthesis</td><td>(, [</td></tr>
+                        <tr><td>)</td><td>Closing parenthesis</td><td>), ]</td></tr>
+                        <tr><td>,</td><td>Comma</td><td>,</td></tr>
+                        <tr><td>.</td><td>Sentence-final punctuation</td><td>. ! ?</td></tr>
+                        <tr><td>:</td><td>Colon, semicolon, ellipsis</td><td>: ; ...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-example">
+                <h4>🏷️ Fully Tagged Sentence Example</h4>
+                <p>Sentence: <em>"The quick brown fox jumps over the lazy dog."</em></p>
+                <div style="margin-top: 0.5rem;">
+                    <span class="tagged-word">The <span class="tag">/DT</span></span>
+                    <span class="tagged-word">quick <span class="tag">/JJ</span></span>
+                    <span class="tagged-word">brown <span class="tag">/JJ</span></span>
+                    <span class="tagged-word">fox <span class="tag">/NN</span></span>
+                    <span class="tagged-word">jumps <span class="tag">/VBZ</span></span>
+                    <span class="tagged-word">over <span class="tag">/IN</span></span>
+                    <span class="tagged-word">the <span class="tag">/DT</span></span>
+                    <span class="tagged-word">lazy <span class="tag">/JJ</span></span>
+                    <span class="tagged-word">dog <span class="tag">/NN</span></span>
+                    <span class="tagged-word">. <span class="tag">/.</span></span>
+                </div>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Manually tag each word in: <strong>"The dog quickly chased the cat"</strong></p>
+                <button onclick="document.getElementById('solution3').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution3" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <div>
+                        <span class="tagged-word">The <span class="tag">/DT</span></span>
+                        <span class="tagged-word">dog <span class="tag">/NN</span></span>
+                        <span class="tagged-word">quickly <span class="tag">/RB</span></span>
+                        <span class="tagged-word">chased <span class="tag">/VBD</span></span>
+                        <span class="tagged-word">the <span class="tag">/DT</span></span>
+                        <span class="tagged-word">cat <span class="tag">/NN</span></span>
+                    </div>
+                    <p style="margin-top:0.5rem;"><strong>The</strong>=Determiner, <strong>dog</strong>=Singular noun, <strong>quickly</strong>=Adverb, <strong>chased</strong>=Past tense verb, <strong>the</strong>=Determiner, <strong>cat</strong>=Singular noun.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 4: Markov Chains -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="markov">
+            <h2><span class="icon">🔗</span> Markov Chains</h2>
+            <p>A foundation for sequential probabilistic modeling</p>
+        </div>
+
+        <div class="content-block">
+            <h3>States, Transitions, and the Memoryless Property</h3>
+            <p>A <strong>Markov chain</strong> is a stochastic model describing a sequence of states where the probability of transitioning to the next state depends <em>only</em> on the current state&mdash;not on the sequence of states that preceded it.</p>
+
+            <p>Formally, a Markov chain consists of:</p>
+            <ul>
+                <li>A set of <strong>states</strong> \( S = \{s_1, s_2, \ldots, s_N\} \)</li>
+                <li>A <strong>transition probability matrix</strong> \( A \) where \( a_{ij} = P(q_t = s_j \mid q_{t-1} = s_i) \)</li>
+                <li>An <strong>initial probability distribution</strong> \( \pi \) where \( \pi_i = P(q_1 = s_i) \)</li>
+            </ul>
+
+            <div class="formula-box">
+                <div class="formula-label">The Markov Property (Memorylessness)</div>
+                \[ P(q_t \mid q_1, q_2, \ldots, q_{t-1}) = P(q_t \mid q_{t-1}) \]
+                <div class="formula-description">
+                    <p>The future state depends only on the present state, not on the entire history. This dramatically simplifies computation.</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Transition Probability</div>
+                \[ a_{ij} = P(q_t = s_j \mid q_{t-1} = s_i), \quad \sum_{j=1}^{N} a_{ij} = 1 \;\;\forall\; i \]
+                <div class="formula-description">
+                    <p>Each row of the transition matrix sums to 1, since from any state we must go somewhere.</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Sequence Probability</div>
+                \[ P(q_1, q_2, \ldots, q_T) = \pi_{q_1} \cdot \prod_{t=2}^{T} a_{q_{t-1}, q_t} \]
+                <div class="formula-description">
+                    <p>The probability of an entire sequence is the initial probability times the product of all transition probabilities along the path.</p>
+                </div>
+            </div>
+
+            <h3>Example: Weather Markov Chain</h3>
+            <p>Consider a simple weather model with two states: <strong>Sunny</strong> and <strong>Rainy</strong>.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>From \ To</th><th>Sunny</th><th>Rainy</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Sunny</strong></td><td>0.7</td><td>0.3</td></tr>
+                        <tr><td><strong>Rainy</strong></td><td>0.4</td><td>0.6</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>If today is Sunny, there is a 70% chance tomorrow is Sunny and 30% chance of Rain. If today is Rainy, there is a 40% chance of Sunny and 60% chance of Rain tomorrow.</p>
+
+            <div class="callout callout-concept">
+                <h4>🔑 Key Insight</h4>
+                <p>Markov chains model <strong>observable</strong> sequences. In POS tagging, the tags form a Markov chain (the tag of the current word depends on the previous tag), but we do not directly <em>observe</em> the tags&mdash;we observe the <em>words</em>. This is why we need <strong>Hidden</strong> Markov Models.</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Given the weather transition matrix above and initial probabilities \( \pi(\text{Sunny}) = 0.6 \), \( \pi(\text{Rainy}) = 0.4 \), calculate:</p>
+                <p>\( P(\text{Sunny, Rainy, Rainy}) \)</p>
+                <button onclick="document.getElementById('solution4').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution4" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p>\( P(\text{Sunny, Rainy, Rainy}) = \pi(\text{Sunny}) \times a_{\text{Sunny} \to \text{Rainy}} \times a_{\text{Rainy} \to \text{Rainy}} \)</p>
+                    <p>\( = 0.6 \times 0.3 \times 0.6 = 0.108 \)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 5: Hidden Markov Models -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="hmm">
+            <h2><span class="icon">🎭</span> Hidden Markov Models</h2>
+            <p>When states are hidden and only observations are visible</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Hidden States vs. Observations</h3>
+            <p>In a <strong>Hidden Markov Model (HMM)</strong>, the system's states are not directly observable. Instead, each state produces an <strong>observation</strong> (also called an emission) according to a probability distribution. We observe the emissions and must <em>infer</em> the hidden state sequence.</p>
+
+            <h3>HMM Components: \( \lambda = (A, B, \pi) \)</h3>
+            <ul>
+                <li>\( A \) &mdash; <strong>Transition probability matrix:</strong> \( a_{ij} = P(q_t = j \mid q_{t-1} = i) \)</li>
+                <li>\( B \) &mdash; <strong>Emission probability matrix:</strong> \( b_j(o_t) = P(o_t \mid q_t = j) \)</li>
+                <li>\( \pi \) &mdash; <strong>Initial state distribution:</strong> \( \pi_j = P(q_1 = j) \)</li>
+            </ul>
+
+            <div class="formula-box">
+                <div class="formula-label">Emission Probability</div>
+                \[ b_j(o_t) = P(o_t \mid q_t = j) \]
+                <div class="formula-description">
+                    <p>The probability that state \( j \) emits observation \( o_t \). Each state has its own probability distribution over possible observations.</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Joint Probability of Observations and States</div>
+                \[ P(O, Q \mid \lambda) = \pi_{q_1} \cdot b_{q_1}(o_1) \cdot \prod_{t=2}^{T} a_{q_{t-1}, q_t} \cdot b_{q_t}(o_t) \]
+                <div class="formula-description">
+                    <p>The joint probability of observing sequence \( O = o_1, \ldots, o_T \) and state sequence \( Q = q_1, \ldots, q_T \) under model \( \lambda \).</p>
+                </div>
+            </div>
+
+            <h3>The Ice Cream / Weather Example</h3>
+            <p>Imagine you are a climatologist in the year 2100 trying to figure out past weather from someone's diary that only records <strong>how many ice creams they ate each day</strong> (1, 2, or 3). The weather (Hot or Cold) is the <strong>hidden state</strong>; the ice cream count is the <strong>observation</strong>.</p>
+
+            <div class="block-grid">
+                <div class="content-block half">
+                    <h4>Transition Probabilities \( A \)</h4>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>From \ To</th><th>Hot</th><th>Cold</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>Hot</strong></td><td>0.7</td><td>0.3</td></tr>
+                                <tr><td><strong>Cold</strong></td><td>0.4</td><td>0.6</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="content-block half">
+                    <h4>Emission Probabilities \( B \)</h4>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>State</th><th>1 ice cream</th><th>2 ice creams</th><th>3 ice creams</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>Hot</strong></td><td>0.2</td><td>0.4</td><td>0.4</td></tr>
+                                <tr><td><strong>Cold</strong></td><td>0.5</td><td>0.4</td><td>0.1</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <p>Initial probabilities: \( \pi(\text{Hot}) = 0.8 \), \( \pi(\text{Cold}) = 0.2 \).</p>
+
+            <h3>Three Fundamental HMM Problems</h3>
+            <ol>
+                <li><strong>Evaluation (Likelihood):</strong> Given a model \( \lambda \) and observation sequence \( O \), compute \( P(O \mid \lambda) \). Solved by the <strong>Forward algorithm</strong>.</li>
+                <li><strong>Decoding:</strong> Given a model \( \lambda \) and observation sequence \( O \), find the most likely state sequence \( Q^* \). Solved by the <strong>Viterbi algorithm</strong>.</li>
+                <li><strong>Learning:</strong> Given an observation sequence \( O \), find model parameters \( \lambda \) that maximize \( P(O \mid \lambda) \). Solved by the <strong>Baum-Welch algorithm</strong> (a special case of EM).</li>
+            </ol>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Using the ice cream HMM above, calculate the joint probability of observing \( O = (3, 1) \) with hidden states \( Q = (\text{Hot, Hot}) \).</p>
+                <p>That is, compute \( P(O=(3,1), Q=(\text{Hot, Hot}) \mid \lambda) \).</p>
+                <button onclick="document.getElementById('solution5').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution5" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p>\( P(O, Q) = \pi(\text{Hot}) \times b_{\text{Hot}}(3) \times a_{\text{Hot} \to \text{Hot}} \times b_{\text{Hot}}(1) \)</p>
+                    <p>\( = 0.8 \times 0.4 \times 0.7 \times 0.2 \)</p>
+                    <p>\( = 0.0448 \)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 6: HMM POS Tagging & Viterbi -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="viterbi">
+            <h2><span class="icon">🧮</span> HMM POS Tagging &amp; Viterbi</h2>
+            <p>Mapping the HMM framework to sequence labeling</p>
+        </div>
+
+        <div class="content-block">
+            <h3>HMM for POS Tagging</h3>
+            <p>In POS tagging, the HMM mapping is:</p>
+            <ul>
+                <li><strong>Hidden states</strong> = POS tags (NN, VB, DT, JJ, ...)</li>
+                <li><strong>Observations</strong> = Words in the sentence</li>
+                <li><strong>Transition probabilities</strong> \( A \): How likely is tag \( t_j \) after tag \( t_i \)?</li>
+                <li><strong>Emission probabilities</strong> \( B \): How likely is word \( w \) given tag \( t \)?</li>
+            </ul>
+
+            <p>The goal is to find the tag sequence \( T^* \) that maximizes:</p>
+            <div class="formula-box">
+                <div class="formula-label">Most Likely Tag Sequence</div>
+                \[ T^* = \arg\max_{T} P(T \mid W) = \arg\max_{T} P(W \mid T) \cdot P(T) \]
+                <div class="formula-description">
+                    <p>By Bayes' rule, we find the tag sequence that maximizes the product of the likelihood \( P(W|T) \) and the prior \( P(T) \).</p>
+                </div>
+            </div>
+
+            <h3>MLE Training from Tagged Corpora</h3>
+            <p>Given a tagged training corpus, we estimate transition and emission probabilities using <strong>Maximum Likelihood Estimation (MLE)</strong>:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Transition Probability (MLE)</div>
+                \[ P(t_i \mid t_{i-1}) = \frac{C(t_{i-1}, t_i)}{C(t_{i-1})} \]
+                <div class="formula-description">
+                    <p>Count how often tag \( t_i \) follows tag \( t_{i-1} \), divided by the total count of \( t_{i-1} \).</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Emission Probability (MLE)</div>
+                \[ P(w_i \mid t_i) = \frac{C(t_i, w_i)}{C(t_i)} \]
+                <div class="formula-description">
+                    <p>Count how often word \( w_i \) appears with tag \( t_i \), divided by the total count of tag \( t_i \).</p>
+                </div>
+            </div>
+
+            <h3>The Viterbi Algorithm</h3>
+            <p>The <strong>Viterbi algorithm</strong> is a dynamic programming algorithm that finds the most likely sequence of hidden states. It avoids the exponential cost of evaluating all possible tag sequences.</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Viterbi Initialization</div>
+                \[ v_1(j) = \pi_j \cdot b_j(o_1) \]
+                <div class="formula-description">
+                    <p>For each state \( j \), the initial Viterbi value is the initial probability of \( j \) times the probability that \( j \) emits the first observation.</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Viterbi Recursion</div>
+                \[ v_t(j) = \max_{i=1}^{N} \left[ v_{t-1}(i) \cdot a_{ij} \cdot b_j(o_t) \right] \]
+                <div class="formula-description">
+                    <p>At each time step, for each state \( j \), we find the maximum probability path ending at \( j \) by considering all possible previous states \( i \).</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Backpointer</div>
+                \[ bp_t(j) = \arg\max_{i=1}^{N} \left[ v_{t-1}(i) \cdot a_{ij} \cdot b_j(o_t) \right] \]
+                <div class="formula-description">
+                    <p>The backpointer records which previous state \( i \) gave the maximum value, allowing us to trace back the best path.</p>
+                </div>
+            </div>
+
+            <h3>Worked Example: "I saw the dog"</h3>
+            <p>Let us trace Viterbi on the sentence <strong>"I saw the dog"</strong> using a simplified tag set: {PRP, VBD, DT, NN}.</p>
+
+            <h4>Step 1: Define Probabilities</h4>
+            <p><strong>Initial (start-of-sentence) probabilities \( \pi \):</strong></p>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>PRP</th><th>VBD</th><th>DT</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>0.40</td><td>0.05</td><td>0.30</td><td>0.25</td></tr></tbody>
+                </table>
+            </div>
+
+            <p><strong>Transition probabilities \( A \) (simplified):</strong></p>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>From \ To</th><th>PRP</th><th>VBD</th><th>DT</th><th>NN</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>PRP</strong></td><td>0.01</td><td>0.50</td><td>0.09</td><td>0.40</td></tr>
+                        <tr><td><strong>VBD</strong></td><td>0.10</td><td>0.01</td><td>0.50</td><td>0.39</td></tr>
+                        <tr><td><strong>DT</strong></td><td>0.01</td><td>0.01</td><td>0.01</td><td>0.97</td></tr>
+                        <tr><td><strong>NN</strong></td><td>0.20</td><td>0.30</td><td>0.20</td><td>0.30</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p><strong>Emission probabilities \( B \) (simplified):</strong></p>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Tag</th><th>I</th><th>saw</th><th>the</th><th>dog</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>PRP</strong></td><td>0.50</td><td>0.01</td><td>0.01</td><td>0.01</td></tr>
+                        <tr><td><strong>VBD</strong></td><td>0.01</td><td>0.40</td><td>0.01</td><td>0.01</td></tr>
+                        <tr><td><strong>DT</strong></td><td>0.01</td><td>0.01</td><td>0.80</td><td>0.01</td></tr>
+                        <tr><td><strong>NN</strong></td><td>0.01</td><td>0.10</td><td>0.01</td><td>0.50</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Step 2: Initialization (word = "I")</h4>
+            <p>
+                \( v_1(\text{PRP}) = 0.40 \times 0.50 = 0.200 \) <br>
+                \( v_1(\text{VBD}) = 0.05 \times 0.01 = 0.0005 \) <br>
+                \( v_1(\text{DT}) = 0.30 \times 0.01 = 0.003 \) <br>
+                \( v_1(\text{NN}) = 0.25 \times 0.01 = 0.0025 \)
+            </p>
+
+            <h4>Step 3: Recursion (word = "saw")</h4>
+            <p>For each tag \( j \), compute \( v_2(j) = \max_i [ v_1(i) \cdot a_{ij} \cdot b_j(\text{saw}) ] \):</p>
+            <p>
+                \( v_2(\text{VBD}) = \max \) { \( 0.200 \times 0.50 \times 0.40 \), ... } \( = 0.040 \) (from PRP) <br>
+                \( v_2(\text{NN}) = \max \) { \( 0.200 \times 0.40 \times 0.10 \), ... } \( = 0.008 \) (from PRP)
+            </p>
+
+            <h4>Step 4: Recursion (word = "the")</h4>
+            <p>
+                \( v_3(\text{DT}) = \max \) { \( 0.040 \times 0.50 \times 0.80 \), ... } \( = 0.016 \) (from VBD)
+            </p>
+
+            <h4>Step 5: Recursion (word = "dog")</h4>
+            <p>
+                \( v_4(\text{NN}) = \max \) { \( 0.016 \times 0.97 \times 0.50 \), ... } \( = 0.00776 \) (from DT)
+            </p>
+
+            <h4>Step 6: Backtrace</h4>
+            <p>Following backpointers: <strong>PRP &rarr; VBD &rarr; DT &rarr; NN</strong></p>
+            <div style="text-align:center; margin:1rem 0;">
+                <span class="tagged-word">I <span class="tag">/PRP</span></span>
+                <span class="tagged-word">saw <span class="tag">/VBD</span></span>
+                <span class="tagged-word">the <span class="tag">/DT</span></span>
+                <span class="tagged-word">dog <span class="tag">/NN</span></span>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Using the same probabilities above, what would \( v_2(\text{PRP}) \) be for the word "saw"? Why is this value so small?</p>
+                <button onclick="document.getElementById('solution6').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solution6" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p>\( v_2(\text{PRP}) = \max_i [ v_1(i) \cdot a_{i,\text{PRP}} \cdot b_{\text{PRP}}(\text{saw}) ] \)</p>
+                    <p>The best predecessor is NN: \( v_1(\text{NN}) \cdot a_{\text{NN} \to \text{PRP}} \cdot b_{\text{PRP}}(\text{saw}) = 0.0025 \times 0.20 \times 0.01 = 0.000005 \)</p>
+                    <p>This is extremely small because (1) "saw" has very low emission probability from PRP (0.01), and (2) transitions into PRP from most states are low. The model correctly disfavors tagging "saw" as a pronoun.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 7: Visualization -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="visualization">
+            <h2><span class="icon">📊</span> Visualization</h2>
+            <p>Visual representations of tag transitions and frequencies</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Tag Transition Heatmap</h3>
+            <p>This heatmap shows transition probabilities between common POS tags. Darker green cells indicate higher probabilities.</p>
+            <div style="text-align:center; margin: 1.5rem 0;">
+                <canvas id="transitionHeatmap" class="heatmap" width="500" height="500"></canvas>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3>POS Tag Frequency Distribution</h3>
+            <p>This chart shows the relative frequency of common POS tags in a sample of English text.</p>
+            <div class="chart-container">
+                <canvas id="tagFrequencyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 8: Playground -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="playground">
+            <h2><span class="icon">🎮</span> Playground</h2>
+            <p>Train an HMM and tag sentences interactively</p>
+        </div>
+
+        <div class="content-block">
+            <h3>HMM POS Tagger Playground</h3>
+            <p>Edit the training corpus (word/TAG format, one sentence per line), then enter a test sentence to tag.</p>
+
+            <div class="interactive-section">
+                <div class="input-group">
+                    <label for="trainingCorpus">Tagged Training Corpus</label>
+                    <textarea id="trainingCorpus" rows="8" style="font-family: 'Consolas', monospace; font-size: 0.9rem;">The/DT dog/NN chased/VBD the/DT cat/NN ./.
+The/DT cat/NN sat/VBD on/IN the/DT mat/NN ./.
+A/DT dog/NN saw/VBD a/DT cat/NN ./.
+The/DT big/JJ dog/NN ran/VBD quickly/RB ./.
+A/DT small/JJ cat/NN chased/VBD the/DT dog/NN ./.
+The/DT dog/NN sat/VBD on/IN a/DT big/JJ mat/NN ./.
+A/DT cat/NN ran/VBD quickly/RB ./.
+The/DT small/JJ dog/NN saw/VBD the/DT cat/NN ./.</textarea>
+                </div>
+                <div class="input-group">
+                    <label for="testSentence">Test Sentence</label>
+                    <input type="text" id="testSentence" value="The dog sat" placeholder="Enter a sentence to tag">
+                </div>
+                <button onclick="runPlayground()">Tag Sentence</button>
+
+                <div id="playgroundResult" class="result-display" style="display:none;">
+                    <h4>Tagged Output</h4>
+                    <div id="taggedOutput"></div>
+                    <h4 style="margin-top:1rem;">Viterbi Trellis</h4>
+                    <div id="trellisDisplay" class="table-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 9: Python Implementation -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="python">
+            <h2><span class="icon">🐍</span> Python Implementation</h2>
+            <p>A complete HMM POS tagger in Python</p>
+        </div>
+
+        <div class="content-block">
+            <h3>HMMPosTagger Class</h3>
+<pre><code><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict, Counter
+<span class="keyword">from</span> typing <span class="keyword">import</span> List, Tuple, Dict
+<span class="keyword">import</span> math
+
+
+<span class="keyword">class</span> <span class="class-name">HMMPosTagger</span>:
+    <span class="string">"""Hidden Markov Model POS Tagger with Viterbi decoding.
+
+    Attributes:
+        tags: Set of all POS tags observed in training.
+        vocab: Set of all words observed in training.
+        transition_probs: P(tag_i | tag_{i-1}) with add-1 smoothing.
+        emission_probs: P(word | tag) with add-1 smoothing.
+        initial_probs: P(tag | &lt;start&gt;).
+    """</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self) <span class="operator">-></span> <span class="keyword">None</span>:
+        self.tags: set = set()
+        self.vocab: set = set()
+        self.transition_counts: Dict[str, Counter] = defaultdict(Counter)
+        self.emission_counts: Dict[str, Counter] = defaultdict(Counter)
+        self.tag_counts: Counter = Counter()
+        self.initial_counts: Counter = Counter()
+        self.transition_probs: Dict[str, Dict[str, float]] = {}
+        self.emission_probs: Dict[str, Dict[str, float]] = {}
+        self.initial_probs: Dict[str, float] = {}
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, tagged_sentences: List[List[Tuple[str, str]]]) <span class="operator">-></span> <span class="keyword">None</span>:
+        <span class="string">"""Train HMM parameters from tagged sentences.
+
+        Args:
+            tagged_sentences: List of sentences, each a list of (word, tag) tuples.
+        """</span>
+        <span class="keyword">for</span> sentence <span class="keyword">in</span> tagged_sentences:
+            <span class="keyword">if</span> <span class="keyword">not</span> sentence:
+                <span class="keyword">continue</span>
+            <span class="comment"># Initial tag</span>
+            word0, tag0 = sentence[<span class="number">0</span>]
+            self.initial_counts[tag0] += <span class="number">1</span>
+            self.emission_counts[tag0][word0] += <span class="number">1</span>
+            self.tag_counts[tag0] += <span class="number">1</span>
+            self.tags.add(tag0)
+            self.vocab.add(word0)
+
+            <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, len(sentence)):
+                word, tag = sentence[i]
+                prev_tag = sentence[i - <span class="number">1</span>][<span class="number">1</span>]
+                self.transition_counts[prev_tag][tag] += <span class="number">1</span>
+                self.emission_counts[tag][word] += <span class="number">1</span>
+                self.tag_counts[tag] += <span class="number">1</span>
+                self.tags.add(tag)
+                self.vocab.add(word)
+
+        self._compute_transition_probs()
+        self._compute_emission_probs()
+        self._compute_initial_probs(len(tagged_sentences))
+
+    <span class="keyword">def</span> <span class="function">_compute_transition_probs</span>(self) <span class="operator">-></span> <span class="keyword">None</span>:
+        <span class="string">"""Compute transition probabilities with add-1 smoothing."""</span>
+        n_tags = len(self.tags)
+        <span class="keyword">for</span> prev_tag <span class="keyword">in</span> self.tags:
+            self.transition_probs[prev_tag] = {}
+            total = sum(self.transition_counts[prev_tag].values()) + n_tags
+            <span class="keyword">for</span> tag <span class="keyword">in</span> self.tags:
+                count = self.transition_counts[prev_tag][tag] + <span class="number">1</span>
+                self.transition_probs[prev_tag][tag] = count / total
+
+    <span class="keyword">def</span> <span class="function">_compute_emission_probs</span>(self) <span class="operator">-></span> <span class="keyword">None</span>:
+        <span class="string">"""Compute emission probabilities with add-1 smoothing."""</span>
+        v_size = len(self.vocab)
+        <span class="keyword">for</span> tag <span class="keyword">in</span> self.tags:
+            self.emission_probs[tag] = {}
+            total = self.tag_counts[tag] + v_size
+            <span class="keyword">for</span> word <span class="keyword">in</span> self.vocab:
+                count = self.emission_counts[tag][word] + <span class="number">1</span>
+                self.emission_probs[tag][word] = count / total
+
+    <span class="keyword">def</span> <span class="function">_compute_initial_probs</span>(self, n_sentences: int) <span class="operator">-></span> <span class="keyword">None</span>:
+        <span class="string">"""Compute initial state probabilities with add-1 smoothing."""</span>
+        n_tags = len(self.tags)
+        <span class="keyword">for</span> tag <span class="keyword">in</span> self.tags:
+            self.initial_probs[tag] = (self.initial_counts[tag] + <span class="number">1</span>) / (n_sentences + n_tags)
+
+    <span class="keyword">def</span> <span class="function">_get_emission</span>(self, tag: str, word: str) <span class="operator">-></span> float:
+        <span class="string">"""Get emission probability, handling unknown words."""</span>
+        <span class="keyword">if</span> word <span class="keyword">in</span> self.vocab:
+            <span class="keyword">return</span> self.emission_probs[tag].get(word, <span class="number">1e-10</span>)
+        <span class="comment"># Unknown word: uniform across tags</span>
+        <span class="keyword">return</span> <span class="number">1.0</span> / len(self.vocab)
+
+    <span class="keyword">def</span> <span class="function">viterbi</span>(self, sentence: List[str]) <span class="operator">-></span> List[str]:
+        <span class="string">"""Find the most likely tag sequence using Viterbi.
+
+        Args:
+            sentence: List of words to tag.
+
+        Returns:
+            List of POS tags, one per word.
+        """</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> sentence:
+            <span class="keyword">return</span> []
+
+        tags = list(self.tags)
+        T = len(sentence)
+
+        <span class="comment"># viterbi[t][tag] = best log-prob ending at (t, tag)</span>
+        viterbi_table = [{} <span class="keyword">for</span> _ <span class="keyword">in</span> range(T)]
+        backpointer = [{} <span class="keyword">for</span> _ <span class="keyword">in</span> range(T)]
+
+        <span class="comment"># Initialization</span>
+        <span class="keyword">for</span> tag <span class="keyword">in</span> tags:
+            emit = self._get_emission(tag, sentence[<span class="number">0</span>])
+            viterbi_table[<span class="number">0</span>][tag] = math.log(self.initial_probs[tag]) + math.log(emit)
+            backpointer[<span class="number">0</span>][tag] = <span class="keyword">None</span>
+
+        <span class="comment"># Recursion</span>
+        <span class="keyword">for</span> t <span class="keyword">in</span> range(<span class="number">1</span>, T):
+            <span class="keyword">for</span> tag <span class="keyword">in</span> tags:
+                best_score = <span class="number">float</span>(<span class="string">'-inf'</span>)
+                best_prev = <span class="keyword">None</span>
+                emit = self._get_emission(tag, sentence[t])
+                <span class="keyword">for</span> prev_tag <span class="keyword">in</span> tags:
+                    score = (viterbi_table[t - <span class="number">1</span>][prev_tag]
+                             + math.log(self.transition_probs[prev_tag][tag])
+                             + math.log(emit))
+                    <span class="keyword">if</span> score > best_score:
+                        best_score = score
+                        best_prev = prev_tag
+                viterbi_table[t][tag] = best_score
+                backpointer[t][tag] = best_prev
+
+        <span class="comment"># Termination</span>
+        best_final_tag = max(tags, key=<span class="keyword">lambda</span> t: viterbi_table[T - <span class="number">1</span>][t])
+
+        <span class="comment"># Backtrace</span>
+        result = [best_final_tag]
+        <span class="keyword">for</span> t <span class="keyword">in</span> range(T - <span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>):
+            result.append(backpointer[t][result[-<span class="number">1</span>]])
+        result.reverse()
+        <span class="keyword">return</span> result
+
+    <span class="keyword">def</span> <span class="function">evaluate</span>(self, test_sentences: List[List[Tuple[str, str]]]) <span class="operator">-></span> float:
+        <span class="string">"""Evaluate tagger accuracy on test data.
+
+        Args:
+            test_sentences: List of sentences with (word, tag) tuples.
+
+        Returns:
+            Accuracy as a float between 0 and 1.
+        """</span>
+        correct = <span class="number">0</span>
+        total = <span class="number">0</span>
+        <span class="keyword">for</span> sentence <span class="keyword">in</span> test_sentences:
+            words = [w <span class="keyword">for</span> w, t <span class="keyword">in</span> sentence]
+            gold_tags = [t <span class="keyword">for</span> w, t <span class="keyword">in</span> sentence]
+            predicted = self.viterbi(words)
+            <span class="keyword">for</span> g, p <span class="keyword">in</span> zip(gold_tags, predicted):
+                <span class="keyword">if</span> g == p:
+                    correct += <span class="number">1</span>
+                total += <span class="number">1</span>
+        <span class="keyword">return</span> correct / total <span class="keyword">if</span> total > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0.0</span>
+
+
+<span class="comment"># ---- Usage Example ----</span>
+train_data = [
+    [(<span class="string">"The"</span>, <span class="string">"DT"</span>), (<span class="string">"dog"</span>, <span class="string">"NN"</span>), (<span class="string">"chased"</span>, <span class="string">"VBD"</span>),
+     (<span class="string">"the"</span>, <span class="string">"DT"</span>), (<span class="string">"cat"</span>, <span class="string">"NN"</span>), (<span class="string">"."</span>, <span class="string">"."</span>)],
+    [(<span class="string">"The"</span>, <span class="string">"DT"</span>), (<span class="string">"cat"</span>, <span class="string">"NN"</span>), (<span class="string">"sat"</span>, <span class="string">"VBD"</span>),
+     (<span class="string">"on"</span>, <span class="string">"IN"</span>), (<span class="string">"the"</span>, <span class="string">"DT"</span>), (<span class="string">"mat"</span>, <span class="string">"NN"</span>), (<span class="string">"."</span>, <span class="string">"."</span>)],
+    [(<span class="string">"A"</span>, <span class="string">"DT"</span>), (<span class="string">"big"</span>, <span class="string">"JJ"</span>), (<span class="string">"dog"</span>, <span class="string">"NN"</span>),
+     (<span class="string">"ran"</span>, <span class="string">"VBD"</span>), (<span class="string">"quickly"</span>, <span class="string">"RB"</span>), (<span class="string">"."</span>, <span class="string">"."</span>)],
+]
+
+tagger = HMMPosTagger()
+tagger.train(train_data)
+
+test_sentence = [<span class="string">"The"</span>, <span class="string">"dog"</span>, <span class="string">"sat"</span>]
+tags = tagger.viterbi(test_sentence)
+print(list(zip(test_sentence, tags)))
+<span class="comment"># Output: [('The', 'DT'), ('dog', 'NN'), ('sat', 'VBD')]</span>
+
+<span class="comment"># Evaluate on test data</span>
+test_data = [
+    [(<span class="string">"A"</span>, <span class="string">"DT"</span>), (<span class="string">"cat"</span>, <span class="string">"NN"</span>), (<span class="string">"chased"</span>, <span class="string">"VBD"</span>),
+     (<span class="string">"the"</span>, <span class="string">"DT"</span>), (<span class="string">"dog"</span>, <span class="string">"NN"</span>), (<span class="string">"."</span>, <span class="string">"."</span>)],
+]
+accuracy = tagger.evaluate(test_data)
+print(f<span class="string">"Accuracy: {accuracy:.2%}"</span>)
+<span class="comment"># Output: Accuracy: 100.00%</span></code></pre>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 10: References -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="references">
+            <h2><span class="icon">📚</span> References</h2>
+            <p>Key texts and papers on POS tagging and HMMs</p>
+        </div>
+
+        <div class="content-block auto">
+            <ul class="references-list">
+                <li>
+                    <strong>Jurafsky, D. &amp; Martin, J. H.</strong> (2024). <em>Speech and Language Processing</em>, 3rd edition, Chapter 8: Sequence Labeling for Parts of Speech and Named Entities. <a href="https://web.stanford.edu/~jurafsky/slp3/" target="_blank" style="color: var(--primary-color);">https://web.stanford.edu/~jurafsky/slp3/</a>
+                </li>
+                <li>
+                    <strong>Manning, C. D. &amp; Sch&uuml;tze, H.</strong> (1999). <em>Foundations of Statistical Natural Language Processing</em>, Chapter 10: Part-of-Speech Tagging. MIT Press.
+                </li>
+                <li>
+                    <strong>Marcus, M. P., Santorini, B., &amp; Marcinkiewicz, M. A.</strong> (1993). Building a Large Annotated Corpus of English: The Penn Treebank. <em>Computational Linguistics</em>, 19(2), 313&ndash;330.
+                </li>
+                <li>
+                    <strong>Rabiner, L. R.</strong> (1989). A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition. <em>Proceedings of the IEEE</em>, 77(2), 257&ndash;286.
+                </li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 3rem; color: white; background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); border-radius: 1.5rem; margin-top: 2rem;">
+            <p>Created for educational purposes | POS Tagging &amp; HMMs: the foundation of sequence labeling in NLP</p>
+            <p style="margin-top: 1rem;">
+                <a href="ngram_educational.html" style="color: rgba(255,255,255,0.9); margin: 0 1rem;">N-gram LMs</a>
+                <a href="tfidf_educational.html" style="color: rgba(255,255,255,0.9); margin: 0 1rem;">TF-IDF</a>
+                <a href="word2vec_educational.html" style="color: rgba(255,255,255,0.9); margin: 0 1rem;">Word2Vec</a>
+                <a href="llm_prompt_engineering_educational.html" style="color: rgba(255,255,255,0.9); margin: 0 1rem;">LLMs &amp; Prompting</a>
+            </p>
+            <p style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; opacity: 0.8;">Conceived and curated by <strong>Rahul Basu</strong>, with inputs from acknowledged resources and the research community.</p>
+        </footer>
+    </main>
+
+    <script>
+        // ============================================================
+        // Toggle Solution helper
+        // ============================================================
+        function toggleSolution(id) {
+            document.getElementById(id).classList.toggle('show');
+        }
+
+        // ============================================================
+        // Visualization: Tag Transition Heatmap
+        // ============================================================
+        function drawTransitionHeatmap() {
+            const canvas = document.getElementById('transitionHeatmap');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const tags = ['DT', 'NN', 'VB', 'JJ', 'IN', 'RB', 'PRP'];
+            const n = tags.length;
+
+            // Realistic-ish transition probabilities
+            const probs = [
+                // DT     NN     VB     JJ     IN     RB     PRP
+                [0.01, 0.50, 0.04, 0.35, 0.02, 0.05, 0.03], // from DT
+                [0.08, 0.12, 0.30, 0.05, 0.25, 0.10, 0.10], // from NN
+                [0.25, 0.20, 0.05, 0.10, 0.15, 0.15, 0.10], // from VB
+                [0.05, 0.65, 0.05, 0.10, 0.05, 0.05, 0.05], // from JJ
+                [0.40, 0.20, 0.05, 0.10, 0.05, 0.05, 0.15], // from IN
+                [0.10, 0.10, 0.30, 0.15, 0.15, 0.10, 0.10], // from RB
+                [0.05, 0.10, 0.50, 0.05, 0.05, 0.15, 0.10], // from PRP
+            ];
+
+            const cellSize = 55;
+            const labelOffset = 50;
+            const w = labelOffset + n * cellSize;
+            const h = labelOffset + n * cellSize;
+            canvas.width = w;
+            canvas.height = h;
+
+            ctx.font = '12px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Column headers
+            for (let j = 0; j < n; j++) {
+                ctx.fillStyle = '#1f2937';
+                ctx.fillText(tags[j], labelOffset + j * cellSize + cellSize / 2, labelOffset / 2);
+            }
+
+            // Row headers and cells
+            for (let i = 0; i < n; i++) {
+                ctx.fillStyle = '#1f2937';
+                ctx.textAlign = 'right';
+                ctx.fillText(tags[i], labelOffset - 8, labelOffset + i * cellSize + cellSize / 2);
+                ctx.textAlign = 'center';
+
+                for (let j = 0; j < n; j++) {
+                    const p = probs[i][j];
+                    const intensity = Math.min(p / 0.65, 1);
+                    const r = Math.round(16 + (255 - 16) * (1 - intensity));
+                    const g = Math.round(185 + (255 - 185) * (1 - intensity));
+                    const b = Math.round(129 + (255 - 129) * (1 - intensity));
+
+                    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                    ctx.fillRect(labelOffset + j * cellSize, labelOffset + i * cellSize, cellSize - 1, cellSize - 1);
+
+                    ctx.fillStyle = intensity > 0.5 ? 'white' : '#1f2937';
+                    ctx.fillText(p.toFixed(2), labelOffset + j * cellSize + cellSize / 2, labelOffset + i * cellSize + cellSize / 2);
+                }
+            }
+        }
+
+        // ============================================================
+        // Visualization: Tag Frequency Bar Chart
+        // ============================================================
+        let tagFreqChart = null;
+        function initTagFrequencyChart() {
+            const ctx = document.getElementById('tagFrequencyChart');
+            if (!ctx) return;
+
+            const data = {
+                labels: ['NN', 'IN', 'DT', 'NNP', 'JJ', 'NNS', 'VBD', 'RB', 'VB', 'VBZ', 'CC', 'PRP', 'VBG', 'VBN', 'VBP', 'MD', 'TO'],
+                datasets: [{
+                    label: 'Relative Frequency (%)',
+                    data: [13.1, 10.6, 8.9, 8.8, 5.8, 5.5, 4.7, 4.2, 3.8, 2.4, 2.3, 2.2, 2.0, 1.9, 1.5, 1.1, 2.5],
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                    borderColor: '#10b981',
+                    borderWidth: 2
+                }]
+            };
+
+            tagFreqChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'POS Tag Frequency Distribution (Penn Treebank sample)',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Frequency (%)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================================
+        // Playground: HMM Trainer & Viterbi Tagger
+        // ============================================================
+        function trainHMM(corpusText) {
+            const lines = corpusText.trim().split('\n').filter(l => l.trim());
+            const sentences = [];
+
+            for (const line of lines) {
+                const tokens = line.trim().split(/\s+/);
+                const sent = [];
+                for (const tok of tokens) {
+                    const idx = tok.lastIndexOf('/');
+                    if (idx > 0) {
+                        sent.push({ word: tok.substring(0, idx).toLowerCase(), tag: tok.substring(idx + 1) });
+                    }
+                }
+                if (sent.length > 0) sentences.push(sent);
+            }
+
+            const tags = new Set();
+            const vocab = new Set();
+            const transCount = {};
+            const emitCount = {};
+            const tagCount = {};
+            const initCount = {};
+
+            for (const sent of sentences) {
+                const t0 = sent[0].tag;
+                initCount[t0] = (initCount[t0] || 0) + 1;
+
+                for (let i = 0; i < sent.length; i++) {
+                    const { word, tag } = sent[i];
+                    tags.add(tag);
+                    vocab.add(word);
+                    tagCount[tag] = (tagCount[tag] || 0) + 1;
+
+                    if (!emitCount[tag]) emitCount[tag] = {};
+                    emitCount[tag][word] = (emitCount[tag][word] || 0) + 1;
+
+                    if (i > 0) {
+                        const prevTag = sent[i - 1].tag;
+                        if (!transCount[prevTag]) transCount[prevTag] = {};
+                        transCount[prevTag][tag] = (transCount[prevTag][tag] || 0) + 1;
+                    }
+                }
+            }
+
+            const tagList = Array.from(tags);
+            const vocabList = Array.from(vocab);
+            const nTags = tagList.length;
+            const vSize = vocabList.length;
+            const nSent = sentences.length;
+
+            // Add-1 smoothing for transitions
+            const trans = {};
+            for (const pt of tagList) {
+                trans[pt] = {};
+                const counts = transCount[pt] || {};
+                const total = Object.values(counts).reduce((a, b) => a + b, 0) + nTags;
+                for (const t of tagList) {
+                    trans[pt][t] = ((counts[t] || 0) + 1) / total;
+                }
+            }
+
+            // Add-1 smoothing for emissions
+            const emit = {};
+            for (const t of tagList) {
+                emit[t] = {};
+                const counts = emitCount[t] || {};
+                const total = (tagCount[t] || 0) + vSize;
+                for (const w of vocabList) {
+                    emit[t][w] = ((counts[w] || 0) + 1) / total;
+                }
+            }
+
+            // Initial probs
+            const init = {};
+            for (const t of tagList) {
+                init[t] = ((initCount[t] || 0) + 1) / (nSent + nTags);
+            }
+
+            return { tags: tagList, vocab: vocabList, trans, emit, init, vSize };
+        }
+
+        function viterbiTag(words, model) {
+            const { tags, trans, emit, init, vSize } = model;
+            const T = words.length;
+            if (T === 0) return { path: [], trellis: [] };
+
+            const viterbi = [];
+            const bp = [];
+
+            // Init
+            const v0 = {};
+            const bp0 = {};
+            for (const tag of tags) {
+                const e = emit[tag][words[0]] || (1 / vSize);
+                v0[tag] = Math.log(init[tag] || 1e-10) + Math.log(e);
+                bp0[tag] = null;
+            }
+            viterbi.push(v0);
+            bp.push(bp0);
+
+            // Recursion
+            for (let t = 1; t < T; t++) {
+                const vt = {};
+                const bpt = {};
+                for (const tag of tags) {
+                    const e = emit[tag][words[t]] || (1 / vSize);
+                    let bestScore = -Infinity;
+                    let bestPrev = null;
+                    for (const prev of tags) {
+                        const score = viterbi[t - 1][prev] + Math.log(trans[prev][tag]) + Math.log(e);
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestPrev = prev;
+                        }
+                    }
+                    vt[tag] = bestScore;
+                    bpt[tag] = bestPrev;
+                }
+                viterbi.push(vt);
+                bp.push(bpt);
+            }
+
+            // Backtrace
+            let bestTag = tags[0];
+            for (const tag of tags) {
+                if (viterbi[T - 1][tag] > viterbi[T - 1][bestTag]) bestTag = tag;
+            }
+            const path = [bestTag];
+            for (let t = T - 1; t > 0; t--) {
+                path.unshift(bp[t][path[0]]);
+            }
+
+            return { path, trellis: viterbi };
+        }
+
+        function displayTrellis(words, tags, trellis, bestPath) {
+            let html = '<table class="trellis-table"><thead><tr><th>Tag</th>';
+            for (const w of words) {
+                html += `<th>${w}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+
+            for (const tag of tags) {
+                html += `<tr><td><strong>${tag}</strong></td>`;
+                for (let t = 0; t < words.length; t++) {
+                    const val = trellis[t][tag];
+                    const prob = Math.exp(val);
+                    const isBest = bestPath[t] === tag;
+                    html += `<td class="${isBest ? 'best-path' : ''}">${prob.toExponential(2)}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function runPlayground() {
+            const corpusText = document.getElementById('trainingCorpus').value;
+            const testText = document.getElementById('testSentence').value.trim();
+
+            if (!corpusText || !testText) return;
+
+            const model = trainHMM(corpusText);
+            const words = testText.toLowerCase().split(/\s+/);
+            const { path, trellis } = viterbiTag(words, model);
+
+            // Display tagged output
+            let taggedHtml = '';
+            for (let i = 0; i < words.length; i++) {
+                taggedHtml += `<span class="tagged-word">${testText.split(/\s+/)[i]} <span class="tag">/${path[i]}</span></span> `;
+            }
+            document.getElementById('taggedOutput').innerHTML = taggedHtml;
+
+            // Display trellis
+            document.getElementById('trellisDisplay').innerHTML = displayTrellis(
+                testText.split(/\s+/), model.tags, trellis, path
+            );
+
+            document.getElementById('playgroundResult').style.display = 'block';
+        }
+
+        // ============================================================
+        // Initialize on load
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            drawTransitionHeatmap();
+            initTagFrequencyChart();
+
+            // Auto-run playground
+            setTimeout(() => {
+                runPlayground();
+            }, 500);
+        });
+    </script>
+
+    <!-- Home Button -->
+    <a href="nlp_guide_index.html" class="home-btn" title="Back to Home">🏠</a>
+
+    <!-- Feedback Button & Modal -->
+    <button class="feedback-btn" onclick="document.getElementById('feedbackOverlay').classList.add('active')">
+        💬 Feedback
+    </button>
+
+    <div class="feedback-overlay" id="feedbackOverlay" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="feedback-modal">
+            <h3>📝 Share Your Feedback</h3>
+            <label for="feedbackType">Type</label>
+            <select id="feedbackType">
+                <option value="enhancement">💡 Enhancement / Suggestion</option>
+                <option value="defect">🐛 Bug / Defect</option>
+                <option value="topic">📚 New Topic Request</option>
+                <option value="content">✏️ Content Correction</option>
+                <option value="general">💬 General Feedback</option>
+            </select>
+            <label for="feedbackTitle">Title</label>
+            <input type="text" id="feedbackTitle" placeholder="Brief summary of your feedback">
+            <label for="feedbackDesc">Details</label>
+            <textarea id="feedbackDesc" placeholder="Please describe your feedback, suggestion, or the issue you found..."></textarea>
+            <div class="feedback-actions">
+                <button class="feedback-cancel" onclick="document.getElementById('feedbackOverlay').classList.remove('active')">Cancel</button>
+                <button class="feedback-submit" onclick="submitFeedback()">Submit on GitHub</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function submitFeedback() {
+        const PAGE_NAME = 'POS Tagging';
+        const type = document.getElementById('feedbackType');
+        const title = document.getElementById('feedbackTitle');
+        const desc = document.getElementById('feedbackDesc');
+        const typeLabel = type.options[type.selectedIndex].text;
+        const labels = {'enhancement':'enhancement','defect':'bug','topic':'enhancement','content':'bug','general':'feedback'};
+        const issueTitle = encodeURIComponent('[' + PAGE_NAME + '] ' + (title.value || 'Feedback'));
+        const issueBody = encodeURIComponent('**Page:** ' + PAGE_NAME + '\n**Type:** ' + typeLabel + '\n**Browser:** ' + navigator.userAgent + '\n\n---\n\n' + (desc.value || 'No details provided.'));
+        const label = labels[type.value] || 'feedback';
+        window.open('https://github.com/rahulbasu-dev/nlp-kb/issues/new?title=' + issueTitle + '&body=' + issueBody + '&labels=' + label, '_blank');
+        document.getElementById('feedbackOverlay').classList.remove('active');
+        title.value = '';
+        desc.value = '';
+    }
+    </script>
+</body>
+</html>
