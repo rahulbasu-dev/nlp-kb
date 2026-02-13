@@ -6,3 +6,5 @@ __pycache__/
 *.py[cod]
 *.md
 *.pdf
+nul
+.claude/
