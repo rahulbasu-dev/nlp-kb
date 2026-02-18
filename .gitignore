@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.py[cod]
+*.md
+*.pdf
+nul
+.claude/
+*.gift
+quiz/
