@@ -722,30 +722,62 @@ tr:last-child td {
             box-shadow: var(--shadow);
         }
 
-        .path-steps {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 1rem;
+        .path-row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
             position: relative;
-            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
         }
 
-        .path-steps::before {
+        .path-row-2 {
+            grid-template-columns: repeat(7, 1fr);
+            margin-top: 0.5rem;
+        }
+
+        /* Connecting line within row 1 */
+        .path-row-1::before {
             content: '';
             position: absolute;
             top: 2rem;
-            left: 5%;
-            right: 5%;
+            left: calc(100% / 14);
+            right: calc(100% / 14);
             height: 4px;
-            background: linear-gradient(90deg, #2563eb, #7c3aed, #059669, #d97706, #dc2626);
+            background: linear-gradient(90deg, #2563eb, #7c3aed, #059669, #d97706, #dc2626, #e11d48, #8b5cf6);
             border-radius: 2px;
             z-index: 0;
         }
 
+        /* Connecting line within row 2 (columns 4-7, right-to-left: 8->9->10->11) */
+        .path-row-2::before {
+            content: '';
+            position: absolute;
+            top: 2rem;
+            left: calc(3 * 100% / 7 + 100% / 14);
+            right: calc(100% / 14);
+            height: 4px;
+            background: linear-gradient(270deg, #2563eb, #0ea5e9, #0891b2, #7c3aed);
+            border-radius: 2px;
+            z-index: 0;
+        }
+
+        /* Vertical snake connector from row 1 end to row 2 start */
+        .path-snake-connector {
+            display: flex;
+            justify-content: flex-end;
+            padding-right: calc(100% / 14 - 2px);
+            position: relative;
+        }
+
+        .path-snake-connector::before {
+            content: '';
+            width: 4px;
+            height: 100%;
+            min-height: 2.5rem;
+            background: linear-gradient(180deg, #8b5cf6, #2563eb);
+            border-radius: 2px;
+        }
+
         .path-step {
-            flex: 1;
-            min-width: 150px;
             text-align: center;
             position: relative;
             z-index: 1;
@@ -766,13 +798,18 @@ tr:last-child td {
             margin: 0 auto 1rem;
         }
 
-        .path-step:nth-child(1) .path-step-number { border-color: #2563eb; color: #2563eb; }
-        .path-step:nth-child(2) .path-step-number { border-color: #7c3aed; color: #7c3aed; }
-        .path-step:nth-child(3) .path-step-number { border-color: #059669; color: #059669; }
-        .path-step:nth-child(4) .path-step-number { border-color: #d97706; color: #d97706; }
-        .path-step:nth-child(5) .path-step-number { border-color: #dc2626; color: #dc2626; }
-        .path-step:nth-child(6) .path-step-number { border-color: #e11d48; color: #e11d48; }
-        .path-step:nth-child(7) .path-step-number { border-color: #8b5cf6; color: #8b5cf6; }
+        .path-row-1 .path-step:nth-child(1) .path-step-number { border-color: #2563eb; color: #2563eb; }
+        .path-row-1 .path-step:nth-child(2) .path-step-number { border-color: #7c3aed; color: #7c3aed; }
+        .path-row-1 .path-step:nth-child(3) .path-step-number { border-color: #059669; color: #059669; }
+        .path-row-1 .path-step:nth-child(4) .path-step-number { border-color: #d97706; color: #d97706; }
+        .path-row-1 .path-step:nth-child(5) .path-step-number { border-color: #dc2626; color: #dc2626; }
+        .path-row-1 .path-step:nth-child(6) .path-step-number { border-color: #e11d48; color: #e11d48; }
+        .path-row-1 .path-step:nth-child(7) .path-step-number { border-color: #8b5cf6; color: #8b5cf6; }
+        /* Row 2 colors: step 8 (col 7) through step 11 (col 4) */
+        .path-row-2 .path-step:nth-child(1) .path-step-number { border-color: #2563eb; color: #2563eb; }   /* 8 */
+        .path-row-2 .path-step:nth-child(2) .path-step-number { border-color: #0ea5e9; color: #0ea5e9; }   /* 9 */
+        .path-row-2 .path-step:nth-child(3) .path-step-number { border-color: #0891b2; color: #0891b2; }   /* 10 */
+        .path-row-2 .path-step:nth-child(4) .path-step-number { border-color: #7c3aed; color: #7c3aed; }   /* 11 */
 
         .path-step h4 {
             font-size: 1rem;
@@ -1051,17 +1088,21 @@ tr:last-child td {
                 padding: 2rem 1.5rem;
             }
 
-            .path-steps::before {
+            .path-row {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+
+            .path-row-2 .path-step {
+                grid-column: auto !important;
+            }
+
+            .path-row-1::before,
+            .path-row-2::before {
                 display: none;
             }
 
-            .path-steps {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .path-step {
-                min-width: 100%;
+            .path-snake-connector {
+                display: none;
             }
         }
     
@@ -1283,7 +1324,8 @@ tr:last-child td {
                 <p>Follow this sequence for the best understanding of word representation techniques</p>
             </div>
 
-            <div class="path-steps">
+            <!-- Row 1: steps 1-7 (left to right) -->
+            <div class="path-row path-row-1">
                 <div class="path-step">
                     <div class="path-step-number">1</div>
                     <h4>TF-IDF</h4>
@@ -1319,22 +1361,29 @@ tr:last-child td {
                     <h4>Methods Comparison</h4>
                     <p>Compare all approaches</p>
                 </div>
-                <div class="path-step">
+            </div>
+
+            <!-- Snake connector: vertical line from step 7 down to step 8 -->
+            <div class="path-snake-connector"></div>
+
+            <!-- Row 2: steps 8-11 (right to left, right-aligned) -->
+            <div class="path-row path-row-2">
+                <div class="path-step" style="grid-column: 7;">
                     <div class="path-step-number">8</div>
                     <h4>N-gram LMs</h4>
                     <p>Language modeling basics</p>
                 </div>
-                <div class="path-step">
+                <div class="path-step" style="grid-column: 6;">
                     <div class="path-step-number">9</div>
                     <h4>POS Tagging</h4>
                     <p>Sequence labeling &amp; HMMs</p>
                 </div>
-                <div class="path-step">
+                <div class="path-step" style="grid-column: 5;">
                     <div class="path-step-number">10</div>
                     <h4>POS Models</h4>
                     <p>Advanced tagging methods</p>
                 </div>
-                <div class="path-step">
+                <div class="path-step" style="grid-column: 4;">
                     <div class="path-step-number">11</div>
                     <h4>LLMs &amp; Prompting</h4>
                     <p>Modern language models</p>
