@@ -1209,58 +1209,53 @@ tr:last-child td {
 
             <nav class="sidebar-nav">
                 <div class="sidebar-section">
-                    <div class="sidebar-section-title">Main</div>
                     <a href="nlp_guide_index.html" class="sidebar-link active">
                         <span class="icon">🏠</span>
                         <span>Home</span>
                     </a>
-                    <a href="methods_comparison.html" class="sidebar-link">
-                        <span class="icon">🔬</span>
-                        <span>Methods Comparison</span>
-                    </a>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Foundations</div>
-                    <a href="neural_networks_educational.html" class="sidebar-link">
-                        <span class="icon">🧠</span>
-                        <span>Neural Networks</span>
-                    </a>
                     <a href="tfidf_educational.html" class="sidebar-link">
-                        <span class="icon">📊</span>
+                        <span class="icon">1</span>
                         <span>TF-IDF</span>
                     </a>
-                    <a href="ngram_educational.html" class="sidebar-link">
-                        <span class="icon">📖</span>
-                        <span>N-gram LMs</span>
+                    <a href="neural_networks_educational.html" class="sidebar-link">
+                        <span class="icon">2</span>
+                        <span>Neural Networks</span>
                     </a>
-                    <a href="llm_prompt_engineering_educational.html" class="sidebar-link">
-                        <span class="icon">🤖</span>
-                        <span>LLMs &amp; Prompting</span>
-                    </a>
-                    <a href="pos_tagging_educational.html" class="sidebar-link">
-                        <span class="icon">🏷️</span>
-                        <span>POS Tagging</span>
-                    </a>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Word Embeddings</div>
                     <a href="word2vec_educational.html" class="sidebar-link">
-                        <span class="icon">🎯</span>
+                        <span class="icon">3</span>
                         <span>Word2Vec</span>
                     </a>
                     <a href="sgns_educational.html" class="sidebar-link">
-                        <span class="icon">⚡</span>
+                        <span class="icon">4</span>
                         <span>Skip-gram (SGNS)</span>
                     </a>
                     <a href="cbow_educational.html" class="sidebar-link">
-                        <span class="icon">📦</span>
+                        <span class="icon">5</span>
                         <span>CBOW</span>
                     </a>
                     <a href="glove_educational.html" class="sidebar-link">
-                        <span class="icon">🌐</span>
+                        <span class="icon">6</span>
                         <span>GloVe</span>
+                    </a>
+                    <a href="methods_comparison.html" class="sidebar-link">
+                        <span class="icon">7</span>
+                        <span>Methods Comparison</span>
+                    </a>
+                    <a href="ngram_educational.html" class="sidebar-link">
+                        <span class="icon">8</span>
+                        <span>N-gram LMs</span>
+                    </a>
+                    <a href="pos_tagging_educational.html" class="sidebar-link">
+                        <span class="icon">9</span>
+                        <span>POS Tagging</span>
+                    </a>
+                    <a href="pos_tagging_models_educational.html" class="sidebar-link">
+                        <span class="icon">10</span>
+                        <span>POS Models</span>
+                    </a>
+                    <a href="llm_prompt_engineering_educational.html" class="sidebar-link">
+                        <span class="icon">11</span>
+                        <span>LLMs &amp; Prompting</span>
                     </a>
                 </div>
             </nav>
@@ -1296,8 +1291,8 @@ tr:last-child td {
                 </div>
                 <div class="path-step">
                     <div class="path-step-number">2</div>
-                    <h4>N-gram LMs</h4>
-                    <p>Language modeling basics</p>
+                    <h4>Neural Networks</h4>
+                    <p>Deep learning fundamentals</p>
                 </div>
                 <div class="path-step">
                     <div class="path-step-number">3</div>
@@ -1321,13 +1316,28 @@ tr:last-child td {
                 </div>
                 <div class="path-step">
                     <div class="path-step-number">7</div>
-                    <h4>LLMs &amp; Prompting</h4>
-                    <p>Modern language models</p>
+                    <h4>Methods Comparison</h4>
+                    <p>Compare all approaches</p>
                 </div>
                 <div class="path-step">
                     <div class="path-step-number">8</div>
+                    <h4>N-gram LMs</h4>
+                    <p>Language modeling basics</p>
+                </div>
+                <div class="path-step">
+                    <div class="path-step-number">9</div>
                     <h4>POS Tagging</h4>
                     <p>Sequence labeling &amp; HMMs</p>
+                </div>
+                <div class="path-step">
+                    <div class="path-step-number">10</div>
+                    <h4>POS Models</h4>
+                    <p>Advanced tagging methods</p>
+                </div>
+                <div class="path-step">
+                    <div class="path-step-number">11</div>
+                    <h4>LLMs &amp; Prompting</h4>
+                    <p>Modern language models</p>
                 </div>
             </div>
         </section>
@@ -1481,6 +1491,27 @@ tr:last-child td {
                         <span class="feature-tag">Penn Treebank</span>
                     </div>
                     <a href="pos_tagging_educational.html" class="topic-card-link">
+                        Start Learning <span>→</span>
+                    </a>
+                </div>
+            </article>
+
+            <!-- POS Tagging Models -->
+            <article class="topic-card">
+                <div class="topic-card-header" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+                    <h3>POS Tagging Models</h3>
+                    <div class="subtitle">Advanced POS Tagging: Forward, MEMM, CRF &amp; Neural</div>
+                    <span class="icon">🔬</span>
+                </div>
+                <div class="topic-card-body">
+                    <p>Go beyond HMMs with the Forward Algorithm, discriminative models (MEMMs, CRFs), and neural taggers (BiLSTM-CRF, BERT). The natural Part 2 to the POS Tagging foundations guide.</p>
+                    <div class="topic-card-features">
+                        <span class="feature-tag">Forward Algorithm</span>
+                        <span class="feature-tag">MEMM</span>
+                        <span class="feature-tag">BiLSTM-CRF</span>
+                        <span class="feature-tag">Neural Tagging</span>
+                    </div>
+                    <a href="pos_tagging_models_educational.html" class="topic-card-link">
                         Start Learning <span>→</span>
                     </a>
                 </div>

@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Advanced POS Tagging Models: Forward Algorithm, Viterbi, MEMMs, CRFs, BiLSTM, and Transformer-based taggers">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Advanced POS Tagging Models: From HMMs to Neural Taggers</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary-color: #7c3aed;
+            --accent-color: #059669;
+            --warning-color: #d97706;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --block-height: auto;
+            --block-min-height: 400px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        nav a:hover, nav a:focus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border-radius: 1.5rem;
+            color: white;
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+        }
+
+        /* Content Blocks */
+        .content-block {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            min-height: var(--block-min-height);
+            display: flex;
+            flex-direction: column;
+        }
+        .content-block.half { min-height: calc(var(--block-min-height) / 2); }
+        .content-block.auto { min-height: auto; }
+
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .block-grid .content-block { margin-bottom: 0; }
+        @media (max-width: 1024px) {
+            .block-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        h2 .icon { font-size: 1.75rem; }
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.35rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+        }
+        h4 {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            margin: 1.25rem 0 0.75rem;
+            font-weight: 600;
+        }
+        p { margin-bottom: 1rem; font-size: 1.05rem; }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+        .callout-analogy {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid var(--warning-color);
+        }
+        .callout-concept {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid var(--primary-color);
+        }
+        .callout-example {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid var(--accent-color);
+        }
+        .callout-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+        }
+        .callout h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .callout-analogy h4 { color: var(--warning-color); }
+        .callout-concept h4 { color: var(--primary-color); }
+        .callout-example h4 { color: var(--accent-color); }
+        .callout-warning h4 { color: #ef4444; }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        .formula-box .formula-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        .formula-box .formula-description {
+            margin-top: 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+        tr:nth-child(even) { background: #f8fafc; }
+        tr:hover { background: #e0f2fe; }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 1.5rem 0;
+        }
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .inline-code {
+            background: #e5e7eb;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .string { color: #c3e88d; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .class-name { color: #ffcb6b; }
+        .operator { color: #89ddff; }
+
+        /* Interactive Section */
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+        .input-group { margin-bottom: 1.25rem; }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+        .input-group textarea { min-height: 100px; resize: vertical; }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        button:active { transform: translateY(0); }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        /* Result Display */
+        .result-display {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .result-display h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Lists */
+        ul, ol { margin: 1rem 0 1rem 1.5rem; }
+        li { margin-bottom: 0.5rem; font-size: 1.05rem; }
+
+        .highlight {
+            background: linear-gradient(120deg, #fef08a 0%, #fef08a 100%);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Try It Yourself Box */
+        .try-it-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px dashed var(--warning-color);
+            border-radius: 1rem;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+        }
+        .try-it-box h4 {
+            color: var(--warning-color);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .try-it-box .solution {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .try-it-box .solution.show { display: block; }
+        .try-it-box button { background: var(--warning-color); margin-top: 1rem; }
+        .try-it-box button:hover { background: #b45309; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-container { flex-direction: column; gap: 1rem; }
+            nav ul { gap: 0.25rem; }
+            nav a { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+            main { padding: 6rem 1rem 2rem; }
+            .content-block { padding: 1.5rem; min-height: auto; }
+            header { padding: 2rem 1.5rem; min-height: auto; }
+            h2 { font-size: 1.5rem; }
+            .section-header h2 { font-size: 2rem; }
+            .chart-container { height: 300px; }
+            pre { font-size: 0.8rem; padding: 1rem; }
+        }
+
+        /* References Section */
+        .references-list { list-style: none; margin: 0; padding: 0; }
+        .references-list li {
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            background: var(--bg-color);
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .references-list li:hover { background: #e0f2fe; }
+
+        /* Home Button */
+        .home-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 999;
+            text-decoration: none;
+        }
+        .home-btn:hover { transform: scale(1.1); background: var(--primary-dark); }
+
+        /* Feedback Button */
+        .feedback-btn {
+            position: fixed;
+            bottom: 6rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            z-index: 998;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .feedback-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5); }
+        .feedback-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+        .feedback-overlay.active { display: flex; }
+        .feedback-modal {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .feedback-modal h3 { margin-bottom: 1.5rem; color: #1f2937; font-size: 1.35rem; }
+        .feedback-modal label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #374151; font-size: 0.95rem; }
+        .feedback-modal select,
+        .feedback-modal input,
+        .feedback-modal textarea {
+            width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;
+            font-size: 0.95rem; margin-bottom: 1rem; font-family: inherit; transition: border-color 0.2s;
+        }
+        .feedback-modal select:focus, .feedback-modal input:focus, .feedback-modal textarea:focus { outline: none; border-color: #6366f1; }
+        .feedback-modal textarea { min-height: 120px; resize: vertical; }
+        .feedback-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 0.5rem; }
+        .feedback-actions button { padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
+        .feedback-submit { background: #4f46e5; color: white; border: none; }
+        .feedback-submit:hover { background: #4338ca; }
+        .feedback-cancel { background: white; color: #6b7280; border: 2px solid #e5e7eb; }
+        .feedback-cancel:hover { background: #f9fafb; }
+
+        /* Tagged words */
+        .tagged-word {
+            display: inline-block;
+            margin: 0.25rem;
+            padding: 0.3rem 0.6rem;
+            background: #e0f2fe;
+            border: 1px solid #7dd3fc;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .tagged-word .tag { color: var(--primary-dark); font-weight: 700; font-size: 0.8rem; }
+
+        /* Trellis table */
+        .trellis-table { font-size: 0.85rem; }
+        .trellis-table td, .trellis-table th { padding: 0.5rem 0.75rem; text-align: center; }
+        .trellis-table .best-path { background: #e0f2fe; font-weight: 700; }
+
+        /* Model comparison cards */
+        .model-compare {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .model-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+        .model-card:hover { border-color: var(--primary-color); box-shadow: var(--shadow); }
+        .model-card h4 { color: var(--primary-color); margin-top: 0; }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0; left: 50%;
+            width: 3px;
+            background: var(--primary-color);
+            transform: translateX(-50%);
+        }
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .timeline-item:nth-child(odd) { flex-direction: row; }
+        .timeline-item:nth-child(even) { flex-direction: row-reverse; }
+        .timeline-content {
+            width: 45%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .timeline-dot {
+            width: 20px; height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            border: 3px solid white;
+            box-shadow: var(--shadow);
+        }
+        @media (max-width: 768px) {
+            .timeline::before { left: 20px; }
+            .timeline-item, .timeline-item:nth-child(even) { flex-direction: row; }
+            .timeline-content { width: calc(100% - 50px); margin-left: 50px; }
+            .timeline-dot { left: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">POS Models Guide</div>
+            <ul>
+                <li><a href="#intro">Intuition</a></li>
+                <li><a href="#forward">Forward Algorithm</a></li>
+                <li><a href="#viterbi">Viterbi Decoding</a></li>
+                <li><a href="#memm">MEMM</a></li>
+                <li><a href="#bidirectional">Bidirectionality</a></li>
+                <li><a href="#neural">Neural Models</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#playground">Playground</a></li>
+                <li><a href="#python">Python</a></li>
+                <li><a href="#references">References</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Header -->
+        <header>
+            <h1>Advanced POS Tagging Models</h1>
+            <p>From the Forward Algorithm and Viterbi decoding through discriminative models (MEMMs, CRFs) to modern neural taggers (BiLSTM-CRF, Transformers). A comprehensive Part 2 to the HMM foundations.</p>
+            <div class="subtitle">Forward Algorithm &bull; MEMM &bull; CRF &bull; BiLSTM &bull; BERT</div>
+        </header>
+
+        <!-- ============================================================ -->
+        <!-- Section 1: Intuition -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="intro">
+            <h2><span class="icon">💡</span> Intuition</h2>
+            <p>Why we need models beyond basic HMMs for POS tagging</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Recap: POS Tagging as Sequence Labeling</h3>
+            <p>In <a href="pos_tagging_educational.html">Part 1</a>, we learned that POS tagging assigns a grammatical label (noun, verb, adjective, etc.) to every word in a sentence. We modeled this with <strong>Hidden Markov Models (HMMs)</strong>, which use transition probabilities between tags and emission probabilities from tags to words.</p>
+
+            <p>But HMMs have significant limitations. This page explores the evolution of POS tagging models that overcome those limitations:</p>
+
+            <div class="model-compare">
+                <div class="model-card">
+                    <h4>Rule-Based</h4>
+                    <p>Hand-crafted rules like "a word ending in <em>-ly</em> is an adverb." Brittle but interpretable.</p>
+                </div>
+                <div class="model-card">
+                    <h4>Statistical (HMM)</h4>
+                    <p>Generative model: learns P(words, tags). Uses Viterbi for decoding. ~95% accuracy.</p>
+                </div>
+                <div class="model-card">
+                    <h4>Discriminative (MEMM/CRF)</h4>
+                    <p>Models P(tags | words) directly. Rich features. ~96&ndash;97% accuracy.</p>
+                </div>
+                <div class="model-card">
+                    <h4>Neural (BiLSTM, BERT)</h4>
+                    <p>Learns features automatically from data. Bidirectional context. ~97.5&ndash;98% accuracy.</p>
+                </div>
+            </div>
+
+            <h3>Why HMMs Aren't Enough</h3>
+            <ul>
+                <li><strong>Independence assumption:</strong> HMMs assume the observed word depends <em>only</em> on the current tag. It cannot look at neighboring words, word shape, prefixes, or suffixes.</li>
+                <li><strong>Generative vs. discriminative:</strong> HMMs model the joint P(words, tags), but we only need the conditional P(tags | words). Discriminative models are more direct and often more accurate.</li>
+                <li><strong>Limited context:</strong> Standard HMMs use only bigram tag context (previous tag). They cannot use the word two positions back, or the word two positions ahead.</li>
+            </ul>
+
+            <div class="callout callout-analogy">
+                <h4>🔍 The Bidirectional Reading Analogy</h4>
+                <p>Imagine reading a sentence left-to-right and encountering the word "bank." You might guess it's a financial institution. But if you could also peek ahead and see "...of the river," you'd instantly know it's a river bank. <strong>Reading forwards AND backwards</strong> gives more context&mdash;and that's the key insight behind bidirectional models.</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Consider: <strong>"The old man the boats."</strong></p>
+                <p>A forward-only model might tag "old" as JJ (adjective) and "man" as NN (noun). But the correct parse has "old" as NN (noun, meaning "elderly people") and "man" as VB (verb, meaning "to operate"). What information from the <em>right context</em> would help a bidirectional model get this right?</p>
+                <button onclick="document.getElementById('sol-intro').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="sol-intro" class="solution">
+                    <p><strong>Solution:</strong> Seeing "the boats" at the end reveals that something must be a verb governing "boats" as its object. A bidirectional model reading backwards would recognize that "man" needs to be a verb for the sentence to be grammatical, and "old" must therefore be a noun (subject).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 2: The Forward Algorithm -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="forward">
+            <h2><span class="icon">📊</span> The Forward Algorithm</h2>
+            <p>Computing the likelihood of an observation sequence efficiently</p>
+        </div>
+
+        <div class="content-block">
+            <h3>The Problem: P(O|&lambda;)</h3>
+            <p>Given an HMM &lambda; = (A, B, &pi;) and an observation sequence O = o<sub>1</sub>, o<sub>2</sub>, ..., o<sub>T</sub>, how do we compute the <strong>total probability</strong> of seeing that sequence? This is the <em>evaluation</em> problem&mdash;one of the three fundamental HMM problems.</p>
+
+            <h3>The Naive Approach: Exponential Complexity</h3>
+            <p>We could enumerate <em>every possible</em> state sequence Q = q<sub>1</sub>, ..., q<sub>T</sub> and sum:</p>
+            <div class="formula-box">
+                <div class="formula-label">Naive Computation</div>
+                \[ P(O|\lambda) = \sum_{\text{all } Q} P(O|Q, \lambda) \cdot P(Q|\lambda) \]
+                <div class="formula-description">
+                    <p>With N hidden states and T observations, there are N<sup>T</sup> possible state sequences. For N=10 states and T=20 words, that's 10<sup>20</sup> sequences&mdash;completely intractable!</p>
+                </div>
+            </div>
+
+            <h3>The Forward Variable</h3>
+            <p>The <strong>forward variable</strong> &alpha;<sub>t</sub>(j) captures the probability of having seen the first t observations <em>and</em> being in state j at time t:</p>
+            <div class="formula-box">
+                <div class="formula-label">Forward Variable Definition</div>
+                \[ \alpha_t(j) = P(o_1, o_2, \ldots, o_t, \; q_t = j \mid \lambda) \]
+            </div>
+
+            <h3>The Three Steps</h3>
+
+            <div class="formula-box">
+                <div class="formula-label">1. Initialization (t = 1)</div>
+                \[ \alpha_1(j) = \pi_j \cdot b_j(o_1) \]
+                <div class="formula-description">
+                    <p>The probability of starting in state j (&pi;<sub>j</sub>) times the probability of state j emitting the first observation (b<sub>j</sub>(o<sub>1</sub>)).</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">2. Recursion (t = 2, ..., T)</div>
+                \[ \alpha_t(j) = \left[ \sum_{i=1}^{N} \alpha_{t-1}(i) \cdot a_{ij} \right] \cdot b_j(o_t) \]
+                <div class="formula-description">
+                    <p>Sum over all states i that could have been the previous state: take &alpha;<sub>t-1</sub>(i) (probability of being in state i at t-1), multiply by a<sub>ij</sub> (transition probability from i to j), then multiply by b<sub>j</sub>(o<sub>t</sub>) (emission probability).</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">3. Termination</div>
+                \[ P(O|\lambda) = \sum_{j=1}^{N} \alpha_T(j) \]
+                <div class="formula-description">
+                    <p>The total sequence probability is the sum of all forward variables at the final time step.</p>
+                </div>
+            </div>
+
+            <h3>Complexity: O(N&sup2;T) vs O(N<sup>T</sup>)</h3>
+            <p>The Forward Algorithm reuses intermediate computations (dynamic programming). At each of T time steps, we compute N states, each requiring a sum over N previous states: <strong>O(N&sup2;T)</strong>&mdash;polynomial instead of exponential.</p>
+
+            <h3>Worked Example</h3>
+            <p>Let's use a weather/ice cream example with 2 states (Hot, Cold) and 3 observations (3, 1, 3 ice creams eaten):</p>
+            <ul>
+                <li>States: Hot (H), Cold (C)</li>
+                <li>&pi; = [0.8, 0.2] (start probabilities)</li>
+                <li>Transition matrix A: a<sub>HH</sub>=0.6, a<sub>HC</sub>=0.4, a<sub>CH</sub>=0.5, a<sub>CC</sub>=0.5</li>
+                <li>Emission B: b<sub>H</sub>(1)=0.2, b<sub>H</sub>(2)=0.4, b<sub>H</sub>(3)=0.4; b<sub>C</sub>(1)=0.5, b<sub>C</sub>(2)=0.4, b<sub>C</sub>(3)=0.1</li>
+            </ul>
+
+            <p><strong>Observation sequence:</strong> O = (3, 1, 3)</p>
+
+            <h4>Step 1: Initialization (t=1, o<sub>1</sub>=3)</h4>
+            <ul>
+                <li>&alpha;<sub>1</sub>(H) = &pi;<sub>H</sub> &middot; b<sub>H</sub>(3) = 0.8 &times; 0.4 = <strong>0.32</strong></li>
+                <li>&alpha;<sub>1</sub>(C) = &pi;<sub>C</sub> &middot; b<sub>C</sub>(3) = 0.2 &times; 0.1 = <strong>0.02</strong></li>
+            </ul>
+
+            <h4>Step 2: Recursion (t=2, o<sub>2</sub>=1)</h4>
+            <ul>
+                <li>&alpha;<sub>2</sub>(H) = [&alpha;<sub>1</sub>(H)&middot;a<sub>HH</sub> + &alpha;<sub>1</sub>(C)&middot;a<sub>CH</sub>] &middot; b<sub>H</sub>(1) = [0.32&times;0.6 + 0.02&times;0.5] &times; 0.2 = [0.192 + 0.01] &times; 0.2 = <strong>0.0404</strong></li>
+                <li>&alpha;<sub>2</sub>(C) = [&alpha;<sub>1</sub>(H)&middot;a<sub>HC</sub> + &alpha;<sub>1</sub>(C)&middot;a<sub>CC</sub>] &middot; b<sub>C</sub>(1) = [0.32&times;0.4 + 0.02&times;0.5] &times; 0.5 = [0.128 + 0.01] &times; 0.5 = <strong>0.069</strong></li>
+            </ul>
+
+            <h4>Step 3: Recursion (t=3, o<sub>3</sub>=3)</h4>
+            <ul>
+                <li>&alpha;<sub>3</sub>(H) = [0.0404&times;0.6 + 0.069&times;0.5] &times; 0.4 = [0.02424 + 0.0345] &times; 0.4 = <strong>0.02350</strong></li>
+                <li>&alpha;<sub>3</sub>(C) = [0.0404&times;0.4 + 0.069&times;0.5] &times; 0.1 = [0.01616 + 0.0345] &times; 0.1 = <strong>0.005066</strong></li>
+            </ul>
+
+            <h4>Termination</h4>
+            <p>P(O|&lambda;) = &alpha;<sub>3</sub>(H) + &alpha;<sub>3</sub>(C) = 0.02350 + 0.005066 = <strong>0.02856</strong></p>
+
+            <div class="callout callout-concept">
+                <h4>💡 Forward Trellis</h4>
+                <p>The computation forms a <em>trellis</em> (lattice) diagram where each column is a time step, each row is a state, and arrows show how &alpha; values flow forward. Every cell aggregates all incoming paths by <strong>summing</strong>.</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Using the same HMM above, compute the forward variables for the observation sequence O = (1, 3). What is P(O|&lambda;)?</p>
+                <button onclick="document.getElementById('sol-forward').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="sol-forward" class="solution">
+                    <p><strong>Initialization (t=1, o=1):</strong></p>
+                    <ul>
+                        <li>&alpha;<sub>1</sub>(H) = 0.8 &times; 0.2 = 0.16</li>
+                        <li>&alpha;<sub>1</sub>(C) = 0.2 &times; 0.5 = 0.10</li>
+                    </ul>
+                    <p><strong>Recursion (t=2, o=3):</strong></p>
+                    <ul>
+                        <li>&alpha;<sub>2</sub>(H) = [0.16&times;0.6 + 0.10&times;0.5] &times; 0.4 = [0.096+0.05] &times; 0.4 = 0.0584</li>
+                        <li>&alpha;<sub>2</sub>(C) = [0.16&times;0.4 + 0.10&times;0.5] &times; 0.1 = [0.064+0.05] &times; 0.1 = 0.0114</li>
+                    </ul>
+                    <p><strong>P(O|&lambda;) = 0.0584 + 0.0114 = 0.0698</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 3: Viterbi Decoding -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="viterbi">
+            <h2><span class="icon">🔍</span> Viterbi Decoding</h2>
+            <p>Finding the single best state sequence</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Forward vs. Viterbi: Sum vs. Max</h3>
+            <p>The Forward Algorithm <strong>sums</strong> over all paths to get the total probability. The Viterbi Algorithm <strong>maximizes</strong> to find the single most likely state sequence. The structure is identical&mdash;only the aggregation operation changes.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Aspect</th><th>Forward Algorithm</th><th>Viterbi Algorithm</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Goal</strong></td><td>P(O|&lambda;) &mdash; total likelihood</td><td>Best state sequence Q*</td></tr>
+                        <tr><td><strong>Operation</strong></td><td>Sum (&Sigma;)</td><td>Max</td></tr>
+                        <tr><td><strong>Backtracking</strong></td><td>Not needed</td><td>Backpointers required</td></tr>
+                        <tr><td><strong>Complexity</strong></td><td>O(N&sup2;T)</td><td>O(N&sup2;T)</td></tr>
+                        <tr><td><strong>Use case</strong></td><td>Model evaluation, training</td><td>Decoding (tagging)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Viterbi Formulas</h3>
+            <div class="formula-box">
+                <div class="formula-label">Viterbi Variable</div>
+                \[ v_t(j) = \max_{i} \left[ v_{t-1}(i) \cdot a_{ij} \right] \cdot b_j(o_t) \]
+                <div class="formula-description">
+                    <p>Instead of summing over all previous states, we take the <strong>maximum</strong>. This gives the probability of the best path ending in state j at time t.</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Backpointer</div>
+                \[ bt_t(j) = \arg\max_{i} \left[ v_{t-1}(i) \cdot a_{ij} \right] \]
+                <div class="formula-description">
+                    <p>We also record <em>which</em> previous state gave the maximum. After reaching the end, we trace back through these pointers to recover the best path.</p>
+                </div>
+            </div>
+
+            <h3>Log-Space Computation</h3>
+            <p>In practice, multiplying many small probabilities leads to <strong>numerical underflow</strong> (values too small for floating-point). The solution: work in log space.</p>
+            <div class="formula-box">
+                <div class="formula-label">Viterbi in Log Space</div>
+                \[ \log v_t(j) = \max_{i} \left[ \log v_{t-1}(i) + \log a_{ij} \right] + \log b_j(o_t) \]
+                <div class="formula-description">
+                    <p>Multiplications become additions, which are numerically stable. The argmax is unchanged since log is monotonic.</p>
+                </div>
+            </div>
+
+            <h3>Worked Example</h3>
+            <p>Using the same weather HMM and O = (3, 1, 3):</p>
+
+            <h4>Initialization (t=1, o=3)</h4>
+            <ul>
+                <li>v<sub>1</sub>(H) = 0.8 &times; 0.4 = <strong>0.32</strong></li>
+                <li>v<sub>1</sub>(C) = 0.2 &times; 0.1 = <strong>0.02</strong></li>
+            </ul>
+
+            <h4>t=2, o=1</h4>
+            <ul>
+                <li>v<sub>2</sub>(H) = max(0.32&times;0.6, 0.02&times;0.5) &times; 0.2 = max(0.192, 0.01) &times; 0.2 = 0.192 &times; 0.2 = <strong>0.0384</strong>, bt=H</li>
+                <li>v<sub>2</sub>(C) = max(0.32&times;0.4, 0.02&times;0.5) &times; 0.5 = max(0.128, 0.01) &times; 0.5 = 0.128 &times; 0.5 = <strong>0.064</strong>, bt=H</li>
+            </ul>
+
+            <h4>t=3, o=3</h4>
+            <ul>
+                <li>v<sub>3</sub>(H) = max(0.0384&times;0.6, 0.064&times;0.5) &times; 0.4 = max(0.02304, 0.032) &times; 0.4 = 0.032 &times; 0.4 = <strong>0.0128</strong>, bt=C</li>
+                <li>v<sub>3</sub>(C) = max(0.0384&times;0.4, 0.064&times;0.5) &times; 0.1 = max(0.01536, 0.032) &times; 0.1 = 0.032 &times; 0.1 = <strong>0.0032</strong>, bt=C</li>
+            </ul>
+
+            <h4>Backtrace</h4>
+            <p>Best final state: H (0.0128 > 0.0032). Trace back: t=3&rarr;H, bt=C; t=2&rarr;C, bt=H; t=1&rarr;H.</p>
+            <p><strong>Best path: H &rarr; C &rarr; H</strong></p>
+
+            <div class="callout callout-warning">
+                <h4>⚠️ Greedy vs. Viterbi</h4>
+                <p>Picking the most likely state at each time step independently (greedy) can give a different answer than Viterbi. Greedy ignores transition probabilities between consecutive choices. The Viterbi path is globally optimal, not just locally optimal at each step.</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Run Viterbi in <strong>log space</strong> for O = (3, 1, 3) with the same HMM. Verify you get the same best path: H &rarr; C &rarr; H.</p>
+                <button onclick="document.getElementById('sol-viterbi').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="sol-viterbi" class="solution">
+                    <p><strong>In log space (using ln):</strong></p>
+                    <ul>
+                        <li>log v<sub>1</sub>(H) = ln(0.8) + ln(0.4) = -0.223 + (-0.916) = <strong>-1.139</strong></li>
+                        <li>log v<sub>1</sub>(C) = ln(0.2) + ln(0.1) = -1.609 + (-2.303) = <strong>-3.912</strong></li>
+                    </ul>
+                    <ul>
+                        <li>log v<sub>2</sub>(H) = max(-1.139+ln(0.6), -3.912+ln(0.5)) + ln(0.2) = max(-1.650, -4.605) + (-1.609) = <strong>-3.259</strong>, bt=H</li>
+                        <li>log v<sub>2</sub>(C) = max(-1.139+ln(0.4), -3.912+ln(0.5)) + ln(0.5) = max(-2.055, -4.605) + (-0.693) = <strong>-2.748</strong>, bt=H</li>
+                    </ul>
+                    <ul>
+                        <li>log v<sub>3</sub>(H) = max(-3.259+ln(0.6), -2.748+ln(0.5)) + ln(0.4) = max(-3.770, -3.441) + (-0.916) = <strong>-4.357</strong>, bt=C</li>
+                        <li>log v<sub>3</sub>(C) = max(-3.259+ln(0.4), -2.748+ln(0.5)) + ln(0.1) = max(-4.175, -3.441) + (-2.303) = <strong>-5.744</strong>, bt=C</li>
+                    </ul>
+                    <p>Best final: H (-4.357 > -5.744). Backtrace: H&larr;C&larr;H. Same path! ✓</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 4: MEMM -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="memm">
+            <h2><span class="icon">⚙️</span> Maximum Entropy Markov Model</h2>
+            <p>Discriminative sequence labeling with rich features</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Motivation: Limitations of HMMs</h3>
+            <p>HMMs model P(words, tags) generatively. This means:</p>
+            <ul>
+                <li>The emission probability b<sub>j</sub>(o<sub>t</sub>) depends only on the current tag&mdash;we <strong>cannot</strong> condition on neighboring words, word shape, prefixes, or any other features.</li>
+                <li>Adding features requires changing the model structure entirely.</li>
+            </ul>
+            <p><strong>MEMMs</strong> flip the script: they model P(tag<sub>i</sub> | tag<sub>i-1</sub>, observation) directly, and can incorporate <em>arbitrary features</em>.</p>
+
+            <h3>Generative vs. Discriminative</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Aspect</th><th>Generative (HMM)</th><th>Discriminative (MEMM)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Models</strong></td><td>P(words, tags) = P(tags) &middot; P(words|tags)</td><td>P(tags | words) directly</td></tr>
+                        <tr><td><strong>Features</strong></td><td>Only word identity</td><td>Arbitrary: suffixes, shape, neighbors, etc.</td></tr>
+                        <tr><td><strong>Independence</strong></td><td>Words independent given tags</td><td>No such assumption needed</td></tr>
+                        <tr><td><strong>Training</strong></td><td>Count-based (MLE)</td><td>Logistic regression / MaxEnt</td></tr>
+                        <tr><td><strong>Unknown words</strong></td><td>Requires smoothing hacks</td><td>Feature-based: handles naturally</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>The MEMM Model</h3>
+            <p>At each position i, the MEMM models:</p>
+            <div class="formula-box">
+                <div class="formula-label">MEMM Local Classifier</div>
+                \[ P(t_i \mid t_{i-1}, o) = \frac{\exp\left(\mathbf{w} \cdot \mathbf{f}(t_i, t_{i-1}, o)\right)}{\sum_{t'} \exp\left(\mathbf{w} \cdot \mathbf{f}(t', t_{i-1}, o)\right)} \]
+                <div class="formula-description">
+                    <p>This is a <strong>softmax</strong> (maximum entropy) classifier. <strong>f</strong> is a feature vector, <strong>w</strong> is a learned weight vector. The normalization is <em>local</em>&mdash;per position.</p>
+                </div>
+            </div>
+
+            <h3>Feature Engineering</h3>
+            <p>The power of MEMMs comes from rich features. Common POS tagging features include:</p>
+            <ul>
+                <li><strong>Current word:</strong> w<sub>i</sub> = "running"</li>
+                <li><strong>Previous tag:</strong> t<sub>i-1</sub> = VBD</li>
+                <li><strong>Word suffixes:</strong> -ing, -ed, -ly, -tion, -ness</li>
+                <li><strong>Word prefixes:</strong> un-, re-, pre-</li>
+                <li><strong>Word shape:</strong> Xx (capitalized), XXXX (all caps), x.x (abbreviation with period)</li>
+                <li><strong>Capitalization:</strong> is_capitalized, is_all_caps, is_mixed_case</li>
+                <li><strong>Neighboring words:</strong> w<sub>i-1</sub>, w<sub>i+1</sub></li>
+                <li><strong>Contains digit:</strong> has_digit, is_number</li>
+                <li><strong>Contains hyphen:</strong> is_hyphenated</li>
+            </ul>
+
+            <div class="callout callout-example">
+                <h4>✅ Feature Example</h4>
+                <p>For the word "running" with previous tag VBD:</p>
+                <ul>
+                    <li>f<sub>1</sub>: word="running" &amp; tag=VBG &rarr; 1</li>
+                    <li>f<sub>2</sub>: suffix="-ing" &amp; tag=VBG &rarr; 1</li>
+                    <li>f<sub>3</sub>: prev_tag=VBD &amp; tag=VBG &rarr; 1</li>
+                    <li>f<sub>4</sub>: is_lowercase &amp; tag=VBG &rarr; 1</li>
+                </ul>
+                <p>The model learns weights for thousands of such features from training data.</p>
+            </div>
+
+            <h3>The Label Bias Problem</h3>
+            <p>MEMMs have a critical flaw: <strong>label bias</strong>. Because normalization is <em>local</em> (per state), states with few outgoing transitions effectively ignore observations.</p>
+
+            <div class="callout callout-warning">
+                <h4>⚠️ Label Bias Explained</h4>
+                <p>Imagine a state that can only transition to one other state. No matter what word is observed, all probability mass goes to that single successor. The observation is <strong>ignored</strong>. This happens because the probabilities must sum to 1 at each state, and if there's only one option, it gets all the mass. CRFs solve this with <em>global</em> normalization.</p>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Design a feature set for tagging the unknown word <strong>"unforgettable"</strong>. What features would help a MEMM correctly tag it as JJ (adjective)?</p>
+                <button onclick="document.getElementById('sol-memm').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="sol-memm" class="solution">
+                    <p><strong>Useful features:</strong></p>
+                    <ul>
+                        <li><strong>prefix="un-"</strong>: common adjective prefix (unhappy, unusual, unlikely)</li>
+                        <li><strong>suffix="-able"</strong>: strong indicator of adjective (readable, comfortable)</li>
+                        <li><strong>word_length &gt; 10</strong>: longer words are often adjectives or nouns</li>
+                        <li><strong>contains no digits/hyphens</strong>: rules out number/compound</li>
+                        <li><strong>is_lowercase</strong>: not a proper noun</li>
+                        <li><strong>prev_word context</strong>: if preceded by "is" or "an", strongly suggests JJ</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 5: Bidirectionality -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="bidirectional">
+            <h2><span class="icon">↔️</span> Bidirectionality &amp; CRFs</h2>
+            <p>Using full context and global normalization</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Why Left-to-Right Isn't Enough</h3>
+            <p>Consider these sentences where <em>right context</em> is crucial:</p>
+            <ul>
+                <li><strong>"The <span class="highlight">lead</span> paint was dangerous."</strong> &mdash; "lead" is JJ (adjective), but only "paint" tells us that.</li>
+                <li><strong>"Please <span class="highlight">record</span> the results."</strong> vs. <strong>"This is a <span class="highlight">record</span>."</strong> &mdash; The word after "record" disambiguates verb vs. noun.</li>
+                <li><strong>"The old <span class="highlight">man</span> the boats."</strong> &mdash; Only "the boats" at the end reveals "man" is a verb.</li>
+            </ul>
+
+            <h3>Bidirectional Approaches</h3>
+            <p>A bidirectional model runs two passes:</p>
+            <ol>
+                <li><strong>Forward pass:</strong> processes the sentence left-to-right</li>
+                <li><strong>Backward pass:</strong> processes the sentence right-to-left</li>
+            </ol>
+            <p>The predictions combine information from both directions at each position.</p>
+
+            <h3>Conditional Random Fields (CRFs)</h3>
+            <p>CRFs solve both the label bias problem and the directionality limitation. They use <strong>global normalization</strong> over the entire sequence:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">Linear-Chain CRF</div>
+                \[ P(\mathbf{y}|\mathbf{x}) = \frac{1}{Z(\mathbf{x})} \exp\left( \sum_{t=1}^{T} \sum_{k} \lambda_k f_k(y_t, y_{t-1}, \mathbf{x}, t) \right) \]
+                <div class="formula-description">
+                    <p>Where Z(<strong>x</strong>) is the <strong>partition function</strong> (normalization constant) that sums over <em>all possible</em> tag sequences:</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-label">Partition Function</div>
+                \[ Z(\mathbf{x}) = \sum_{\mathbf{y}'} \exp\left( \sum_{t=1}^{T} \sum_{k} \lambda_k f_k(y'_t, y'_{t-1}, \mathbf{x}, t) \right) \]
+                <div class="formula-description">
+                    <p>This global normalization means the model considers the <strong>entire sequence</strong> when making predictions, avoiding label bias.</p>
+                </div>
+            </div>
+
+            <h3>HMM vs. MEMM vs. CRF</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Property</th><th>HMM</th><th>MEMM</th><th>CRF</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Type</strong></td><td>Generative</td><td>Discriminative</td><td>Discriminative</td></tr>
+                        <tr><td><strong>Models</strong></td><td>P(x, y)</td><td>P(y<sub>t</sub>|y<sub>t-1</sub>, x)</td><td>P(y|x)</td></tr>
+                        <tr><td><strong>Normalization</strong></td><td>Global (generative)</td><td>Local (per state)</td><td>Global (over sequence)</td></tr>
+                        <tr><td><strong>Features</strong></td><td>Limited</td><td>Rich, arbitrary</td><td>Rich, arbitrary</td></tr>
+                        <tr><td><strong>Label bias</strong></td><td>No</td><td>Yes (problematic)</td><td>No</td></tr>
+                        <tr><td><strong>Typical accuracy</strong></td><td>~95%</td><td>~96%</td><td>~97%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Find a sentence where the POS tag of a word is ambiguous if you only read left-to-right, but becomes clear with right context. Explain which tag is correct and why.</p>
+                <button onclick="document.getElementById('sol-bidir').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="sol-bidir" class="solution">
+                    <p><strong>Example:</strong> "She saw her <strong>duck</strong> under the table."</p>
+                    <p>Reading left-to-right up to "duck," it could be a noun (the animal) or a verb (to lower one's head). The phrase "under the table" confirms it's a <strong>verb</strong> (VB)&mdash;she saw her duck (crouch) under the table.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 6: Neural Models -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="neural">
+            <h2><span class="icon">🧠</span> Neural Network Models</h2>
+            <p>From handcrafted features to learned representations</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Word Embeddings as Input</h3>
+            <p>Instead of discrete word identities, neural taggers use dense <strong>word embeddings</strong> (see <a href="word2vec_educational.html">Word2Vec guide</a>). Each word w<sub>t</sub> is represented as a vector x<sub>t</sub> &isin; &Ropf;<sup>d</sup> that captures semantic and syntactic properties.</p>
+
+            <h3>Window-Based Feedforward Tagger</h3>
+            <p>The simplest neural approach: concatenate embeddings of the target word and its neighbors (e.g., a 5-word window), feed into a feedforward network, and predict the tag with softmax. This is simple but limited&mdash;fixed window size means limited context.</p>
+
+            <h3>BiLSTM Tagger</h3>
+            <p>The <strong>Bidirectional LSTM</strong> processes the entire sentence in both directions:</p>
+
+            <div class="formula-box">
+                <div class="formula-label">BiLSTM Architecture</div>
+                \[ \vec{h}_t = \text{LSTM}_f(x_t, \vec{h}_{t-1}) \]
+                \[ \overleftarrow{h}_t = \text{LSTM}_b(x_t, \overleftarrow{h}_{t+1}) \]
+                \[ \hat{y}_t = \text{softmax}(W \cdot [\vec{h}_t ; \overleftarrow{h}_t] + b) \]
+                <div class="formula-description">
+                    <p>The forward LSTM reads left-to-right; the backward LSTM reads right-to-left. Their hidden states are concatenated [;] at each position, giving a representation that captures <strong>full bidirectional context</strong>. A linear layer + softmax produces tag probabilities.</p>
+                </div>
+            </div>
+
+            <h3>BiLSTM-CRF</h3>
+            <p>Adding a CRF layer on top of the BiLSTM combines the best of both worlds:</p>
+            <ul>
+                <li><strong>BiLSTM:</strong> Learns rich contextual representations automatically</li>
+                <li><strong>CRF layer:</strong> Enforces valid tag transition constraints (e.g., I-PER shouldn't follow B-LOC) and optimizes the <em>whole sequence</em> jointly</li>
+            </ul>
+            <p>The CRF uses BiLSTM outputs as emission scores and learns transition scores between tags. Decoding uses Viterbi over these combined scores.</p>
+
+            <h3>Transformer-Based Taggers</h3>
+            <p><strong>Self-attention</strong> allows each word to attend to all other words simultaneously&mdash;no sequential bottleneck. Pre-trained models like <strong>BERT</strong> capture deep contextual knowledge:</p>
+            <ol>
+                <li>Take a pre-trained BERT model</li>
+                <li>Add a simple linear classification layer on top</li>
+                <li>Fine-tune on POS tagging data</li>
+            </ol>
+            <p>BERT's bidirectional attention across all layers gives it extremely rich representations for each token.</p>
+
+            <h3>Performance Comparison</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Model</th><th>Accuracy (PTB)</th><th>Year</th><th>Key Innovation</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>HMM</td><td>~95.0%</td><td>1960s&ndash;</td><td>Probabilistic sequence model</td></tr>
+                        <tr><td>MEMM</td><td>~96.0%</td><td>2000</td><td>Discriminative + rich features</td></tr>
+                        <tr><td>CRF</td><td>~97.0%</td><td>2001</td><td>Global normalization</td></tr>
+                        <tr><td>BiLSTM-CRF</td><td>~97.5%</td><td>2015</td><td>Learned features + sequence opt.</td></tr>
+                        <tr><td>BERT</td><td>~97.9%</td><td>2019</td><td>Pre-trained deep bidirectional</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Trace through a BiLSTM for the sentence <strong>"I can fly"</strong> (3 words). Assume embedding dimension d=2 and hidden size h=2. The forward LSTM processes "I" &rarr; "can" &rarr; "fly"; the backward LSTM processes "fly" &rarr; "can" &rarr; "I". What dimension is the concatenated representation at each position?</p>
+                <button onclick="document.getElementById('sol-neural').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="sol-neural" class="solution">
+                    <p>Each LSTM produces a hidden vector of dimension h=2. At each position:</p>
+                    <ul>
+                        <li>Forward hidden: &vec;h<sub>t</sub> &isin; &Ropf;<sup>2</sup></li>
+                        <li>Backward hidden: &#8592;h<sub>t</sub> &isin; &Ropf;<sup>2</sup></li>
+                        <li>Concatenated: [&vec;h<sub>t</sub>; &#8592;h<sub>t</sub>] &isin; <strong>&Ropf;<sup>4</sup></strong></li>
+                    </ul>
+                    <p>So the classification layer W has shape (num_tags &times; 4). For "can" at position 2, &vec;h<sub>2</sub> encodes "I can" (left context) and &#8592;h<sub>2</sub> encodes "can fly" (right context)&mdash;both directions help disambiguate "can" as a modal verb.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 7: Visualization -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="visualization">
+            <h2><span class="icon">📈</span> Visualization</h2>
+            <p>Model evolution and performance comparison</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Model Evolution Timeline</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4>1960s&ndash;1980s: HMMs</h4>
+                        <p>Probabilistic sequence models. Viterbi decoding. ~95% accuracy.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4>2000: MEMMs</h4>
+                        <p>McCallum et al. introduce discriminative sequence models with rich features.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4>2001: CRFs</h4>
+                        <p>Lafferty et al. solve label bias with global normalization. ~97% accuracy.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4>2015: BiLSTM-CRF</h4>
+                        <p>Huang et al. combine neural representations with CRF decoding. ~97.5%.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4>2018&ndash;2019: Transformers &amp; BERT</h4>
+                        <p>Pre-trained bidirectional models push accuracy to ~98%. Devlin et al.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="block-grid">
+            <div class="content-block auto">
+                <h3>Model Accuracy Comparison</h3>
+                <div class="chart-container">
+                    <canvas id="accuracyChart"></canvas>
+                </div>
+            </div>
+            <div class="content-block auto">
+                <h3>MEMM Feature Importance</h3>
+                <div class="chart-container">
+                    <canvas id="featureChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 8: Playground -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="playground">
+            <h2><span class="icon">🎮</span> Interactive Playground</h2>
+            <p>Compare HMM, MEMM, and simulated BiLSTM taggers</p>
+        </div>
+
+        <div class="content-block">
+            <div class="interactive-section">
+                <div class="input-group">
+                    <label for="modelSelect">Select Models to Compare</label>
+                    <select id="modelSelect" multiple style="min-height:80px;">
+                        <option value="hmm" selected>HMM (Bigram)</option>
+                        <option value="memm" selected>Bigram MEMM (with features)</option>
+                        <option value="bilstm" selected>BiLSTM (simulated)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="pgTrainingCorpus">Tagged Training Corpus (word/TAG per line, blank line between sentences)</label>
+                    <textarea id="pgTrainingCorpus" rows="10">The/DT dog/NN chased/VBD the/DT cat/NN
+The/DT cat/NN sat/VBD on/IN the/DT mat/NN
+A/DT big/JJ dog/NN runs/VBZ quickly/RB
+The/DT old/JJ man/NN walked/VBD slowly/RB
+I/PRP can/MD swim/VB in/IN the/DT pool/NN
+She/PRP will/MD run/VB fast/RB
+The/DT small/JJ cat/NN can/MD jump/VB high/RB
+A/DT new/JJ book/NN is/VBZ on/IN the/DT table/NN
+He/PRP read/VBD the/DT old/JJ book/NN quickly/RB
+The/DT fish/NN can/MD swim/VB</textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="pgTestSentence">Test Sentence</label>
+                    <input type="text" id="pgTestSentence" value="The old dog can run fast" placeholder="Enter a sentence to tag...">
+                </div>
+
+                <button onclick="runComparison()">Compare Models</button>
+
+                <div id="comparisonResult" class="result-display" style="display:none;">
+                    <h4>Model Comparison Results</h4>
+                    <div id="comparisonOutput"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 9: Python Code -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="python">
+            <h2><span class="icon">🐍</span> Python Implementations</h2>
+            <p>Forward Algorithm, MEMM, and BiLSTM tagger code</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Forward Algorithm</h3>
+<pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">from</span> typing <span class="keyword">import</span> Dict, List, Tuple
+
+
+<span class="keyword">class</span> <span class="class-name">ForwardAlgorithm</span>:
+    <span class="string">"""Compute P(O|lambda) using the Forward Algorithm."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, states: List[str], obs: List[str],
+                 pi: Dict[str, float], A: Dict[str, Dict[str, float]],
+                 B: Dict[str, Dict[str, float]]):
+        <span class="string">"""Args:
+            states: Hidden state labels.
+            obs: Observation vocabulary.
+            pi: Initial state probabilities.
+            A: Transition probabilities A[i][j] = P(j|i).
+            B: Emission probabilities B[state][obs].
+        """</span>
+        self.states = states
+        self.pi = pi
+        self.A = A
+        self.B = B
+
+    <span class="keyword">def</span> <span class="function">forward</span>(self, observations: List[str]) -> Tuple[float, List[Dict[str, float]]]:
+        <span class="string">"""Compute forward variables and total probability.
+
+        Args:
+            observations: Sequence of observed symbols.
+
+        Returns:
+            Tuple of (total probability, list of alpha dicts per time step).
+        """</span>
+        T = len(observations)
+        alpha: List[Dict[str, float]] = []
+
+        <span class="comment"># Initialization</span>
+        a0 = {}
+        <span class="keyword">for</span> s <span class="keyword">in</span> self.states:
+            a0[s] = self.pi[s] * self.B[s][observations[<span class="number">0</span>]]
+        alpha.append(a0)
+
+        <span class="comment"># Recursion</span>
+        <span class="keyword">for</span> t <span class="keyword">in</span> range(<span class="number">1</span>, T):
+            at = {}
+            <span class="keyword">for</span> j <span class="keyword">in</span> self.states:
+                at[j] = sum(
+                    alpha[t - <span class="number">1</span>][i] * self.A[i][j]
+                    <span class="keyword">for</span> i <span class="keyword">in</span> self.states
+                ) * self.B[j][observations[t]]
+            alpha.append(at)
+
+        <span class="comment"># Termination</span>
+        total = sum(alpha[T - <span class="number">1</span>][s] <span class="keyword">for</span> s <span class="keyword">in</span> self.states)
+        <span class="keyword">return</span> total, alpha
+
+
+<span class="comment"># Usage example</span>
+fa = ForwardAlgorithm(
+    states=[<span class="string">'H'</span>, <span class="string">'C'</span>],
+    obs=[<span class="string">'1'</span>, <span class="string">'2'</span>, <span class="string">'3'</span>],
+    pi={<span class="string">'H'</span>: <span class="number">0.8</span>, <span class="string">'C'</span>: <span class="number">0.2</span>},
+    A={<span class="string">'H'</span>: {<span class="string">'H'</span>: <span class="number">0.6</span>, <span class="string">'C'</span>: <span class="number">0.4</span>}, <span class="string">'C'</span>: {<span class="string">'H'</span>: <span class="number">0.5</span>, <span class="string">'C'</span>: <span class="number">0.5</span>}},
+    B={<span class="string">'H'</span>: {<span class="string">'1'</span>: <span class="number">0.2</span>, <span class="string">'2'</span>: <span class="number">0.4</span>, <span class="string">'3'</span>: <span class="number">0.4</span>},
+       <span class="string">'C'</span>: {<span class="string">'1'</span>: <span class="number">0.5</span>, <span class="string">'2'</span>: <span class="number">0.4</span>, <span class="string">'3'</span>: <span class="number">0.1</span>}}
+)
+prob, alphas = fa.forward([<span class="string">'3'</span>, <span class="string">'1'</span>, <span class="string">'3'</span>])
+print(<span class="string">f"P(O|lambda) = </span>{prob:<span class="number">.6f</span><span class="string">"</span>)  <span class="comment"># ≈ 0.02856</span>
+</code></pre>
+        </div>
+
+        <div class="content-block">
+            <h3>MEMM Tagger</h3>
+<pre><code><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> LogisticRegression
+<span class="keyword">from</span> typing <span class="keyword">import</span> Dict, List, Optional
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+
+<span class="keyword">class</span> <span class="class-name">MEMMTagger</span>:
+    <span class="string">"""Maximum Entropy Markov Model for POS tagging."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self):
+        self.model: Optional[LogisticRegression] = <span class="keyword">None</span>
+        self.tag_set: List[str] = []
+        self.word_set: set = set()
+
+    <span class="keyword">def</span> <span class="function">extract_features</span>(self, word: str, prev_tag: str,
+                          prev_word: str, next_word: str) -> Dict[str, float]:
+        <span class="string">"""Extract features for a word in context.
+
+        Args:
+            word: Current word.
+            prev_tag: Previous POS tag.
+            prev_word: Previous word.
+            next_word: Next word.
+
+        Returns:
+            Feature dictionary.
+        """</span>
+        features = {
+            <span class="string">f'word=</span>{word.lower()}<span class="string">'</span>: <span class="number">1.0</span>,
+            <span class="string">f'prev_tag=</span>{prev_tag}<span class="string">'</span>: <span class="number">1.0</span>,
+            <span class="string">f'suffix_3=</span>{word[-<span class="number">3</span>:]}<span class="string">'</span>: <span class="number">1.0</span> <span class="keyword">if</span> len(word) >= <span class="number">3</span> <span class="keyword">else</span> <span class="number">0.0</span>,
+            <span class="string">f'suffix_2=</span>{word[-<span class="number">2</span>:]}<span class="string">'</span>: <span class="number">1.0</span> <span class="keyword">if</span> len(word) >= <span class="number">2</span> <span class="keyword">else</span> <span class="number">0.0</span>,
+            <span class="string">'is_capitalized'</span>: <span class="number">1.0</span> <span class="keyword">if</span> word[<span class="number">0</span>].isupper() <span class="keyword">else</span> <span class="number">0.0</span>,
+            <span class="string">'is_all_caps'</span>: <span class="number">1.0</span> <span class="keyword">if</span> word.isupper() <span class="keyword">else</span> <span class="number">0.0</span>,
+            <span class="string">'has_digit'</span>: <span class="number">1.0</span> <span class="keyword">if</span> any(c.isdigit() <span class="keyword">for</span> c <span class="keyword">in</span> word) <span class="keyword">else</span> <span class="number">0.0</span>,
+            <span class="string">'has_hyphen'</span>: <span class="number">1.0</span> <span class="keyword">if</span> <span class="string">'-'</span> <span class="keyword">in</span> word <span class="keyword">else</span> <span class="number">0.0</span>,
+            <span class="string">f'prev_word=</span>{prev_word.lower()}<span class="string">'</span>: <span class="number">1.0</span>,
+            <span class="string">f'next_word=</span>{next_word.lower()}<span class="string">'</span>: <span class="number">1.0</span>,
+            <span class="string">'is_unknown'</span>: <span class="number">0.0</span> <span class="keyword">if</span> word.lower() <span class="keyword">in</span> self.word_set <span class="keyword">else</span> <span class="number">1.0</span>,
+        }
+        <span class="keyword">return</span> features
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, tagged_sentences: List[List[tuple]]) -> <span class="keyword">None</span>:
+        <span class="string">"""Train the MEMM on tagged data.
+
+        Args:
+            tagged_sentences: List of sentences, each a list of (word, tag) tuples.
+        """</span>
+        <span class="comment"># Collect vocabulary and tags</span>
+        <span class="keyword">for</span> sent <span class="keyword">in</span> tagged_sentences:
+            <span class="keyword">for</span> word, tag <span class="keyword">in</span> sent:
+                self.word_set.add(word.lower())
+                <span class="keyword">if</span> tag <span class="keyword">not in</span> self.tag_set:
+                    self.tag_set.append(tag)
+
+        <span class="comment"># Extract features and labels</span>
+        X_dicts, y = [], []
+        <span class="keyword">for</span> sent <span class="keyword">in</span> tagged_sentences:
+            <span class="keyword">for</span> i, (word, tag) <span class="keyword">in</span> enumerate(sent):
+                prev_tag = sent[i - <span class="number">1</span>][<span class="number">1</span>] <span class="keyword">if</span> i > <span class="number">0</span> <span class="keyword">else</span> <span class="string">'&lt;START&gt;'</span>
+                prev_word = sent[i - <span class="number">1</span>][<span class="number">0</span>] <span class="keyword">if</span> i > <span class="number">0</span> <span class="keyword">else</span> <span class="string">'&lt;s&gt;'</span>
+                next_word = sent[i + <span class="number">1</span>][<span class="number">0</span>] <span class="keyword">if</span> i < len(sent) - <span class="number">1</span> <span class="keyword">else</span> <span class="string">'&lt;/s&gt;'</span>
+                X_dicts.append(self.extract_features(word, prev_tag, prev_word, next_word))
+                y.append(tag)
+
+        <span class="comment"># Vectorize features</span>
+        <span class="keyword">from</span> sklearn.feature_extraction <span class="keyword">import</span> DictVectorizer
+        self.vectorizer = DictVectorizer(sparse=<span class="keyword">True</span>)
+        X = self.vectorizer.fit_transform(X_dicts)
+
+        self.model = LogisticRegression(max_iter=<span class="number">1000</span>, C=<span class="number">1.0</span>)
+        self.model.fit(X, y)
+
+    <span class="keyword">def</span> <span class="function">predict</span>(self, words: List[str]) -> List[str]:
+        <span class="string">"""Tag a sentence using greedy left-to-right decoding.
+
+        Args:
+            words: List of words to tag.
+
+        Returns:
+            List of predicted POS tags.
+        """</span>
+        tags = []
+        prev_tag = <span class="string">'&lt;START&gt;'</span>
+        <span class="keyword">for</span> i, word <span class="keyword">in</span> enumerate(words):
+            prev_word = words[i - <span class="number">1</span>] <span class="keyword">if</span> i > <span class="number">0</span> <span class="keyword">else</span> <span class="string">'&lt;s&gt;'</span>
+            next_word = words[i + <span class="number">1</span>] <span class="keyword">if</span> i < len(words) - <span class="number">1</span> <span class="keyword">else</span> <span class="string">'&lt;/s&gt;'</span>
+            feats = self.extract_features(word, prev_tag, prev_word, next_word)
+            X = self.vectorizer.transform([feats])
+            tag = self.model.predict(X)[<span class="number">0</span>]
+            tags.append(tag)
+            prev_tag = tag
+        <span class="keyword">return</span> tags
+</code></pre>
+        </div>
+
+        <div class="content-block">
+            <h3>BiLSTM-CRF Tagger (PyTorch Sketch)</h3>
+<pre><code><span class="keyword">import</span> torch
+<span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn
+<span class="keyword">from</span> typing <span class="keyword">import</span> List, Dict
+
+
+<span class="keyword">class</span> <span class="class-name">BiLSTMCRFTagger</span>(nn.Module):
+    <span class="string">"""BiLSTM-CRF model for POS tagging.
+
+    Args:
+        vocab_size: Size of word vocabulary.
+        tag_to_ix: Mapping from tag string to index.
+        embedding_dim: Dimension of word embeddings.
+        hidden_dim: Dimension of LSTM hidden state.
+    """</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, vocab_size: int, tag_to_ix: Dict[str, int],
+                 embedding_dim: int = <span class="number">100</span>, hidden_dim: int = <span class="number">128</span>):
+        super().__init__()
+        self.tag_to_ix = tag_to_ix
+        self.tagset_size = len(tag_to_ix)
+        self.hidden_dim = hidden_dim
+
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim // <span class="number">2</span>,
+                            bidirectional=<span class="keyword">True</span>, batch_first=<span class="keyword">True</span>)
+        self.hidden2tag = nn.Linear(hidden_dim, self.tagset_size)
+
+        <span class="comment"># CRF transition parameters: transitions[i][j] = score of j -> i</span>
+        self.transitions = nn.Parameter(
+            torch.randn(self.tagset_size, self.tagset_size)
+        )
+
+    <span class="keyword">def</span> <span class="function">_get_lstm_features</span>(self, sentence: torch.Tensor) -> torch.Tensor:
+        <span class="string">"""Get emission scores from BiLSTM.
+
+        Args:
+            sentence: Tensor of word indices, shape (1, seq_len).
+
+        Returns:
+            Emission scores, shape (seq_len, tagset_size).
+        """</span>
+        embeds = self.embedding(sentence)
+        lstm_out, _ = self.lstm(embeds)
+        emissions = self.hidden2tag(lstm_out.squeeze(<span class="number">0</span>))
+        <span class="keyword">return</span> emissions
+
+    <span class="keyword">def</span> <span class="function">_viterbi_decode</span>(self, emissions: torch.Tensor) -> List[int]:
+        <span class="string">"""Find best tag sequence using Viterbi on CRF.
+
+        Args:
+            emissions: Emission scores (seq_len, tagset_size).
+
+        Returns:
+            List of best tag indices.
+        """</span>
+        seq_len = emissions.size(<span class="number">0</span>)
+        viterbi = emissions[<span class="number">0</span>]
+        backpointers: List[torch.Tensor] = []
+
+        <span class="keyword">for</span> t <span class="keyword">in</span> range(<span class="number">1</span>, seq_len):
+            scores = viterbi.unsqueeze(<span class="number">1</span>) + self.transitions
+            max_scores, bp = scores.max(dim=<span class="number">0</span>)
+            viterbi = max_scores + emissions[t]
+            backpointers.append(bp)
+
+        best_last = viterbi.argmax().item()
+        best_path = [best_last]
+        <span class="keyword">for</span> bp <span class="keyword">in</span> reversed(backpointers):
+            best_path.append(bp[best_path[-<span class="number">1</span>]].item())
+        best_path.reverse()
+        <span class="keyword">return</span> best_path
+
+    <span class="keyword">def</span> <span class="function">forward</span>(self, sentence: torch.Tensor) -> List[int]:
+        <span class="string">"""Tag a sentence.
+
+        Args:
+            sentence: Tensor of word indices.
+
+        Returns:
+            List of predicted tag indices.
+        """</span>
+        emissions = self._get_lstm_features(sentence)
+        <span class="keyword">return</span> self._viterbi_decode(emissions)
+</code></pre>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 10: References -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="references">
+            <h2><span class="icon">📚</span> References</h2>
+            <p>Key papers and textbooks</p>
+        </div>
+
+        <div class="content-block auto">
+            <ul class="references-list">
+                <li><strong>Jurafsky, D. &amp; Martin, J.H.</strong> (2024). <em>Speech and Language Processing</em>, 3rd ed., Ch. 8: Sequence Labeling (HMM, Forward Algorithm, Viterbi, CRF).</li>
+                <li><strong>McCallum, A., Freitag, D., &amp; Pereira, F.</strong> (2000). Maximum Entropy Markov Models for Information Extraction and Segmentation. <em>Proc. ICML 2000</em>.</li>
+                <li><strong>Lafferty, J., McCallum, A., &amp; Pereira, F.</strong> (2001). Conditional Random Fields: Probabilistic Models for Segmenting and Labeling Sequence Data. <em>Proc. ICML 2001</em>.</li>
+                <li><strong>Huang, Z., Xu, W., &amp; Yu, K.</strong> (2015). Bidirectional LSTM-CRF Models for Sequence Tagging. <em>arXiv:1508.01991</em>.</li>
+                <li><strong>Devlin, J., Chang, M.-W., Lee, K., &amp; Toutanova, K.</strong> (2019). BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. <em>Proc. NAACL-HLT 2019</em>.</li>
+                <li><strong>Akbik, A., Blythe, D., &amp; Vollgraf, R.</strong> (2018). Contextual String Embeddings for Sequence Labeling. <em>Proc. COLING 2018</em>.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <!-- ============================================================ -->
+    <!-- JavaScript: Charts & Playground -->
+    <!-- ============================================================ -->
+    <script>
+        // ============================================================
+        // Chart.js: Accuracy Comparison
+        // ============================================================
+        function initAccuracyChart() {
+            const ctx = document.getElementById('accuracyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['HMM', 'MEMM', 'CRF', 'BiLSTM-CRF', 'BERT'],
+                    datasets: [{
+                        label: 'Accuracy (%)',
+                        data: [95.0, 96.0, 97.0, 97.5, 97.9],
+                        backgroundColor: [
+                            'rgba(107, 114, 128, 0.8)',
+                            'rgba(234, 179, 8, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(14, 165, 233, 0.8)',
+                            'rgba(124, 58, 237, 0.8)'
+                        ],
+                        borderColor: [
+                            '#6b7280', '#eab308', '#10b981', '#0ea5e9', '#7c3aed'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'POS Tagging Accuracy on Penn Treebank', font: { size: 16 } }
+                    },
+                    scales: {
+                        y: {
+                            min: 93,
+                            max: 99,
+                            title: { display: true, text: 'Accuracy (%)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================================
+        // Chart.js: Feature Importance
+        // ============================================================
+        function initFeatureChart() {
+            const ctx = document.getElementById('featureChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Word identity', 'Previous tag', 'Suffix (-ing, -ed)', 'Capitalization', 'Prefix (un-, re-)', 'Next word', 'Word shape', 'Has digit'],
+                    datasets: [{
+                        label: 'Relative Importance',
+                        data: [0.95, 0.88, 0.82, 0.65, 0.55, 0.50, 0.42, 0.30],
+                        backgroundColor: 'rgba(14, 165, 233, 0.7)',
+                        borderColor: '#0ea5e9',
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'MEMM Feature Importance (Illustrative)', font: { size: 16 } }
+                    },
+                    scales: {
+                        x: {
+                            min: 0, max: 1,
+                            title: { display: true, text: 'Relative Importance' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================================
+        // Playground: HMM Tagger
+        // ============================================================
+        function trainHMM(corpusText) {
+            const sentences = corpusText.trim().split('\n').filter(l => l.trim());
+            const tagCounts = {};
+            const transitionCounts = {};
+            const emissionCounts = {};
+            const tags = new Set();
+            const words = new Set();
+
+            for (const line of sentences) {
+                const tokens = line.trim().split(/\s+/);
+                let prevTag = '<START>';
+                for (const token of tokens) {
+                    const slashIdx = token.lastIndexOf('/');
+                    if (slashIdx === -1) continue;
+                    const word = token.substring(0, slashIdx).toLowerCase();
+                    const tag = token.substring(slashIdx + 1);
+                    tags.add(tag);
+                    words.add(word);
+
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                    if (!transitionCounts[prevTag]) transitionCounts[prevTag] = {};
+                    transitionCounts[prevTag][tag] = (transitionCounts[prevTag][tag] || 0) + 1;
+                    if (!emissionCounts[tag]) emissionCounts[tag] = {};
+                    emissionCounts[tag][word] = (emissionCounts[tag][word] || 0) + 1;
+
+                    prevTag = tag;
+                }
+            }
+
+            const tagList = Array.from(tags);
+            const V = words.size + 1;
+
+            // Compute probabilities with add-1 smoothing
+            const transition = {};
+            for (const t1 of ['<START>', ...tagList]) {
+                transition[t1] = {};
+                const total = tagList.reduce((s, t2) => s + (transitionCounts[t1]?.[t2] || 0), 0) + tagList.length;
+                for (const t2 of tagList) {
+                    transition[t1][t2] = ((transitionCounts[t1]?.[t2] || 0) + 1) / total;
+                }
+            }
+
+            const emission = {};
+            for (const tag of tagList) {
+                emission[tag] = {};
+                const total = Object.values(emissionCounts[tag] || {}).reduce((s, v) => s + v, 0) + V;
+                emission[tag]._default = 1 / total;
+                for (const w of words) {
+                    emission[tag][w] = ((emissionCounts[tag]?.[w] || 0) + 1) / total;
+                }
+            }
+
+            return { tags: tagList, transition, emission, words };
+        }
+
+        function viterbiTag(words, model) {
+            const T = words.length;
+            const viterbi = [];
+            const backpointer = [];
+
+            // Init
+            const v0 = {};
+            const bp0 = {};
+            for (const tag of model.tags) {
+                const trans = model.transition['<START>']?.[tag] || 1e-10;
+                const emit = model.emission[tag]?.[words[0]] || model.emission[tag]._default;
+                v0[tag] = Math.log(trans) + Math.log(emit);
+                bp0[tag] = '<START>';
+            }
+            viterbi.push(v0);
+            backpointer.push(bp0);
+
+            for (let t = 1; t < T; t++) {
+                const vt = {};
+                const bpt = {};
+                for (const tag of model.tags) {
+                    let bestScore = -Infinity;
+                    let bestPrev = model.tags[0];
+                    for (const prev of model.tags) {
+                        const score = viterbi[t - 1][prev] + Math.log(model.transition[prev]?.[tag] || 1e-10);
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestPrev = prev;
+                        }
+                    }
+                    const emit = model.emission[tag]?.[words[t]] || model.emission[tag]._default;
+                    vt[tag] = bestScore + Math.log(emit);
+                    bpt[tag] = bestPrev;
+                }
+                viterbi.push(vt);
+                backpointer.push(bpt);
+            }
+
+            // Backtrace
+            let bestTag = model.tags[0];
+            let bestScore = -Infinity;
+            for (const tag of model.tags) {
+                if (viterbi[T - 1][tag] > bestScore) {
+                    bestScore = viterbi[T - 1][tag];
+                    bestTag = tag;
+                }
+            }
+            const path = [bestTag];
+            for (let t = T - 1; t > 0; t--) {
+                path.unshift(backpointer[t][path[0]]);
+            }
+            return path;
+        }
+
+        // ============================================================
+        // Playground: MEMM Tagger (simplified)
+        // ============================================================
+        function memmTag(words, model) {
+            // Simple MEMM: uses suffix and capitalization features with heuristic weights
+            const suffixTagMap = {
+                'ing': 'VBG', 'ed': 'VBD', 'ly': 'RB', 'tion': 'NN', 'ness': 'NN',
+                'able': 'JJ', 'ful': 'JJ', 'ous': 'JJ', 'ive': 'JJ', 'al': 'JJ',
+                'er': 'NN', 'est': 'JJS', 'ment': 'NN', 'ize': 'VB', 'ise': 'VB'
+            };
+
+            const path = [];
+            let prevTag = '<START>';
+
+            for (let i = 0; i < words.length; i++) {
+                const w = words[i].toLowerCase();
+
+                // First try: exact match from HMM emission (known word)
+                let bestTag = null;
+                let bestScore = -Infinity;
+
+                for (const tag of model.tags) {
+                    let score = 0;
+                    // Emission feature
+                    const emit = model.emission[tag]?.[w] || 0;
+                    score += emit * 3;
+                    // Transition feature
+                    const trans = model.transition[prevTag]?.[tag] || 0;
+                    score += trans * 2;
+                    // Suffix features
+                    for (const [suf, stag] of Object.entries(suffixTagMap)) {
+                        if (w.endsWith(suf) && tag === stag) score += 0.5;
+                    }
+                    // Capitalization
+                    if (words[i][0] === words[i][0].toUpperCase() && words[i][0] !== words[i][0].toLowerCase()) {
+                        if (tag === 'NNP') score += 0.3;
+                    }
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestTag = tag;
+                    }
+                }
+
+                path.push(bestTag || 'NN');
+                prevTag = bestTag || 'NN';
+            }
+            return path;
+        }
+
+        // ============================================================
+        // Playground: BiLSTM Tagger (simulated)
+        // ============================================================
+        function bilstmTag(words, model) {
+            // Simulated BiLSTM: uses context from both directions via simple heuristics
+            // First pass: get HMM-like scores
+            const hmmPath = viterbiTag(words.map(w => w.toLowerCase()), model);
+
+            // Second pass: apply bidirectional context corrections
+            const path = [...hmmPath];
+            for (let i = 0; i < words.length; i++) {
+                const w = words[i].toLowerCase();
+                const prev = i > 0 ? words[i - 1].toLowerCase() : '';
+                const next = i < words.length - 1 ? words[i + 1].toLowerCase() : '';
+
+                // Bidirectional context rules (simulating learned patterns)
+                if (['can', 'will', 'may', 'shall', 'must', 'could', 'would', 'should', 'might'].includes(w)) {
+                    // If next word looks like a verb base form, this is a modal
+                    if (next && model.emission['VB']?.[next] > (model.emission['NN']?.[next] || 0)) {
+                        path[i] = 'MD';
+                    }
+                }
+                if (w === 'the' || w === 'a' || w === 'an') path[i] = 'DT';
+                if (['i', 'he', 'she', 'we', 'they', 'it', 'you'].includes(w)) path[i] = 'PRP';
+                if (['in', 'on', 'at', 'to', 'for', 'with', 'from', 'by'].includes(w)) path[i] = 'IN';
+
+                // Suffix-based corrections (simulating learned character features)
+                if (w.endsWith('ly') && w.length > 3) path[i] = 'RB';
+                if (w.endsWith('ing') && w.length > 4) path[i] = 'VBG';
+                if (w.endsWith('ed') && w.length > 3 && !['bed', 'red', 'fed', 'led', 'wed'].includes(w)) path[i] = 'VBD';
+            }
+            return path;
+        }
+
+        // ============================================================
+        // Playground: Compare Models
+        // ============================================================
+        function runComparison() {
+            const corpusText = document.getElementById('pgTrainingCorpus').value;
+            const testText = document.getElementById('pgTestSentence').value.trim();
+            const select = document.getElementById('modelSelect');
+            const selectedModels = Array.from(select.selectedOptions).map(o => o.value);
+
+            if (!corpusText || !testText || selectedModels.length === 0) return;
+
+            const model = trainHMM(corpusText);
+            const words = testText.split(/\s+/);
+            const lowerWords = words.map(w => w.toLowerCase());
+
+            let html = '';
+            const results = {};
+
+            if (selectedModels.includes('hmm')) {
+                results.hmm = viterbiTag(lowerWords, model);
+            }
+            if (selectedModels.includes('memm')) {
+                results.memm = memmTag(words, model);
+            }
+            if (selectedModels.includes('bilstm')) {
+                results.bilstm = bilstmTag(words, model);
+            }
+
+            // Build comparison table
+            html += '<div class="table-container"><table><thead><tr><th>Word</th>';
+            if (results.hmm) html += '<th>HMM</th>';
+            if (results.memm) html += '<th>MEMM</th>';
+            if (results.bilstm) html += '<th>BiLSTM</th>';
+            html += '</tr></thead><tbody>';
+
+            for (let i = 0; i < words.length; i++) {
+                html += `<tr><td><strong>${words[i]}</strong></td>`;
+                if (results.hmm) html += `<td>${results.hmm[i]}</td>`;
+                if (results.memm) html += `<td>${results.memm[i]}</td>`;
+                if (results.bilstm) html += `<td>${results.bilstm[i]}</td>`;
+                html += '</tr>';
+            }
+            html += '</tbody></table></div>';
+
+            // Show tagged outputs
+            for (const [name, tags] of Object.entries(results)) {
+                const label = name === 'hmm' ? 'HMM' : name === 'memm' ? 'MEMM' : 'BiLSTM (simulated)';
+                html += `<h4 style="margin-top:1rem;">${label}</h4><div>`;
+                for (let i = 0; i < words.length; i++) {
+                    html += `<span class="tagged-word">${words[i]} <span class="tag">/${tags[i]}</span></span> `;
+                }
+                html += '</div>';
+            }
+
+            document.getElementById('comparisonOutput').innerHTML = html;
+            document.getElementById('comparisonResult').style.display = 'block';
+        }
+
+        // ============================================================
+        // Initialize on load
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initAccuracyChart();
+            initFeatureChart();
+            setTimeout(() => runComparison(), 500);
+        });
+    </script>
+
+    <!-- Home Button -->
+    <a href="nlp_guide_index.html" class="home-btn" title="Back to Home">🏠</a>
+
+    <!-- Feedback Button & Modal -->
+    <button class="feedback-btn" onclick="document.getElementById('feedbackOverlay').classList.add('active')">
+        💬 Feedback
+    </button>
+
+    <div class="feedback-overlay" id="feedbackOverlay" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="feedback-modal">
+            <h3>📝 Share Your Feedback</h3>
+            <label for="feedbackType">Type</label>
+            <select id="feedbackType">
+                <option value="enhancement">💡 Enhancement / Suggestion</option>
+                <option value="defect">🐛 Bug / Defect</option>
+                <option value="topic">📚 New Topic Request</option>
+                <option value="content">✏️ Content Correction</option>
+                <option value="general">💬 General Feedback</option>
+            </select>
+            <label for="feedbackTitle">Title</label>
+            <input type="text" id="feedbackTitle" placeholder="Brief summary of your feedback">
+            <label for="feedbackDesc">Details</label>
+            <textarea id="feedbackDesc" placeholder="Please describe your feedback, suggestion, or the issue you found..."></textarea>
+            <div class="feedback-actions">
+                <button class="feedback-cancel" onclick="document.getElementById('feedbackOverlay').classList.remove('active')">Cancel</button>
+                <button class="feedback-submit" onclick="submitFeedback()">Submit on GitHub</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function submitFeedback() {
+        const PAGE_NAME = 'POS Tagging Models';
+        const type = document.getElementById('feedbackType');
+        const title = document.getElementById('feedbackTitle');
+        const desc = document.getElementById('feedbackDesc');
+        const typeLabel = type.options[type.selectedIndex].text;
+        const labels = {'enhancement':'enhancement','defect':'bug','topic':'enhancement','content':'bug','general':'feedback'};
+        const issueTitle = encodeURIComponent('[' + PAGE_NAME + '] ' + (title.value || 'Feedback'));
+        const issueBody = encodeURIComponent('**Page:** ' + PAGE_NAME + '\n**Type:** ' + typeLabel + '\n**Browser:** ' + navigator.userAgent + '\n\n---\n\n' + (desc.value || 'No details provided.'));
+        const label = labels[type.value] || 'feedback';
+        window.open('https://github.com/rahulbasu-dev/nlp-kb/issues/new?title=' + issueTitle + '&body=' + issueBody + '&labels=' + label, '_blank');
+        document.getElementById('feedbackOverlay').classList.remove('active');
+        title.value = '';
+        desc.value = '';
+    }
+    </script>
+</body>
+</html>
