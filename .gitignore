@@ -9,4 +9,6 @@ __pycache__/
 nul
 .claude/
 *.gift
-resources/
+local/
+docs/
+reference/
