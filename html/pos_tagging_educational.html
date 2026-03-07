@@ -755,6 +755,9 @@
             background: #d1fae5;
             font-weight: 700;
         }
+        .trellis-svg-container { overflow-x: auto; text-align: center; margin: 1.5rem 0; }
+        .algo-diff-callout { background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem 1.5rem; border-radius: 0.5rem; margin: 1rem 0; }
+        .flowchart-svg { display: block; margin: 1.5rem auto; max-width: 100%; }
     </style>
 </head>
 <body>
@@ -762,12 +765,18 @@
     <nav role="navigation" aria-label="Main navigation">
         <div class="nav-container">
             <div class="logo">POS Tagging Guide</div>
+            <div style="font-size:0.75rem;color:#a7f3d0;margin-bottom:0.25rem;letter-spacing:0.03em;">
+                Part 1 of 2 &nbsp;·&nbsp;
+                <a href="pos_tagging_models_educational.html" style="color:#6ee7b7;text-decoration:underline;">Part 2: Advanced Models →</a>
+            </div>
             <ul>
                 <li><a href="#intro">Intuition</a></li>
                 <li><a href="#classes">Word Classes</a></li>
                 <li><a href="#penn">Penn Treebank</a></li>
                 <li><a href="#markov">Markov Chains</a></li>
                 <li><a href="#hmm">HMM</a></li>
+                <li><a href="#forward">Forward</a></li>
+                <li><a href="#baumwelch">Baum-Welch</a></li>
                 <li><a href="#viterbi">HMM POS Tagging</a></li>
                 <li><a href="#visualization">Visualization</a></li>
                 <li><a href="#playground">Playground</a></li>
@@ -1086,6 +1095,60 @@
 
             <p>If today is Sunny, there is a 70% chance tomorrow is Sunny and 30% chance of Rain. If today is Rainy, there is a 40% chance of Sunny and 60% chance of Rain tomorrow.</p>
 
+            <h3>POS Tagging Example: Deriving A from a Tagged Corpus</h3>
+            <p>Given 3 tagged training sentences (5 tags: DT, NN, VBD, IN, JJ):</p>
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.75rem;padding:1rem;margin:0.75rem 0;font-family:monospace;font-size:0.9rem;line-height:2;">
+                <span class="tagged-word">The <span class="tag">/DT</span></span>
+                <span class="tagged-word">cat <span class="tag">/NN</span></span>
+                <span class="tagged-word">sat <span class="tag">/VBD</span></span>
+                <span class="tagged-word">on <span class="tag">/IN</span></span>
+                <span class="tagged-word">the <span class="tag">/DT</span></span>
+                <span class="tagged-word">mat <span class="tag">/NN</span></span><br>
+                <span class="tagged-word">The <span class="tag">/DT</span></span>
+                <span class="tagged-word">dog <span class="tag">/NN</span></span>
+                <span class="tagged-word">ran <span class="tag">/VBD</span></span>
+                <span class="tagged-word">to <span class="tag">/IN</span></span>
+                <span class="tagged-word">the <span class="tag">/DT</span></span>
+                <span class="tagged-word">park <span class="tag">/NN</span></span><br>
+                <span class="tagged-word">A <span class="tag">/DT</span></span>
+                <span class="tagged-word">big <span class="tag">/JJ</span></span>
+                <span class="tagged-word">cat <span class="tag">/NN</span></span>
+                <span class="tagged-word">sat <span class="tag">/VBD</span></span>
+                <span class="tagged-word">on <span class="tag">/IN</span></span>
+                <span class="tagged-word">a <span class="tag">/DT</span></span>
+                <span class="tagged-word">mat <span class="tag">/NN</span></span>
+            </div>
+
+            <p><strong>Step 1:</strong> Count bigram tag transitions (e.g. DT→NN appears 5 times):</p>
+            <div class="table-container">
+                <table style="font-size:0.85rem;">
+                    <thead><tr><th>From \ To</th><th>DT</th><th>NN</th><th>VBD</th><th>IN</th><th>JJ</th><th>Total</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>DT</strong></td><td>0</td><td>5</td><td>0</td><td>0</td><td>1</td><td>6</td></tr>
+                        <tr><td><strong>NN</strong></td><td>0</td><td>0</td><td>3</td><td>0</td><td>0</td><td>3</td></tr>
+                        <tr><td><strong>VBD</strong></td><td>0</td><td>0</td><td>0</td><td>3</td><td>0</td><td>3</td></tr>
+                        <tr><td><strong>IN</strong></td><td>3</td><td>0</td><td>0</td><td>0</td><td>0</td><td>3</td></tr>
+                        <tr><td><strong>JJ</strong></td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p><strong>Step 2:</strong> Divide each row by its total to get transition probabilities \( A \):</p>
+            <div class="table-container">
+                <table style="font-size:0.85rem;">
+                    <thead><tr><th>From \ To</th><th>DT</th><th>NN</th><th>VBD</th><th>IN</th><th>JJ</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>DT</strong></td><td>0</td><td>0.833</td><td>0</td><td>0</td><td>0.167</td></tr>
+                        <tr><td><strong>NN</strong></td><td>0</td><td>0</td><td>1.0</td><td>0</td><td>0</td></tr>
+                        <tr><td><strong>VBD</strong></td><td>0</td><td>0</td><td>0</td><td>1.0</td><td>0</td></tr>
+                        <tr><td><strong>IN</strong></td><td>1.0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                        <tr><td><strong>JJ</strong></td><td>0</td><td>1.0</td><td>0</td><td>0</td><td>0</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p><strong>Initial π:</strong> All 3 sentences start with DT, so \( \pi(\text{DT}) = 1.0 \), all others 0. This small corpus creates a very <em>peaked</em> distribution — real corpora produce smoother estimates.</p>
+
             <div class="callout callout-concept">
                 <h4>🔑 Key Insight</h4>
                 <p>Markov chains model <strong>observable</strong> sequences. In POS tagging, the tags form a Markov chain (the tag of the current word depends on the previous tag), but we do not directly <em>observe</em> the tags&mdash;we observe the <em>words</em>. This is why we need <strong>Hidden</strong> Markov Models.</p>
@@ -1171,6 +1234,22 @@
 
             <p>Initial probabilities: \( \pi(\text{Hot}) = 0.8 \), \( \pi(\text{Cold}) = 0.2 \).</p>
 
+            <h3>POS Tagging HMM: Emission Matrix from Corpus</h3>
+            <p>Using the same 3-sentence corpus, we derive the emission matrix \( B \) — \( b_j(w) = P(w \mid \text{tag}_j) \):</p>
+            <div class="table-container">
+                <table style="font-size:0.8rem;">
+                    <thead><tr><th>Tag \ Word</th><th>the</th><th>a</th><th>cat</th><th>dog</th><th>sat</th><th>ran</th><th>on</th><th>to</th><th>mat</th><th>park</th><th>big</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>DT</strong></td><td>0.667</td><td>0.333</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                        <tr><td><strong>NN</strong></td><td>0</td><td>0</td><td>0.333</td><td>0.167</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0.333</td><td>0.167</td><td>0</td></tr>
+                        <tr><td><strong>VBD</strong></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0.667</td><td>0.333</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                        <tr><td><strong>IN</strong></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0.667</td><td>0.333</td><td>0</td><td>0</td><td>0</td></tr>
+                        <tr><td><strong>JJ</strong></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1.0</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>Read: \( b_{\text{DT}}(\text{the}) = 4/6 \approx 0.667 \) — "the" appears 4 times out of 6 total DT tokens. This matrix + the transition matrix from above fully defines our POS tagging HMM.</p>
+
             <h3>Three Fundamental HMM Problems</h3>
             <ol>
                 <li><strong>Evaluation (Likelihood):</strong> Given a model \( \lambda \) and observation sequence \( O \), compute \( P(O \mid \lambda) \). Solved by the <strong>Forward algorithm</strong>.</li>
@@ -1193,7 +1272,186 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- Section 6: HMM POS Tagging & Viterbi -->
+        <!-- Section 6a: The Forward Algorithm -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="forward">
+            <h2><span class="icon">➡️</span> The Forward Algorithm</h2>
+            <p>Computing the total probability of an observation sequence</p>
+        </div>
+
+        <div class="content-block">
+            <h3>What Problem Does It Solve?</h3>
+            <p>Given an HMM \( \lambda = (A, B, \pi) \) and an observation sequence \( O = (o_1, o_2, \ldots, o_T) \), the Forward algorithm answers:</p>
+            <blockquote style="border-left:4px solid #6366f1;padding:0.75rem 1rem;background:#eef2ff;border-radius:0.5rem;margin:1rem 0;">
+                <strong>What is \( P(O \mid \lambda) \)?</strong> — How well does this HMM explain what we observed?
+            </blockquote>
+            <p>This is useful for:</p>
+            <ul>
+                <li><strong>Model comparison:</strong> Given two trained HMMs, which better explains an observed word sequence?</li>
+                <li><strong>Sequence scoring:</strong> How likely is this particular sentence under our POS model?</li>
+                <li><strong>EM training (Baum-Welch):</strong> The E-step requires \( P(O \mid \lambda) \) as a normaliser.</li>
+            </ul>
+            <div class="algo-diff-callout">
+                <strong>Cross-reference:</strong> For a detailed numerical walkthrough using the ice-cream HMM, see the
+                <a href="pos_tagging_models_educational.html#forward">POS Models page → Forward Algorithm section</a>.
+                This section focuses on the POS tagging perspective with "I saw the dog".
+            </div>
+
+            <h3>Why Not Brute Force?</h3>
+            <p>A naive approach enumerates every possible state sequence:</p>
+            <ul>
+                <li>With \( N \) tags and a sentence of \( T \) words, there are \( N^T \) possible tag sequences.</li>
+                <li>Penn Treebank has 45 tags. For a 10-word sentence: \( 45^{10} \approx 3.4 \times 10^{16} \) sequences — infeasible.</li>
+            </ul>
+            <p>The Forward algorithm reduces this to <strong>\( O(N^2 T) \)</strong> using dynamic programming, by reusing partial sums across time steps.</p>
+
+            <h3>The Forward Variable</h3>
+            <div class="formula-box">
+                <div class="formula-label">Forward Variable Definition</div>
+                \[ \alpha_t(j) = P(o_1, o_2, \ldots, o_t,\; q_t = j \mid \lambda) \]
+                <div class="formula-description">
+                    <p>The probability of observing the first \( t \) words <em>and</em> being in state \( j \) at time \( t \).</p>
+                </div>
+            </div>
+            <div class="formula-box">
+                <div class="formula-label">Initialization</div>
+                \[ \alpha_1(j) = \pi_j \cdot b_j(o_1) \]
+                <div class="formula-description"><p>Initial state probability times emission probability for the first word.</p></div>
+            </div>
+            <div class="formula-box">
+                <div class="formula-label">Recursion</div>
+                \[ \alpha_t(j) = \left[ \sum_{i=1}^{N} \alpha_{t-1}(i) \cdot a_{ij} \right] \cdot b_j(o_t) \]
+                <div class="formula-description">
+                    <p>Sum over all possible previous states \( i \), weight each by the transition \( a_{ij} \), then multiply by the emission \( b_j(o_t) \).</p>
+                </div>
+            </div>
+            <div class="formula-box">
+                <div class="formula-label">Termination</div>
+                \[ P(O \mid \lambda) = \sum_{j=1}^{N} \alpha_T(j) \]
+                <div class="formula-description"><p>Sum the forward values at the final time step over all states.</p></div>
+            </div>
+
+            <h3>Visualising the Trellis: Sum Over All Paths</h3>
+            <p>The trellis below shows \( \alpha \) values for "I saw the" with tags PRP, VBD, DT, NN. <strong>Each node accumulates probability from all incoming arrows</strong> (SUM), unlike Viterbi which keeps only the maximum.</p>
+            <div class="trellis-svg-container">
+                <svg width="620" height="290" viewBox="0 0 620 290" xmlns="http://www.w3.org/2000/svg" aria-label="Forward algorithm trellis for I saw the">
+                    <!-- Observations header -->
+                    <text x="120" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e293b">t=1: "I"</text>
+                    <text x="310" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e293b">t=2: "saw"</text>
+                    <text x="500" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e293b">t=3: "the"</text>
+                    <!-- State labels -->
+                    <text x="28" y="75"  text-anchor="middle" font-size="12" fill="#475569">PRP</text>
+                    <text x="28" y="135" text-anchor="middle" font-size="12" fill="#475569">VBD</text>
+                    <text x="28" y="195" text-anchor="middle" font-size="12" fill="#475569">DT</text>
+                    <text x="28" y="255" text-anchor="middle" font-size="12" fill="#475569">NN</text>
+
+                    <!-- t=1 → t=2 arrows: PRP→VBD strong (green), rest gray -->
+                    <line x1="140" y1="70"  x2="290" y2="130" stroke="#10b981" stroke-width="3" opacity="0.9"/>
+                    <line x1="140" y1="70"  x2="290" y2="70"  stroke="#94a3b8" stroke-width="1" opacity="0.4"/>
+                    <line x1="140" y1="70"  x2="290" y2="190" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="140" y1="70"  x2="290" y2="250" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="140" y1="130" x2="290" y2="130" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="140" y1="130" x2="290" y2="70"  stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="140" y1="190" x2="290" y2="130" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="140" y1="190" x2="290" y2="70"  stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="140" y1="250" x2="290" y2="130" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="140" y1="250" x2="290" y2="70"  stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <!-- t=2 → t=3 arrows: VBD→DT strong (green) -->
+                    <line x1="330" y1="130" x2="480" y2="190" stroke="#10b981" stroke-width="3" opacity="0.9"/>
+                    <line x1="330" y1="130" x2="480" y2="70"  stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="330" y1="130" x2="480" y2="250" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="330" y1="70"  x2="480" y2="190" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="330" y1="190" x2="480" y2="190" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="330" y1="250" x2="480" y2="190" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+                    <line x1="330" y1="250" x2="480" y2="250" stroke="#94a3b8" stroke-width="1" opacity="0.3"/>
+
+                    <!-- t=1 nodes -->
+                    <circle cx="120" cy="70"  r="22" fill="#dcfce7" stroke="#10b981" stroke-width="2"/>
+                    <circle cx="120" cy="130" r="18" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+                    <circle cx="120" cy="190" r="18" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+                    <circle cx="120" cy="250" r="18" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+                    <text x="120" y="67"  text-anchor="middle" font-size="10" font-weight="bold" fill="#166534">0.200</text>
+                    <text x="120" y="77"  text-anchor="middle" font-size="9"  fill="#166534">PRP</text>
+                    <text x="120" y="128" text-anchor="middle" font-size="10" fill="#64748b">5e-4</text>
+                    <text x="120" y="138" text-anchor="middle" font-size="9"  fill="#64748b">VBD</text>
+                    <text x="120" y="188" text-anchor="middle" font-size="10" fill="#64748b">3e-3</text>
+                    <text x="120" y="198" text-anchor="middle" font-size="9"  fill="#64748b">DT</text>
+                    <text x="120" y="248" text-anchor="middle" font-size="10" fill="#64748b">2.5e-3</text>
+                    <text x="120" y="258" text-anchor="middle" font-size="9"  fill="#64748b">NN</text>
+
+                    <!-- t=2 nodes -->
+                    <circle cx="310" cy="130" r="22" fill="#dcfce7" stroke="#10b981" stroke-width="2"/>
+                    <circle cx="310" cy="70"  r="16" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+                    <circle cx="310" cy="190" r="16" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+                    <circle cx="310" cy="250" r="18" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+                    <text x="310" y="127" text-anchor="middle" font-size="10" font-weight="bold" fill="#166534">0.040</text>
+                    <text x="310" y="137" text-anchor="middle" font-size="9"  fill="#166534">VBD</text>
+                    <text x="310" y="67"  text-anchor="middle" font-size="10" fill="#64748b">2e-5</text>
+                    <text x="310" y="77"  text-anchor="middle" font-size="9"  fill="#64748b">PRP</text>
+                    <text x="310" y="187" text-anchor="middle" font-size="10" fill="#64748b">8e-5</text>
+                    <text x="310" y="197" text-anchor="middle" font-size="9"  fill="#64748b">DT</text>
+                    <text x="310" y="247" text-anchor="middle" font-size="10" fill="#64748b">8e-3</text>
+                    <text x="310" y="257" text-anchor="middle" font-size="9"  fill="#64748b">NN</text>
+
+                    <!-- t=3 nodes -->
+                    <circle cx="500" cy="190" r="22" fill="#dcfce7" stroke="#10b981" stroke-width="2"/>
+                    <circle cx="500" cy="70"  r="14" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+                    <circle cx="500" cy="130" r="14" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+                    <circle cx="500" cy="250" r="16" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+                    <text x="500" y="187" text-anchor="middle" font-size="10" font-weight="bold" fill="#166534">0.016</text>
+                    <text x="500" y="197" text-anchor="middle" font-size="9"  fill="#166534">DT</text>
+                    <text x="500" y="67"  text-anchor="middle" font-size="10" fill="#64748b">~0</text>
+                    <text x="500" y="77"  text-anchor="middle" font-size="9"  fill="#64748b">PRP</text>
+                    <text x="500" y="127" text-anchor="middle" font-size="10" fill="#64748b">~0</text>
+                    <text x="500" y="137" text-anchor="middle" font-size="9"  fill="#64748b">VBD</text>
+                    <text x="500" y="247" text-anchor="middle" font-size="10" fill="#64748b">8e-4</text>
+                    <text x="500" y="257" text-anchor="middle" font-size="9"  fill="#64748b">NN</text>
+
+                    <!-- Annotation on dominant arrow -->
+                    <text x="215" y="88" text-anchor="middle" font-size="9" fill="#059669" font-style="italic">a×b</text>
+                    <text x="415" y="148" text-anchor="middle" font-size="9" fill="#059669" font-style="italic">a×b</text>
+                </svg>
+            </div>
+            <p style="text-align:center;font-size:0.85rem;color:#64748b;margin-top:0.5rem;">
+                <em>Thick green = dominant paths. At each node we <strong>SUM</strong> over all incoming paths — unlike Viterbi which takes the MAX.</em>
+            </p>
+
+            <h3>Worked Example: "I saw" (2 states)</h3>
+            <p>Using only PRP and VBD with the same probability tables as the Viterbi section below:</p>
+            <p><strong>Initialization (t=1, word = "I"):</strong></p>
+            <p>
+                \( \alpha_1(\text{PRP}) = \pi_{\text{PRP}} \cdot b_{\text{PRP}}(\text{I}) = 0.40 \times 0.50 = 0.200 \)<br>
+                \( \alpha_1(\text{VBD}) = \pi_{\text{VBD}} \cdot b_{\text{VBD}}(\text{I}) = 0.05 \times 0.01 = 0.0005 \)
+            </p>
+            <p><strong>Recursion (t=2, word = "saw") — SUM over predecessors:</strong></p>
+            <p>
+                \( \alpha_2(\text{VBD}) = [\alpha_1(\text{PRP}) \cdot a_{\text{PRP} \to \text{VBD}} + \alpha_1(\text{VBD}) \cdot a_{\text{VBD} \to \text{VBD}}] \cdot b_{\text{VBD}}(\text{saw}) \)<br>
+                \( \phantom{\alpha_2(\text{VBD})} = [0.200 \times 0.50 + 0.0005 \times 0.01] \times 0.40 \)<br>
+                \( \phantom{\alpha_2(\text{VBD})} = [0.1000 + 0.000005] \times 0.40 \approx 0.040 \)
+            </p>
+            <p>
+                \( \alpha_2(\text{PRP}) = [\alpha_1(\text{PRP}) \cdot a_{\text{PRP} \to \text{PRP}} + \alpha_1(\text{VBD}) \cdot a_{\text{VBD} \to \text{PRP}}] \cdot b_{\text{PRP}}(\text{saw}) \)<br>
+                \( \phantom{\alpha_2(\text{PRP})} = [0.200 \times 0.01 + 0.0005 \times 0.10] \times 0.01 \)<br>
+                \( \phantom{\alpha_2(\text{PRP})} = [0.002 + 0.00005] \times 0.01 \approx 2.05 \times 10^{-5} \)
+            </p>
+            <p><strong>Termination:</strong> \( P(\text{"I saw"} \mid \lambda) = \alpha_2(\text{PRP}) + \alpha_2(\text{VBD}) \approx 0.040 \)</p>
+            <p style="color:#059669;"><em>Notice \( \alpha_2(\text{VBD}) \) dominates because the PRP→VBD transition is strong (0.50) and VBD emits "saw" well (0.40).</em></p>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Using the initialization probabilities \( \pi \) and emission matrix \( B \) from the Viterbi section, compute \( \alpha_1(\text{DT}) \) and \( \alpha_1(\text{NN}) \) for word "the".</p>
+                <button onclick="document.getElementById('solutionFwd').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solutionFwd" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p>\( \alpha_1(\text{DT}) = \pi_{\text{DT}} \cdot b_{\text{DT}}(\text{the}) = 0.30 \times 0.80 = 0.240 \)</p>
+                    <p>\( \alpha_1(\text{NN}) = \pi_{\text{NN}} \cdot b_{\text{NN}}(\text{the}) = 0.25 \times 0.01 = 0.0025 \)</p>
+                    <p>If "the" were the first word, DT would dominate because it has both a high initial probability and a high emission for "the".</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 6b: HMM POS Tagging & Viterbi -->
         <!-- ============================================================ -->
         <div class="section-header" id="viterbi">
             <h2><span class="icon">🧮</span> HMM POS Tagging &amp; Viterbi</h2>
@@ -1241,6 +1499,14 @@
             <h3>The Viterbi Algorithm</h3>
             <p>The <strong>Viterbi algorithm</strong> is a dynamic programming algorithm that finds the most likely sequence of hidden states. It avoids the exponential cost of evaluating all possible tag sequences.</p>
 
+            <div class="algo-diff-callout">
+                <strong>Forward vs Viterbi — one key difference:</strong><br><br>
+                The <strong>Forward algorithm SUMS</strong> over all paths: \( \alpha_t(j) = \left[\sum_i \alpha_{t-1}(i) \cdot a_{ij}\right] \cdot b_j(o_t) \)<br>
+                The <strong>Viterbi algorithm takes MAX</strong> over all paths: \( v_t(j) = \max_i\left[ v_{t-1}(i) \cdot a_{ij}\right] \cdot b_j(o_t) \)<br><br>
+                Both run in <strong>\( O(N^2 T) \)</strong> — only the aggregation operator differs.
+                Forward answers "what is the total probability of this sequence?"; Viterbi answers "what is the single best tag sequence?".
+            </div>
+
             <div class="formula-box">
                 <div class="formula-label">Viterbi Initialization</div>
                 \[ v_1(j) = \pi_j \cdot b_j(o_1) \]
@@ -1263,6 +1529,16 @@
                 <div class="formula-description">
                     <p>The backpointer records which previous state \( i \) gave the maximum value, allowing us to trace back the best path.</p>
                 </div>
+            </div>
+
+            <div class="algo-diff-callout" style="background:#fff7ed;border-left-color:#f59e0b;">
+                <strong>Log-space Viterbi (avoids underflow):</strong><br><br>
+                Multiplying many small probabilities together causes <em>numerical underflow</em>. The solution: work in log-space.
+                \[ \log v_t(j) = \max_{i}\left[ \log v_{t-1}(i) + \log a_{ij} + \log b_j(o_t) \right] \]
+                Products become sums, and \(\max\) is preserved under the monotone log transform.<br><br>
+                <strong>Example:</strong> \( 0.200 \times 0.50 \times 0.40 = 0.04 \) vs.
+                \( \ln(0.200) + \ln(0.50) + \ln(0.40) = -1.609 + (-0.693) + (-0.916) = -3.218 \)
+                and \( e^{-3.218} \approx 0.04 \) ✓
             </div>
 
             <h3>Worked Example: "I saw the dog"</h3>
@@ -1337,6 +1613,124 @@
                 <span class="tagged-word">dog <span class="tag">/NN</span></span>
             </div>
 
+            <h4>Viterbi Trellis Diagram</h4>
+            <p>The trellis below visualises the Viterbi computation for "I saw the dog". <strong>Thick green arrows</strong> = best-path edges; dashed blue arrows above = backpointers. Use <em>Animate</em> to step through columns.</p>
+            <div class="trellis-svg-container">
+                <svg id="viterbiTrellisSVG" width="640" height="330" viewBox="0 0 640 330" xmlns="http://www.w3.org/2000/svg" aria-label="Viterbi trellis for I saw the dog">
+                    <!-- Observation headers -->
+                    <text x="110" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e293b">t=1: "I"</text>
+                    <text x="260" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e293b">t=2: "saw"</text>
+                    <text x="410" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e293b">t=3: "the"</text>
+                    <text x="560" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e293b">t=4: "dog"</text>
+                    <!-- State row labels -->
+                    <text x="22" y="76"  text-anchor="middle" font-size="11" fill="#475569">PRP</text>
+                    <text x="22" y="146" text-anchor="middle" font-size="11" fill="#475569">VBD</text>
+                    <text x="22" y="216" text-anchor="middle" font-size="11" fill="#475569">DT</text>
+                    <text x="22" y="286" text-anchor="middle" font-size="11" fill="#475569">NN</text>
+
+                    <!-- Best-path edges (green) -->
+                    <!-- t1 PRP → t2 VBD -->
+                    <line class="vt-edge-best" id="vte-1-2-prp-vbd" x1="130" y1="70"  x2="240" y2="140" stroke="#10b981" stroke-width="3" opacity="0"/>
+                    <!-- t2 VBD → t3 DT -->
+                    <line class="vt-edge-best" id="vte-2-3-vbd-dt"  x1="280" y1="140" x2="390" y2="210" stroke="#10b981" stroke-width="3" opacity="0"/>
+                    <!-- t3 DT → t4 NN -->
+                    <line class="vt-edge-best" id="vte-3-4-dt-nn"   x1="430" y1="210" x2="540" y2="280" stroke="#10b981" stroke-width="3" opacity="0"/>
+
+                    <!-- All other edges (gray, dim) — subset shown for clarity -->
+                    <line class="vt-edge-gray" x1="130" y1="70"  x2="240" y2="70"  stroke="#cbd5e1" stroke-width="1" opacity="0.5"/>
+                    <line class="vt-edge-gray" x1="130" y1="70"  x2="240" y2="210" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="130" y1="70"  x2="240" y2="280" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="130" y1="140" x2="240" y2="70"  stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="130" y1="140" x2="240" y2="140" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="130" y1="210" x2="240" y2="140" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="130" y1="280" x2="240" y2="140" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="280" y1="140" x2="390" y2="70"  stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="280" y1="140" x2="390" y2="140" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="280" y1="140" x2="390" y2="280" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="280" y1="70"  x2="390" y2="210" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="280" y1="280" x2="390" y2="210" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="430" y1="210" x2="540" y2="70"  stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="430" y1="210" x2="540" y2="140" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="430" y1="210" x2="540" y2="210" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="430" y1="70"  x2="540" y2="280" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+                    <line class="vt-edge-gray" x1="430" y1="280" x2="540" y2="280" stroke="#cbd5e1" stroke-width="1" opacity="0.3"/>
+
+                    <!-- Backpointer arrows (dashed blue, above trellis) -->
+                    <!-- BP: t2 best = PRP (from t1 PRP) -->
+                    <line class="vt-bp" id="vtbp-2" x1="130" y1="40" x2="240" y2="40" stroke="#6366f1" stroke-width="2" stroke-dasharray="5,3" opacity="0"/>
+                    <polygon class="vt-bp" id="vtbp-2-arr" points="240,36 250,40 240,44" fill="#6366f1" opacity="0"/>
+                    <!-- BP: t3 best = VBD (from t2 VBD) -->
+                    <line class="vt-bp" id="vtbp-3" x1="280" y1="40" x2="390" y2="40" stroke="#6366f1" stroke-width="2" stroke-dasharray="5,3" opacity="0"/>
+                    <polygon class="vt-bp" id="vtbp-3-arr" points="390,36 400,40 390,44" fill="#6366f1" opacity="0"/>
+                    <!-- BP: t4 best = DT (from t3 DT) -->
+                    <line class="vt-bp" id="vtbp-4" x1="430" y1="40" x2="540" y2="40" stroke="#6366f1" stroke-width="2" stroke-dasharray="5,3" opacity="0"/>
+                    <polygon class="vt-bp" id="vtbp-4-arr" points="540,36 550,40 540,44" fill="#6366f1" opacity="0"/>
+                    <!-- Backpointer label -->
+                    <text x="335" y="36" text-anchor="middle" font-size="10" fill="#6366f1" id="vtbp-label" opacity="0">← backpointers</text>
+
+                    <!-- t=1 nodes -->
+                    <circle class="vt-node" id="vtn-1-prp" cx="110" cy="70"  r="22" fill="#dcfce7" stroke="#10b981" stroke-width="2.5"/>
+                    <circle class="vt-node" id="vtn-1-vbd" cx="110" cy="140" r="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+                    <circle class="vt-node" id="vtn-1-dt"  cx="110" cy="210" r="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+                    <circle class="vt-node" id="vtn-1-nn"  cx="110" cy="280" r="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+                    <text x="110" y="67"  text-anchor="middle" font-size="9" font-weight="bold" fill="#166534">0.200</text>
+                    <text x="110" y="77"  text-anchor="middle" font-size="8" fill="#166534">PRP*</text>
+                    <text x="110" y="137" text-anchor="middle" font-size="9" fill="#64748b">5×10⁻⁴</text>
+                    <text x="110" y="147" text-anchor="middle" font-size="8" fill="#64748b">VBD</text>
+                    <text x="110" y="207" text-anchor="middle" font-size="9" fill="#64748b">3×10⁻³</text>
+                    <text x="110" y="217" text-anchor="middle" font-size="8" fill="#64748b">DT</text>
+                    <text x="110" y="277" text-anchor="middle" font-size="9" fill="#64748b">2.5×10⁻³</text>
+                    <text x="110" y="287" text-anchor="middle" font-size="8" fill="#64748b">NN</text>
+
+                    <!-- t=2 nodes -->
+                    <circle class="vt-node" id="vtn-2-vbd" cx="260" cy="140" r="22" fill="#dcfce7" stroke="#10b981" stroke-width="2.5" opacity="0"/>
+                    <circle class="vt-node" id="vtn-2-prp" cx="260" cy="70"  r="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="0"/>
+                    <circle class="vt-node" id="vtn-2-dt"  cx="260" cy="210" r="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="0"/>
+                    <circle class="vt-node" id="vtn-2-nn"  cx="260" cy="280" r="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="0"/>
+                    <text class="vt-node-label" id="vtl-2-vbd-v" x="260" y="137" text-anchor="middle" font-size="9" font-weight="bold" fill="#166534" opacity="0">0.040</text>
+                    <text class="vt-node-label" id="vtl-2-vbd-s" x="260" y="147" text-anchor="middle" font-size="8" fill="#166534" opacity="0">VBD*</text>
+                    <text class="vt-node-label" x="260" y="67"  text-anchor="middle" font-size="9" fill="#64748b" opacity="0" id="vtl-2-prp-v">2×10⁻⁵</text>
+                    <text class="vt-node-label" x="260" y="77"  text-anchor="middle" font-size="8" fill="#64748b" opacity="0" id="vtl-2-prp-s">PRP</text>
+                    <text class="vt-node-label" x="260" y="207" text-anchor="middle" font-size="9" fill="#64748b" opacity="0" id="vtl-2-dt-v">8×10⁻⁵</text>
+                    <text class="vt-node-label" x="260" y="217" text-anchor="middle" font-size="8" fill="#64748b" opacity="0" id="vtl-2-dt-s">DT</text>
+                    <text class="vt-node-label" x="260" y="277" text-anchor="middle" font-size="9" fill="#64748b" opacity="0" id="vtl-2-nn-v">8×10⁻³</text>
+                    <text class="vt-node-label" x="260" y="287" text-anchor="middle" font-size="8" fill="#64748b" opacity="0" id="vtl-2-nn-s">NN</text>
+
+                    <!-- t=3 nodes -->
+                    <circle class="vt-node" id="vtn-3-dt"  cx="410" cy="210" r="22" fill="#dcfce7" stroke="#10b981" stroke-width="2.5" opacity="0"/>
+                    <circle class="vt-node" id="vtn-3-prp" cx="410" cy="70"  r="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="0"/>
+                    <circle class="vt-node" id="vtn-3-vbd" cx="410" cy="140" r="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="0"/>
+                    <circle class="vt-node" id="vtn-3-nn"  cx="410" cy="280" r="15" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="0"/>
+                    <text class="vt-node-label" id="vtl-3-dt-v" x="410" y="207" text-anchor="middle" font-size="9" font-weight="bold" fill="#166534" opacity="0">0.016</text>
+                    <text class="vt-node-label" id="vtl-3-dt-s" x="410" y="217" text-anchor="middle" font-size="8" fill="#166534" opacity="0">DT*</text>
+                    <text class="vt-node-label" x="410" y="67"  text-anchor="middle" font-size="9" fill="#64748b" opacity="0">~0</text>
+                    <text class="vt-node-label" x="410" y="77"  text-anchor="middle" font-size="8" fill="#64748b" opacity="0">PRP</text>
+                    <text class="vt-node-label" x="410" y="137" text-anchor="middle" font-size="9" fill="#64748b" opacity="0">~0</text>
+                    <text class="vt-node-label" x="410" y="147" text-anchor="middle" font-size="8" fill="#64748b" opacity="0">VBD</text>
+                    <text class="vt-node-label" x="410" y="277" text-anchor="middle" font-size="9" fill="#64748b" opacity="0">4×10⁻⁴</text>
+                    <text class="vt-node-label" x="410" y="287" text-anchor="middle" font-size="8" fill="#64748b" opacity="0">NN</text>
+
+                    <!-- t=4 nodes -->
+                    <circle class="vt-node" id="vtn-4-nn"  cx="560" cy="280" r="22" fill="#dcfce7" stroke="#10b981" stroke-width="2.5" opacity="0"/>
+                    <circle class="vt-node" id="vtn-4-prp" cx="560" cy="70"  r="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="0"/>
+                    <circle class="vt-node" id="vtn-4-vbd" cx="560" cy="140" r="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="0"/>
+                    <circle class="vt-node" id="vtn-4-dt"  cx="560" cy="210" r="13" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="0"/>
+                    <text class="vt-node-label" id="vtl-4-nn-v" x="560" y="277" text-anchor="middle" font-size="9" font-weight="bold" fill="#166534" opacity="0">7.76×10⁻³</text>
+                    <text class="vt-node-label" id="vtl-4-nn-s" x="560" y="287" text-anchor="middle" font-size="8" fill="#166534" opacity="0">NN★</text>
+                    <text class="vt-node-label" x="560" y="67"  text-anchor="middle" font-size="8" fill="#64748b" opacity="0">~0</text>
+                    <text class="vt-node-label" x="560" y="77"  text-anchor="middle" font-size="8" fill="#64748b" opacity="0">PRP</text>
+                    <text class="vt-node-label" x="560" y="137" text-anchor="middle" font-size="8" fill="#64748b" opacity="0">~0</text>
+                    <text class="vt-node-label" x="560" y="147" text-anchor="middle" font-size="8" fill="#64748b" opacity="0">VBD</text>
+                    <text class="vt-node-label" x="560" y="207" text-anchor="middle" font-size="8" fill="#64748b" opacity="0">~0</text>
+                    <text class="vt-node-label" x="560" y="217" text-anchor="middle" font-size="8" fill="#64748b" opacity="0">DT</text>
+                </svg>
+            </div>
+            <div style="text-align:center;margin-top:0.5rem;">
+                <button onclick="animateViterbiTrellis()" style="background:#10b981;color:#fff;border:none;padding:0.4rem 1rem;border-radius:0.4rem;cursor:pointer;margin-right:0.5rem;">▶ Animate</button>
+                <button onclick="resetViterbiTrellis()" style="background:#64748b;color:#fff;border:none;padding:0.4rem 1rem;border-radius:0.4rem;cursor:pointer;">↺ Reset</button>
+            </div>
+            <p style="text-align:center;font-size:0.82rem;color:#64748b;margin-top:0.5rem;"><em>★ = best final state. Green circles = best-path nodes. Dashed blue = backpointers.</em></p>
+
             <div class="try-it-box">
                 <h4>✏️ Try It Yourself!</h4>
                 <p>Using the same probabilities above, what would \( v_2(\text{PRP}) \) be for the word "saw"? Why is this value so small?</p>
@@ -1346,6 +1740,268 @@
                     <p>\( v_2(\text{PRP}) = \max_i [ v_1(i) \cdot a_{i,\text{PRP}} \cdot b_{\text{PRP}}(\text{saw}) ] \)</p>
                     <p>The best predecessor is NN: \( v_1(\text{NN}) \cdot a_{\text{NN} \to \text{PRP}} \cdot b_{\text{PRP}}(\text{saw}) = 0.0025 \times 0.20 \times 0.01 = 0.000005 \)</p>
                     <p>This is extremely small because (1) "saw" has very low emission probability from PRP (0.01), and (2) transitions into PRP from most states are low. The model correctly disfavors tagging "saw" as a pronoun.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Section 6c: Baum-Welch (EM for HMMs) -->
+        <!-- ============================================================ -->
+        <div class="section-header" id="baumwelch">
+            <h2><span class="icon">🔄</span> Baum-Welch: Unsupervised HMM Learning</h2>
+            <p>Training an HMM without a labelled corpus using Expectation-Maximisation</p>
+        </div>
+
+        <div class="content-block">
+            <h3>Motivation</h3>
+            <p>The MLE training above (Section 6) requires a <strong>tagged corpus</strong>. But for many languages and domains, labelled data is expensive or unavailable. Baum-Welch lets us train an HMM from <strong>raw (untagged) text</strong>.</p>
+            <div class="concept-box" style="background:#fdf4ff;border-left:4px solid #a855f7;padding:1rem 1.5rem;border-radius:0.5rem;margin:1rem 0;">
+                <strong>Analogy:</strong> Like a chef adjusting a recipe by repeatedly tasting the dish — no recipe card needed. Each iteration improves the model until the flavour (likelihood) stops improving.
+            </div>
+            <p>Baum-Welch is an instance of the <strong>Expectation-Maximisation (EM)</strong> algorithm applied to HMMs:</p>
+            <ul>
+                <li><strong>E-step:</strong> Given the current model \(\lambda\), compute the expected tag assignments for each word position.</li>
+                <li><strong>M-step:</strong> Given the expected assignments, re-estimate \(A\), \(B\), \(\pi\) to maximise likelihood.</li>
+                <li><strong>Repeat</strong> until \(P(O \mid \lambda)\) stops increasing.</li>
+            </ul>
+
+            <h3>The Backward Variable \(\beta\)</h3>
+            <p>The Forward algorithm \(\alpha_t(j)\) accumulates evidence from the <em>left</em>. For EM we also need evidence from the <em>right</em>:</p>
+            <div class="formula-box">
+                <div class="formula-label">Backward Variable Definition</div>
+                \[ \beta_t(i) = P(o_{t+1}, o_{t+2}, \ldots, o_T \mid q_t = i,\; \lambda) \]
+                <div class="formula-description"><p>Probability of all future observations given we are in state \(i\) at time \(t\).</p></div>
+            </div>
+            <div class="formula-box">
+                <div class="formula-label">Initialization</div>
+                \[ \beta_T(i) = 1 \quad \text{for all } i \]
+                <div class="formula-description"><p>At the final time step there are no future observations, so the probability is 1.</p></div>
+            </div>
+            <div class="formula-box">
+                <div class="formula-label">Recursion (backward)</div>
+                \[ \beta_t(i) = \sum_{j=1}^{N} a_{ij} \cdot b_j(o_{t+1}) \cdot \beta_{t+1}(j) \]
+                <div class="formula-description"><p>Sum over all states \(j\) we could transition into: transition probability × emission × future backward value.</p></div>
+            </div>
+            <p style="color:#6366f1;"><em>\(\alpha\) looks forward; \(\beta\) looks backward. Together they bracket every state at every time step.</em></p>
+
+            <h3>The \(\gamma\) and \(\xi\) Variables</h3>
+            <p>Combining \(\alpha\) and \(\beta\) gives us the two sufficient statistics for the M-step:</p>
+            <div class="formula-box">
+                <div class="formula-label">\(\gamma_t(i)\) — State occupancy probability</div>
+                \[ \gamma_t(i) = \frac{\alpha_t(i) \cdot \beta_t(i)}{P(O \mid \lambda)} \]
+                <div class="formula-description"><p>Probability of being in state \(i\) at time \(t\), given the entire observation sequence.</p></div>
+            </div>
+            <div class="formula-box">
+                <div class="formula-label">\(\xi_t(i,j)\) — Transition occupancy probability</div>
+                \[ \xi_t(i,j) = \frac{\alpha_t(i) \cdot a_{ij} \cdot b_j(o_{t+1}) \cdot \beta_{t+1}(j)}{P(O \mid \lambda)} \]
+                <div class="formula-description"><p>Expected number of times we transition from state \(i\) to state \(j\) at time \(t\).</p></div>
+            </div>
+
+            <h3>M-step: Re-estimation Formulas</h3>
+            <div class="formula-box">
+                <div class="formula-label">Re-estimate initial probabilities</div>
+                \[ \hat{\pi}_i = \gamma_1(i) \]
+                <div class="formula-description"><p>The expected probability of starting in state \(i\).</p></div>
+            </div>
+            <div class="formula-box">
+                <div class="formula-label">Re-estimate transition probabilities</div>
+                \[ \hat{a}_{ij} = \frac{\displaystyle\sum_{t=1}^{T-1} \xi_t(i,j)}{\displaystyle\sum_{t=1}^{T-1} \gamma_t(i)} \]
+                <div class="formula-description"><p>Expected transitions \(i \to j\) divided by expected time spent in state \(i\).</p></div>
+            </div>
+            <div class="formula-box">
+                <div class="formula-label">Re-estimate emission probabilities</div>
+                \[ \hat{b}_j(v_k) = \frac{\displaystyle\sum_{t:\, o_t = v_k} \gamma_t(j)}{\displaystyle\sum_{t=1}^{T} \gamma_t(j)} \]
+                <div class="formula-description"><p>Expected time in state \(j\) while emitting symbol \(v_k\), divided by total expected time in \(j\).</p></div>
+            </div>
+
+            <h3>Algorithm Flowchart</h3>
+            <div class="trellis-svg-container">
+                <svg class="flowchart-svg" width="600" height="90" viewBox="0 0 600 90" xmlns="http://www.w3.org/2000/svg" aria-label="Baum-Welch EM flowchart">
+                    <!-- Boxes -->
+                    <rect x="5"   y="25" width="110" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+                    <rect x="140" y="25" width="130" height="40" rx="6" fill="#dcfce7" stroke="#10b981" stroke-width="1.5"/>
+                    <rect x="305" y="25" width="130" height="40" rx="6" fill="#f3e8ff" stroke="#a855f7" stroke-width="1.5"/>
+                    <rect x="465" y="25" width="110" height="40" rx="6" fill="#ffedd5" stroke="#f97316" stroke-width="1.5"/>
+                    <!-- Box labels -->
+                    <text x="60"  y="42" text-anchor="middle" font-size="10" fill="#1e40af">Initialize λ</text>
+                    <text x="60"  y="55" text-anchor="middle" font-size="9"  fill="#1e40af">randomly</text>
+                    <text x="205" y="42" text-anchor="middle" font-size="10" fill="#166534">E-step</text>
+                    <text x="205" y="55" text-anchor="middle" font-size="9"  fill="#166534">compute α, β, γ, ξ</text>
+                    <text x="370" y="42" text-anchor="middle" font-size="10" fill="#6b21a8">M-step</text>
+                    <text x="370" y="55" text-anchor="middle" font-size="9"  fill="#6b21a8">update A, B, π</text>
+                    <text x="520" y="42" text-anchor="middle" font-size="10" fill="#9a3412">Converged?</text>
+                    <!-- Arrows init→E -->
+                    <line x1="115" y1="45" x2="138" y2="45" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <!-- Arrows E→M -->
+                    <line x1="270" y1="45" x2="303" y2="45" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <!-- Arrows M→Conv -->
+                    <line x1="435" y1="45" x2="463" y2="45" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <!-- No arrow: loop back from Conv to E -->
+                    <path d="M520,65 L520,80 L205,80 L205,65" fill="none" stroke="#f97316" stroke-width="1.5" stroke-dasharray="4,2"/>
+                    <text x="362" y="78" text-anchor="middle" font-size="9" fill="#f97316">No — repeat</text>
+                    <!-- Yes arrow -->
+                    <line x1="575" y1="45" x2="598" y2="45" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="595" y="40" font-size="9" fill="#166534">Yes</text>
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <path d="M0,0 L6,3 L0,6 Z" fill="#475569"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>Worked Example: Backward Pass ("I saw", PRP/VBD)</h3>
+            <p>Using the same 2-state simplified model from the Forward example above (T=2, states = PRP, VBD):</p>
+            <p><strong>Initialization (t=T=2):</strong></p>
+            <p>
+                \( \beta_2(\text{PRP}) = 1 \)<br>
+                \( \beta_2(\text{VBD}) = 1 \)
+            </p>
+            <p><strong>Recursion (t=1):</strong></p>
+            <p>
+                \( \beta_1(\text{PRP}) = a_{\text{PRP} \to \text{PRP}} \cdot b_{\text{PRP}}(\text{saw}) \cdot \beta_2(\text{PRP}) + a_{\text{PRP} \to \text{VBD}} \cdot b_{\text{VBD}}(\text{saw}) \cdot \beta_2(\text{VBD}) \)<br>
+                \( \phantom{\beta_1(\text{PRP})} = 0.01 \times 0.01 \times 1 + 0.50 \times 0.40 \times 1 = 0.0001 + 0.200 = 0.2001 \)<br><br>
+                \( \beta_1(\text{VBD}) = a_{\text{VBD} \to \text{PRP}} \cdot b_{\text{PRP}}(\text{saw}) \cdot 1 + a_{\text{VBD} \to \text{VBD}} \cdot b_{\text{VBD}}(\text{saw}) \cdot 1 \)<br>
+                \( \phantom{\beta_1(\text{VBD})} = 0.10 \times 0.01 + 0.01 \times 0.40 = 0.001 + 0.004 = 0.005 \)
+            </p>
+            <p><strong>State occupancy \(\gamma\) at t=1:</strong> Recall \(\alpha_1(\text{PRP}) = 0.200\), \(\alpha_1(\text{VBD}) = 0.0005\), \(P(O \mid \lambda) \approx 0.04\).</p>
+            <p>
+                \( \gamma_1(\text{PRP}) = \frac{0.200 \times 0.2001}{0.04} \approx 1.0 \) → <em style="color:#059669;">Almost certainly PRP at t=1 ✓</em><br>
+                \( \gamma_1(\text{VBD}) = \frac{0.0005 \times 0.005}{0.04} \approx 6 \times 10^{-5} \) → <em style="color:#64748b;">Almost never VBD at t=1 ✓</em>
+            </p>
+            <p>These \(\gamma\) values confirm that "I" is overwhelmingly a PRP, which the M-step would reinforce in the next iteration.</p>
+
+            <h3>Interactive Weather / Umbrella Walkthrough</h3>
+            <p>Step through all three algorithms on the classic Weather HMM. States: <strong style="color:#dc2626;">Rainy</strong>, <strong style="color:#2563eb;">Sunny</strong>. Observations: U, N, U.</p>
+
+            <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+                <button class="bw-tab active" data-algo="forward" onclick="bwSetAlgo('forward')">Forward (α)</button>
+                <button class="bw-tab" data-algo="backward" onclick="bwSetAlgo('backward')">Backward (β)</button>
+                <button class="bw-tab" data-algo="viterbi" onclick="bwSetAlgo('viterbi')">Viterbi (max)</button>
+                <button class="bw-tab" data-algo="baumwelch" onclick="bwSetAlgo('baumwelch')">Baum-Welch (EM)</button>
+            </div>
+
+            <!-- Param cards -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin-bottom:1rem;font-size:0.82rem;">
+                <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:0.6rem;padding:0.6rem 0.8rem;">
+                    <strong style="color:#166534;">π</strong>: R=0.5, S=0.5
+                </div>
+                <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:0.6rem;padding:0.6rem 0.8rem;">
+                    <strong style="color:#1e40af;">A</strong>: R→R=0.7, R→S=0.3 / S→R=0.4, S→S=0.6
+                </div>
+                <div style="background:#fefce8;border:1px solid #fde047;border-radius:0.6rem;padding:0.6rem 0.8rem;">
+                    <strong style="color:#854d0e;">B</strong>: R→U=0.9, R→N=0.1 / S→U=0.2, S→N=0.8
+                </div>
+            </div>
+
+            <!-- SVG Trellis -->
+            <div style="background:#fafafa;border:2px solid #e5e7eb;border-radius:1rem;padding:1rem;margin-bottom:0.75rem;overflow-x:auto;">
+                <svg id="bwTrellis" viewBox="0 0 720 280" style="width:100%;max-width:720px;display:block;margin:0 auto;" font-family="Inter,system-ui,sans-serif">
+                    <text x="120" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">t=1 (U)</text>
+                    <text x="330" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">t=2 (N)</text>
+                    <text x="540" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">t=3 (U)</text>
+                    <text x="26" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">R</text>
+                    <text x="26" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#2563eb">S</text>
+                    <!-- Edges -->
+                    <g id="bwEdges" opacity="0.12">
+                        <line x1="160" y1="90" x2="290" y2="90" stroke="#dc2626" stroke-width="2" id="bwE-R1R2"/>
+                        <line x1="160" y1="90" x2="290" y2="195" stroke="#9333ea" stroke-width="2" id="bwE-R1S2"/>
+                        <line x1="160" y1="195" x2="290" y2="90" stroke="#9333ea" stroke-width="2" id="bwE-S1R2"/>
+                        <line x1="160" y1="195" x2="290" y2="195" stroke="#2563eb" stroke-width="2" id="bwE-S1S2"/>
+                        <line x1="370" y1="90" x2="500" y2="90" stroke="#dc2626" stroke-width="2" id="bwE-R2R3"/>
+                        <line x1="370" y1="90" x2="500" y2="195" stroke="#9333ea" stroke-width="2" id="bwE-R2S3"/>
+                        <line x1="370" y1="195" x2="500" y2="90" stroke="#9333ea" stroke-width="2" id="bwE-S2R3"/>
+                        <line x1="370" y1="195" x2="500" y2="195" stroke="#2563eb" stroke-width="2" id="bwE-S2S3"/>
+                    </g>
+                    <!-- Nodes -->
+                    <circle cx="120" cy="90" r="26" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5" id="bwN-R1"/>
+                    <circle cx="120" cy="195" r="26" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5" id="bwN-S1"/>
+                    <circle cx="330" cy="90" r="26" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5" id="bwN-R2"/>
+                    <circle cx="330" cy="195" r="26" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5" id="bwN-S2"/>
+                    <circle cx="540" cy="90" r="26" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5" id="bwN-R3"/>
+                    <circle cx="540" cy="195" r="26" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5" id="bwN-S3"/>
+                    <!-- Value labels -->
+                    <text x="120" y="94" text-anchor="middle" font-size="10" font-weight="600" id="bwV-R1" fill="#991b1b"></text>
+                    <text x="120" y="199" text-anchor="middle" font-size="10" font-weight="600" id="bwV-S1" fill="#1e40af"></text>
+                    <text x="330" y="94" text-anchor="middle" font-size="10" font-weight="600" id="bwV-R2" fill="#991b1b"></text>
+                    <text x="330" y="199" text-anchor="middle" font-size="10" font-weight="600" id="bwV-S2" fill="#1e40af"></text>
+                    <text x="540" y="94" text-anchor="middle" font-size="10" font-weight="600" id="bwV-R3" fill="#991b1b"></text>
+                    <text x="540" y="199" text-anchor="middle" font-size="10" font-weight="600" id="bwV-S3" fill="#1e40af"></text>
+                    <!-- Best path overlay -->
+                    <g id="bwBestPath" opacity="0">
+                        <line x1="120" y1="90" x2="330" y2="90" stroke="#16a34a" stroke-width="4" stroke-dasharray="7 3" id="bwBP1"/>
+                        <line x1="330" y1="90" x2="540" y2="90" stroke="#16a34a" stroke-width="4" stroke-dasharray="7 3" id="bwBP2"/>
+                    </g>
+                    <text x="360" y="265" text-anchor="middle" font-size="12" font-weight="600" id="bwResult" fill="#059669"></text>
+                </svg>
+            </div>
+
+            <!-- Controls -->
+            <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+                <button onclick="bwStep(-1)" style="padding:0.4rem 1rem;border:2px solid var(--primary-color);background:white;color:var(--primary-color);border-radius:0.4rem;font-weight:600;cursor:pointer;">◀ Prev</button>
+                <span style="font-weight:600;min-width:100px;text-align:center;" id="bwStepLabel">Step 0 / 0</span>
+                <button onclick="bwStep(1)" style="padding:0.4rem 1rem;border:2px solid var(--primary-color);background:var(--primary-color);color:white;border-radius:0.4rem;font-weight:600;cursor:pointer;">Next ▶</button>
+                <button onclick="bwAutoPlay()" id="bwAutoBtn" style="padding:0.4rem 0.8rem;border:2px solid #059669;background:#059669;color:white;border-radius:0.4rem;font-weight:600;cursor:pointer;">▶ Play</button>
+                <button onclick="bwReset()" style="padding:0.4rem 0.8rem;border:2px solid #6b7280;background:white;color:#6b7280;border-radius:0.4rem;font-weight:600;cursor:pointer;">⟲</button>
+            </div>
+
+            <!-- Explanation panel -->
+            <div id="bwExpl" style="background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid #93c5fd;border-radius:0.75rem;padding:1rem 1.25rem;min-height:80px;font-size:0.9rem;line-height:1.65;">
+                <strong>Pick an algorithm</strong> above, then press <em>Next</em> to walk through each computation step.
+            </div>
+
+            <!-- Baum-Welch convergence chart -->
+            <div id="bwConvergenceWrap" style="display:none;margin-top:1.5rem;">
+                <h4>Baum-Welch Convergence (10 EM Iterations)</h4>
+                <div class="chart-container" style="max-height:300px;">
+                    <canvas id="bwConvergenceChart"></canvas>
+                </div>
+                <div class="table-container" style="margin-top:0.75rem;">
+                    <table style="font-size:0.8rem;" id="bwIterTable">
+                        <thead>
+                            <tr><th>Iter</th><th>ln P(O|λ)</th><th>π(R)</th><th>π(S)</th><th>a(R,R)</th><th>a(R,S)</th><th>a(S,R)</th><th>a(S,S)</th><th>b<sub>R</sub>(U)</th><th>b<sub>R</sub>(N)</th><th>b<sub>S</sub>(U)</th><th>b<sub>S</sub>(N)</th></tr>
+                        </thead>
+                        <tbody id="bwIterBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <style>
+                .bw-tab {
+                    padding:0.45rem 1.1rem;border:2px solid var(--border-color);background:white;
+                    border-radius:0.5rem;cursor:pointer;font-weight:600;font-size:0.85rem;transition:all 0.2s;
+                }
+                .bw-tab:hover { border-color:var(--primary-color); }
+                .bw-tab.active { background:var(--primary-color);color:white;border-color:var(--primary-color); }
+                #bwTrellis .bw-active { stroke-width:4;filter:drop-shadow(0 0 5px rgba(14,165,233,0.4)); }
+            </style>
+
+            <h3>Supervised MLE vs Baum-Welch</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th></th><th>Supervised MLE</th><th>Baum-Welch (EM)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Input data</strong></td><td>Tagged corpus</td><td>Untagged text only</td></tr>
+                        <tr><td><strong>Speed</strong></td><td>Fast (one pass)</td><td>Slow (iterative)</td></tr>
+                        <tr><td><strong>Optimality</strong></td><td>Global MLE optimum</td><td>Local optimum only</td></tr>
+                        <tr><td><strong>Practical use</strong></td><td>When labelled data exists</td><td>Low-resource languages</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="try-it-box">
+                <h4>✏️ Try It Yourself!</h4>
+                <p>Using the same 2-state model, verify \(\beta_1(\text{PRP}) = 0.2001\) by computing:
+                \( a_{\text{PRP} \to \text{PRP}} = 0.01 \), \( a_{\text{PRP} \to \text{VBD}} = 0.50 \), \( b_{\text{PRP}}(\text{saw}) = 0.01 \), \( b_{\text{VBD}}(\text{saw}) = 0.40 \), \(\beta_2 = 1\).</p>
+                <button onclick="document.getElementById('solutionBW').classList.toggle('show')">Show/Hide Solution</button>
+                <div id="solutionBW" class="solution">
+                    <p><strong>Solution:</strong></p>
+                    <p>\( \beta_1(\text{PRP}) = (0.01 \times 0.01 \times 1) + (0.50 \times 0.40 \times 1) \)</p>
+                    <p>\( = 0.0001 + 0.2000 = 0.2001 \) ✓</p>
+                    <p>The dominant term is the PRP→VBD transition: once in PRP, the model almost always goes to VBD next, and VBD emits "saw" well, producing most of the backward probability.</p>
                 </div>
             </div>
         </div>
@@ -1418,48 +2074,91 @@ The/DT small/JJ dog/NN saw/VBD the/DT cat/NN ./.</textarea>
         <!-- ============================================================ -->
         <div class="section-header" id="python">
             <h2><span class="icon">🐍</span> Python Implementation</h2>
-            <p>A complete HMM POS tagger in Python</p>
+            <p>A complete HMM POS tagger in Python — with Forward, Viterbi, trellis printing, and Baum-Welch</p>
         </div>
 
         <div class="content-block">
-            <h3>HMMPosTagger Class</h3>
+            <h3>What this code implements</h3>
+            <p>The class below mirrors exactly the math from Sections 5–8:</p>
+            <ul>
+                <li><code>train()</code> — MLE from a tagged corpus (Section 6), add-1 (Laplace) smoothing</li>
+                <li><code>forward()</code> — computes P(O|λ) via α, prints a step-by-step trellis (Section 6a)</li>
+                <li><code>viterbi()</code> — log-space decoding with backpointer trace, prints the trellis (Section 6b)</li>
+                <li><code>baum_welch()</code> — unsupervised re-estimation from raw text using α, β, γ, ξ (Section 6c)</li>
+                <li><code>evaluate()</code> — token accuracy + per-tag confusion breakdown</li>
+            </ul>
+            <h3>HMMPosTagger — Full Annotated Implementation</h3>
 <pre><code><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict, Counter
-<span class="keyword">from</span> typing <span class="keyword">import</span> List, Tuple, Dict
+<span class="keyword">from</span> typing <span class="keyword">import</span> List, Tuple, Dict, Optional
 <span class="keyword">import</span> math
 
 
+<span class="comment"># ═══════════════════════════════════════════════════════════════════
+#  HMMPosTagger
+#  ─────────────────────────────────────────────────────────────────
+#  A first-order Hidden Markov Model for part-of-speech tagging.
+#
+#  Model parameters (λ = A, B, π):
+#    π[tag]          = P(tag | sentence start)
+#    A[prev][tag]    = P(tag | prev)         ← transition matrix
+#    B[tag][word]    = P(word | tag)         ← emission matrix
+#
+#  Three tasks (Rabiner 1989):
+#    1. Evaluation  → forward()       — P(O | λ)
+#    2. Decoding    → viterbi()       — argmax_T P(T | W, λ)
+#    3. Learning    → baum_welch()    — argmax_λ P(O | λ)  (unsupervised)
+# ═══════════════════════════════════════════════════════════════════</span>
 <span class="keyword">class</span> <span class="class-name">HMMPosTagger</span>:
-    <span class="string">"""Hidden Markov Model POS Tagger with Viterbi decoding.
+    <span class="string">"""Hidden Markov Model POS Tagger.
 
-    Attributes:
-        tags: Set of all POS tags observed in training.
-        vocab: Set of all words observed in training.
-        transition_probs: P(tag_i | tag_{i-1}) with add-1 smoothing.
-        emission_probs: P(word | tag) with add-1 smoothing.
-        initial_probs: P(tag | &lt;start&gt;).
+    Implements all three HMM tasks:
+      - Supervised MLE training from a tagged corpus
+      - Forward algorithm: P(O | λ)
+      - Viterbi decoding: best tag sequence (log-space)
+      - Baum-Welch EM: unsupervised re-estimation from raw text
+
+    Smoothing: add-1 (Laplace) throughout to handle unseen events.
     """</span>
 
     <span class="keyword">def</span> <span class="function">__init__</span>(self) <span class="operator">-></span> <span class="keyword">None</span>:
+        <span class="comment"># Observed vocabulary and tag set (populated during training)</span>
         self.tags: set = set()
         self.vocab: set = set()
-        self.transition_counts: Dict[str, Counter] = defaultdict(Counter)
-        self.emission_counts: Dict[str, Counter] = defaultdict(Counter)
-        self.tag_counts: Counter = Counter()
-        self.initial_counts: Counter = Counter()
-        self.transition_probs: Dict[str, Dict[str, float]] = {}
-        self.emission_probs: Dict[str, Dict[str, float]] = {}
-        self.initial_probs: Dict[str, float] = {}
 
-    <span class="keyword">def</span> <span class="function">train</span>(self, tagged_sentences: List[List[Tuple[str, str]]]) <span class="operator">-></span> <span class="keyword">None</span>:
-        <span class="string">"""Train HMM parameters from tagged sentences.
+        <span class="comment"># Raw co-occurrence counts from the training corpus</span>
+        self.transition_counts: Dict[str, Counter] = defaultdict(Counter)
+        self.emission_counts:   Dict[str, Counter] = defaultdict(Counter)
+        self.tag_counts:        Counter = Counter()
+        self.initial_counts:    Counter = Counter()
+
+        <span class="comment"># Smoothed probability tables (filled by _compute_* helpers)</span>
+        self.transition_probs: Dict[str, Dict[str, float]] = {}
+        self.emission_probs:   Dict[str, Dict[str, float]] = {}
+        self.initial_probs:    Dict[str, float] = {}
+
+    <span class="comment"># ── Training ────────────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, tagged_sentences: List[List[Tuple[str, str]]],
+              verbose: bool = <span class="keyword">False</span>) <span class="operator">-></span> <span class="keyword">None</span>:
+        <span class="string">"""Estimate λ = (A, B, π) via MLE with add-1 smoothing.
 
         Args:
-            tagged_sentences: List of sentences, each a list of (word, tag) tuples.
+            tagged_sentences: List of sentences; each sentence is a list of
+                              (word, tag) pairs, e.g. [("The","DT"), ...].
+            verbose: If True, print corpus statistics after training.
+
+        Algorithm (one pass over the corpus):
+          1. For sentence-initial words, increment initial_counts[tag].
+          2. For every consecutive (prev_tag, tag) pair, increment
+             transition_counts[prev_tag][tag].
+          3. For every (tag, word) pair, increment emission_counts[tag][word].
+          Then convert raw counts to smoothed probabilities.
         """</span>
         <span class="keyword">for</span> sentence <span class="keyword">in</span> tagged_sentences:
             <span class="keyword">if</span> <span class="keyword">not</span> sentence:
                 <span class="keyword">continue</span>
-            <span class="comment"># Initial tag</span>
+
+            <span class="comment"># ── sentence-initial token ──────────────────────────────</span>
             word0, tag0 = sentence[<span class="number">0</span>]
             self.initial_counts[tag0] += <span class="number">1</span>
             self.emission_counts[tag0][word0] += <span class="number">1</span>
@@ -1467,9 +2166,10 @@ The/DT small/JJ dog/NN saw/VBD the/DT cat/NN ./.</textarea>
             self.tags.add(tag0)
             self.vocab.add(word0)
 
+            <span class="comment"># ── remaining tokens ────────────────────────────────────</span>
             <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, len(sentence)):
                 word, tag = sentence[i]
-                prev_tag = sentence[i - <span class="number">1</span>][<span class="number">1</span>]
+                prev_tag  = sentence[i - <span class="number">1</span>][<span class="number">1</span>]
                 self.transition_counts[prev_tag][tag] += <span class="number">1</span>
                 self.emission_counts[tag][word] += <span class="number">1</span>
                 self.tag_counts[tag] += <span class="number">1</span>
@@ -1480,44 +2180,128 @@ The/DT small/JJ dog/NN saw/VBD the/DT cat/NN ./.</textarea>
         self._compute_emission_probs()
         self._compute_initial_probs(len(tagged_sentences))
 
+        <span class="keyword">if</span> verbose:
+            print(<span class="string">f"Training complete."</span>)
+            print(<span class="string">f"  Tags ({len(self.tags)}): {sorted(self.tags)}"</span>)
+            print(<span class="string">f"  Vocabulary size: {len(self.vocab)}"</span>)
+            print(<span class="string">f"  Sentences: {len(tagged_sentences)}"</span>)
+            print(<span class="string">"\n  Top initial probabilities:"</span>)
+            <span class="keyword">for</span> tag, p <span class="keyword">in</span> sorted(self.initial_probs.items(),
+                                     key=<span class="keyword">lambda</span> x: -x[<span class="number">1</span>])[:<span class="number">5</span>]:
+                print(<span class="string">f"    π({tag}) = {p:.4f}"</span>)
+
     <span class="keyword">def</span> <span class="function">_compute_transition_probs</span>(self) <span class="operator">-></span> <span class="keyword">None</span>:
-        <span class="string">"""Compute transition probabilities with add-1 smoothing."""</span>
+        <span class="string">"""A[prev][tag] = (C(prev→tag) + 1) / (C(prev) + |tags|)
+        Add-1 smoothing: every transition gets at least 1 pseudo-count,
+        preventing zero probabilities for unseen bigrams."""</span>
         n_tags = len(self.tags)
         <span class="keyword">for</span> prev_tag <span class="keyword">in</span> self.tags:
             self.transition_probs[prev_tag] = {}
             total = sum(self.transition_counts[prev_tag].values()) + n_tags
             <span class="keyword">for</span> tag <span class="keyword">in</span> self.tags:
-                count = self.transition_counts[prev_tag][tag] + <span class="number">1</span>
+                count = self.transition_counts[prev_tag].get(tag, <span class="number">0</span>) + <span class="number">1</span>
                 self.transition_probs[prev_tag][tag] = count / total
 
     <span class="keyword">def</span> <span class="function">_compute_emission_probs</span>(self) <span class="operator">-></span> <span class="keyword">None</span>:
-        <span class="string">"""Compute emission probabilities with add-1 smoothing."""</span>
+        <span class="string">"""B[tag][word] = (C(tag,word) + 1) / (C(tag) + |vocab|)
+        Add-1 smoothing ensures every (tag, word) pair has non-zero
+        probability, which matters for unknown words at test time."""</span>
         v_size = len(self.vocab)
         <span class="keyword">for</span> tag <span class="keyword">in</span> self.tags:
             self.emission_probs[tag] = {}
             total = self.tag_counts[tag] + v_size
             <span class="keyword">for</span> word <span class="keyword">in</span> self.vocab:
-                count = self.emission_counts[tag][word] + <span class="number">1</span>
+                count = self.emission_counts[tag].get(word, <span class="number">0</span>) + <span class="number">1</span>
                 self.emission_probs[tag][word] = count / total
 
     <span class="keyword">def</span> <span class="function">_compute_initial_probs</span>(self, n_sentences: int) <span class="operator">-></span> <span class="keyword">None</span>:
-        <span class="string">"""Compute initial state probabilities with add-1 smoothing."""</span>
+        <span class="string">"""π[tag] = (C(sentence starts with tag) + 1) / (n_sentences + |tags|)"""</span>
         n_tags = len(self.tags)
         <span class="keyword">for</span> tag <span class="keyword">in</span> self.tags:
-            self.initial_probs[tag] = (self.initial_counts[tag] + <span class="number">1</span>) / (n_sentences + n_tags)
+            self.initial_probs[tag] = (
+                self.initial_counts.get(tag, <span class="number">0</span>) + <span class="number">1</span>
+            ) / (n_sentences + n_tags)
 
-    <span class="keyword">def</span> <span class="function">_get_emission</span>(self, tag: str, word: str) <span class="operator">-></span> float:
-        <span class="string">"""Get emission probability, handling unknown words."""</span>
+    <span class="keyword">def</span> <span class="function">_emission</span>(self, tag: str, word: str) <span class="operator">-></span> float:
+        <span class="string">"""Return B[tag][word], falling back to 1/|vocab| for unknown words.
+
+        Unknown word heuristic: treat the word as equally likely to have
+        been emitted by any tag (uniform distribution over vocab size).
+        In production systems you would use morphological features here.
+        """</span>
         <span class="keyword">if</span> word <span class="keyword">in</span> self.vocab:
             <span class="keyword">return</span> self.emission_probs[tag].get(word, <span class="number">1e-10</span>)
-        <span class="comment"># Unknown word: uniform across tags</span>
-        <span class="keyword">return</span> <span class="number">1.0</span> / len(self.vocab)
+        <span class="keyword">return</span> <span class="number">1.0</span> / max(len(self.vocab), <span class="number">1</span>)
 
-    <span class="keyword">def</span> <span class="function">viterbi</span>(self, sentence: List[str]) <span class="operator">-></span> List[str]:
-        <span class="string">"""Find the most likely tag sequence using Viterbi.
+    <span class="comment"># ── Task 1: Evaluation (Forward Algorithm) ──────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">forward</span>(self, sentence: List[str],
+               verbose: bool = <span class="keyword">False</span>) <span class="operator">-></span> Tuple[float, List[Dict[str, float]]]:
+        <span class="string">"""Compute P(O | λ) using the Forward algorithm.
+
+        α_t(j) = P(o_1…o_t, q_t=j | λ)
+
+        Initialization:  α_1(j) = π_j · B[j][o_1]
+        Recursion:       α_t(j) = [Σ_i α_{t-1}(i) · A[i][j]] · B[j][o_t]
+        Termination:     P(O|λ) = Σ_j α_T(j)
 
         Args:
-            sentence: List of words to tag.
+            sentence: List of observed words.
+            verbose:  If True, print the full alpha trellis.
+
+        Returns:
+            (total_probability, alpha_table)
+            alpha_table[t] = dict mapping tag → α_t(tag).
+        """</span>
+        tags = list(self.tags)
+        T    = len(sentence)
+        alpha: List[Dict[str, float]] = []
+
+        <span class="comment"># ── Initialization (t = 0) ──────────────────────────────────</span>
+        a0 = {}
+        <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+            <span class="comment"># α_1(j) = π_j · B[j][o_1]</span>
+            a0[j] = self.initial_probs[j] * self._emission(j, sentence[<span class="number">0</span>])
+        alpha.append(a0)
+
+        <span class="comment"># ── Recursion (t = 1 … T-1) ─────────────────────────────────</span>
+        <span class="keyword">for</span> t <span class="keyword">in</span> range(<span class="number">1</span>, T):
+            at = {}
+            <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+                <span class="comment"># Sum over all possible previous states i</span>
+                incoming = sum(
+                    alpha[t - <span class="number">1</span>][i] * self.transition_probs[i][j]
+                    <span class="keyword">for</span> i <span class="keyword">in</span> tags
+                )
+                <span class="comment"># Multiply by emission probability for current word</span>
+                at[j] = incoming * self._emission(j, sentence[t])
+            alpha.append(at)
+
+        <span class="comment"># ── Termination ─────────────────────────────────────────────</span>
+        total = sum(alpha[T - <span class="number">1</span>][j] <span class="keyword">for</span> j <span class="keyword">in</span> tags)
+
+        <span class="keyword">if</span> verbose:
+            self._print_trellis(sentence, tags, alpha, label=<span class="string">"Forward (α)"</span>)
+            print(<span class="string">f"\n  P(O | λ) = Σ_j α_T(j) = {total:.6e}\n"</span>)
+
+        <span class="keyword">return</span> total, alpha
+
+    <span class="comment"># ── Task 2: Decoding (Viterbi Algorithm) ────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">viterbi</span>(self, sentence: List[str],
+               verbose: bool = <span class="keyword">False</span>) <span class="operator">-></span> List[str]:
+        <span class="string">"""Find the most likely tag sequence using Viterbi decoding.
+
+        Works in log-space to avoid floating-point underflow when
+        multiplying many small probabilities together.
+
+        v_t(j) = max_i [ v_{t-1}(i) + log A[i][j] ] + log B[j][o_t]
+
+        vs. Forward which uses SUM instead of MAX.
+
+        Args:
+            sentence: List of words.
+            verbose:  If True, print the Viterbi trellis + backtrace.
 
         Returns:
             List of POS tags, one per word.
@@ -1526,97 +2310,338 @@ The/DT small/JJ dog/NN saw/VBD the/DT cat/NN ./.</textarea>
             <span class="keyword">return</span> []
 
         tags = list(self.tags)
-        T = len(sentence)
+        T    = len(sentence)
+        LOG_ZERO = float(<span class="string">'-inf'</span>)
 
-        <span class="comment"># viterbi[t][tag] = best log-prob ending at (t, tag)</span>
-        viterbi_table = [{} <span class="keyword">for</span> _ <span class="keyword">in</span> range(T)]
-        backpointer = [{} <span class="keyword">for</span> _ <span class="keyword">in</span> range(T)]
+        <span class="comment"># viterbi[t][tag] = best log-probability of any path ending at (t, tag)</span>
+        vt = [{} <span class="keyword">for</span> _ <span class="keyword">in</span> range(T)]
+        <span class="comment"># bp[t][tag] = which tag at t-1 gave that best score</span>
+        bp = [{} <span class="keyword">for</span> _ <span class="keyword">in</span> range(T)]
 
-        <span class="comment"># Initialization</span>
-        <span class="keyword">for</span> tag <span class="keyword">in</span> tags:
-            emit = self._get_emission(tag, sentence[<span class="number">0</span>])
-            viterbi_table[<span class="number">0</span>][tag] = math.log(self.initial_probs[tag]) + math.log(emit)
-            backpointer[<span class="number">0</span>][tag] = <span class="keyword">None</span>
+        <span class="comment"># ── Initialization ──────────────────────────────────────────</span>
+        <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+            emit = self._emission(j, sentence[<span class="number">0</span>])
+            <span class="comment"># log(π_j) + log(B[j][o_1])</span>
+            vt[<span class="number">0</span>][j] = math.log(self.initial_probs[j]) + math.log(emit)
+            bp[<span class="number">0</span>][j] = <span class="keyword">None</span>  <span class="comment"># no predecessor at t=0</span>
 
-        <span class="comment"># Recursion</span>
+        <span class="comment"># ── Recursion ───────────────────────────────────────────────</span>
         <span class="keyword">for</span> t <span class="keyword">in</span> range(<span class="number">1</span>, T):
-            <span class="keyword">for</span> tag <span class="keyword">in</span> tags:
-                best_score = <span class="number">float</span>(<span class="string">'-inf'</span>)
-                best_prev = <span class="keyword">None</span>
-                emit = self._get_emission(tag, sentence[t])
-                <span class="keyword">for</span> prev_tag <span class="keyword">in</span> tags:
-                    score = (viterbi_table[t - <span class="number">1</span>][prev_tag]
-                             + math.log(self.transition_probs[prev_tag][tag])
-                             + math.log(emit))
+            <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+                log_emit = math.log(self._emission(j, sentence[t]))
+                best_score, best_prev = LOG_ZERO, <span class="keyword">None</span>
+                <span class="keyword">for</span> i <span class="keyword">in</span> tags:
+                    <span class="comment"># Score of best path through i, then transitioning to j</span>
+                    score = (vt[t - <span class="number">1</span>][i]
+                             + math.log(self.transition_probs[i][j])
+                             + log_emit)
                     <span class="keyword">if</span> score > best_score:
                         best_score = score
-                        best_prev = prev_tag
-                viterbi_table[t][tag] = best_score
-                backpointer[t][tag] = best_prev
+                        best_prev  = i
+                vt[t][j] = best_score
+                bp[t][j] = best_prev
 
-        <span class="comment"># Termination</span>
-        best_final_tag = max(tags, key=<span class="keyword">lambda</span> t: viterbi_table[T - <span class="number">1</span>][t])
+        <span class="comment"># ── Termination ─────────────────────────────────────────────</span>
+        best_final = max(tags, key=<span class="keyword">lambda</span> j: vt[T - <span class="number">1</span>][j])
 
-        <span class="comment"># Backtrace</span>
-        result = [best_final_tag]
+        <span class="comment"># ── Backtrace ───────────────────────────────────────────────</span>
+        path = [best_final]
         <span class="keyword">for</span> t <span class="keyword">in</span> range(T - <span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>):
-            result.append(backpointer[t][result[-<span class="number">1</span>]])
-        result.reverse()
-        <span class="keyword">return</span> result
+            path.append(bp[t][path[-<span class="number">1</span>]])
+        path.reverse()
 
-    <span class="keyword">def</span> <span class="function">evaluate</span>(self, test_sentences: List[List[Tuple[str, str]]]) <span class="operator">-></span> float:
-        <span class="string">"""Evaluate tagger accuracy on test data.
+        <span class="keyword">if</span> verbose:
+            <span class="comment"># Show trellis with exp() values for readability</span>
+            vt_prob = [
+                {j: math.exp(vt[t][j]) <span class="keyword">for</span> j <span class="keyword">in</span> tags} <span class="keyword">for</span> t <span class="keyword">in</span> range(T)
+            ]
+            self._print_trellis(sentence, tags, vt_prob, label=<span class="string">"Viterbi (v)"</span>)
+            print(<span class="string">"\n  Best path (backtrace):"</span>)
+            <span class="keyword">for</span> word, tag <span class="keyword">in</span> zip(sentence, path):
+                print(<span class="string">f"    {word:12s} → {tag}"</span>)
+
+        <span class="keyword">return</span> path
+
+    <span class="comment"># ── Task 3: Learning (Baum-Welch EM) ────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">baum_welch</span>(self, raw_sentences: List[List[str]],
+                   n_iter: int = <span class="number">10</span>,
+                   tol: float = <span class="number">1e-6</span>,
+                   verbose: bool = <span class="keyword">True</span>) <span class="operator">-></span> List[float]:
+        <span class="string">"""Unsupervised HMM parameter estimation via Baum-Welch (EM).
+
+        Requires a trained (or randomly initialised) model as a starting
+        point. Iteratively updates A, B, π so that P(O | λ) increases.
+
+        E-step: compute α (forward), β (backward), γ (state occupancy),
+                ξ (transition occupancy) for each sentence.
+        M-step: re-estimate A, B, π from the expected counts.
 
         Args:
-            test_sentences: List of sentences with (word, tag) tuples.
+            raw_sentences: List of sentences; each sentence is a list of
+                          plain words (no tags).
+            n_iter:       Maximum EM iterations.
+            tol:          Stop early if log-likelihood improves by less than
+                          this amount between iterations.
+            verbose:      Print log-likelihood after each iteration.
 
         Returns:
-            Accuracy as a float between 0 and 1.
+            List of per-iteration log-likelihood values (for convergence plot).
         """</span>
-        correct = <span class="number">0</span>
-        total = <span class="number">0</span>
+        tags       = list(self.tags)
+        N          = len(tags)
+        tag_idx    = {t: i <span class="keyword">for</span> i, t <span class="keyword">in</span> enumerate(tags)}
+        log_likes  = []
+        prev_ll    = float(<span class="string">'-inf'</span>)
+
+        <span class="keyword">for</span> iteration <span class="keyword">in</span> range(n_iter):
+
+            <span class="comment"># ── E-step accumulators ─────────────────────────────────</span>
+            <span class="comment"># Expected counts (soft versions of the hard counts in train())</span>
+            gamma_init  = Counter()          <span class="comment"># expected initial counts</span>
+            gamma_total = Counter()          <span class="comment"># expected time in each state</span>
+            xi_counts   = defaultdict(Counter)  <span class="comment"># expected transitions</span>
+            emit_counts = defaultdict(Counter)  <span class="comment"># expected emissions</span>
+            total_ll    = <span class="number">0.0</span>
+
+            <span class="keyword">for</span> sentence <span class="keyword">in</span> raw_sentences:
+                T = len(sentence)
+                <span class="keyword">if</span> T == <span class="number">0</span>:
+                    <span class="keyword">continue</span>
+
+                <span class="comment"># Forward pass: α_t(j) = P(o_1..o_t, q_t=j)</span>
+                p_obs, alpha = self.forward(sentence)
+                <span class="keyword">if</span> p_obs == <span class="number">0</span>:
+                    <span class="keyword">continue</span>
+                total_ll += math.log(p_obs)
+
+                <span class="comment"># Backward pass: β_t(j) = P(o_{t+1}..o_T | q_t=j)</span>
+                beta = self._backward(sentence)
+
+                <span class="comment"># γ_t(j) = α_t(j) · β_t(j) / P(O|λ)</span>
+                <span class="keyword">for</span> t <span class="keyword">in</span> range(T):
+                    <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+                        g = alpha[t][j] * beta[t][j] / p_obs
+                        gamma_total[j] += g
+                        emit_counts[j][sentence[t]] += g
+                        <span class="keyword">if</span> t == <span class="number">0</span>:
+                            gamma_init[j] += g
+
+                <span class="comment"># ξ_t(i,j) = α_t(i)·A[i][j]·B[j][o_{t+1}]·β_{t+1}(j) / P(O|λ)</span>
+                <span class="keyword">for</span> t <span class="keyword">in</span> range(T - <span class="number">1</span>):
+                    denom = sum(
+                        alpha[t][i] * self.transition_probs[i][j]
+                        * self._emission(j, sentence[t + <span class="number">1</span>])
+                        * beta[t + <span class="number">1</span>][j]
+                        <span class="keyword">for</span> i <span class="keyword">in</span> tags <span class="keyword">for</span> j <span class="keyword">in</span> tags
+                    )
+                    <span class="keyword">if</span> denom == <span class="number">0</span>:
+                        <span class="keyword">continue</span>
+                    <span class="keyword">for</span> i <span class="keyword">in</span> tags:
+                        <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+                            xi = (alpha[t][i]
+                                  * self.transition_probs[i][j]
+                                  * self._emission(j, sentence[t + <span class="number">1</span>])
+                                  * beta[t + <span class="number">1</span>][j]) / denom
+                            xi_counts[i][j] += xi
+
+            log_likes.append(total_ll)
+
+            <span class="comment"># ── M-step: re-estimate π, A, B ─────────────────────────</span>
+            total_init = sum(gamma_init.values()) or <span class="number">1.0</span>
+            <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+                self.initial_probs[j] = gamma_init[j] / total_init
+
+            <span class="keyword">for</span> i <span class="keyword">in</span> tags:
+                denom = sum(xi_counts[i].values()) or <span class="number">1.0</span>
+                <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+                    self.transition_probs[i][j] = xi_counts[i].get(j, <span class="number">0</span>) / denom
+
+            <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+                denom = gamma_total[j] or <span class="number">1.0</span>
+                <span class="keyword">for</span> word <span class="keyword">in</span> self.vocab:
+                    self.emission_probs[j][word] = (
+                        emit_counts[j].get(word, <span class="number">0</span>) / denom
+                    )
+
+            <span class="keyword">if</span> verbose:
+                print(<span class="string">f"  Iter {iteration + 1:2d}: log P(O|λ) = {total_ll:.4f}"</span>)
+
+            <span class="comment"># Early stopping: converged if improvement is tiny</span>
+            <span class="keyword">if</span> abs(total_ll - prev_ll) < tol:
+                <span class="keyword">if</span> verbose:
+                    print(<span class="string">f"  Converged at iteration {iteration + 1}."</span>)
+                <span class="keyword">break</span>
+            prev_ll = total_ll
+
+        <span class="keyword">return</span> log_likes
+
+    <span class="keyword">def</span> <span class="function">_backward</span>(self, sentence: List[str]) <span class="operator">-></span> List[Dict[str, float]]:
+        <span class="string">"""Compute backward variables β_t(j) for Baum-Welch.
+
+        β_T(j) = 1  for all j
+        β_t(j) = Σ_k  A[j][k] · B[k][o_{t+1}] · β_{t+1}(k)
+        """</span>
+        tags = list(self.tags)
+        T    = len(sentence)
+        beta: List[Dict[str, float]] = [{}] * T
+
+        <span class="comment"># Initialization: β at last time step = 1</span>
+        beta[T - <span class="number">1</span>] = {j: <span class="number">1.0</span> <span class="keyword">for</span> j <span class="keyword">in</span> tags}
+
+        <span class="comment"># Recursion: work backwards from T-2 to 0</span>
+        <span class="keyword">for</span> t <span class="keyword">in</span> range(T - <span class="number">2</span>, -<span class="number">1</span>, -<span class="number">1</span>):
+            bt = {}
+            <span class="keyword">for</span> j <span class="keyword">in</span> tags:
+                bt[j] = sum(
+                    self.transition_probs[j][k]
+                    * self._emission(k, sentence[t + <span class="number">1</span>])
+                    * beta[t + <span class="number">1</span>][k]
+                    <span class="keyword">for</span> k <span class="keyword">in</span> tags
+                )
+            beta[t] = bt
+
+        <span class="keyword">return</span> beta
+
+    <span class="comment"># ── Evaluation ──────────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">evaluate</span>(self, test_sentences: List[List[Tuple[str, str]]],
+                verbose: bool = <span class="keyword">False</span>) <span class="operator">-></span> float:
+        <span class="string">"""Token accuracy + optional per-tag confusion breakdown.
+
+        Args:
+            test_sentences: Tagged sentences to evaluate on.
+            verbose:        Print per-tag precision/recall if True.
+
+        Returns:
+            Overall token accuracy (0.0–1.0).
+        """</span>
+        correct = total = <span class="number">0</span>
+        <span class="comment"># confusion[gold][pred] = count of gold→pred mismatches</span>
+        confusion: Dict[str, Counter] = defaultdict(Counter)
+
         <span class="keyword">for</span> sentence <span class="keyword">in</span> test_sentences:
-            words = [w <span class="keyword">for</span> w, t <span class="keyword">in</span> sentence]
-            gold_tags = [t <span class="keyword">for</span> w, t <span class="keyword">in</span> sentence]
-            predicted = self.viterbi(words)
-            <span class="keyword">for</span> g, p <span class="keyword">in</span> zip(gold_tags, predicted):
-                <span class="keyword">if</span> g == p:
+            words      = [w <span class="keyword">for</span> w, _ <span class="keyword">in</span> sentence]
+            gold_tags  = [t <span class="keyword">for</span> _, t <span class="keyword">in</span> sentence]
+            pred_tags  = self.viterbi(words)
+            <span class="keyword">for</span> gold, pred <span class="keyword">in</span> zip(gold_tags, pred_tags):
+                confusion[gold][pred] += <span class="number">1</span>
+                <span class="keyword">if</span> gold == pred:
                     correct += <span class="number">1</span>
                 total += <span class="number">1</span>
-        <span class="keyword">return</span> correct / total <span class="keyword">if</span> total > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0.0</span>
+
+        accuracy = correct / total <span class="keyword">if</span> total > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0.0</span>
+
+        <span class="keyword">if</span> verbose:
+            print(<span class="string">f"\n  Overall accuracy: {accuracy:.2%}  ({correct}/{total})\n"</span>)
+            print(<span class="string">f"  {'Tag':6s}  {'Correct':>8s}  {'Total':>6s}  {'Acc':>6s}  Most-confused-with"</span>)
+            print(<span class="string">f"  {'─'*55}"</span>)
+            <span class="keyword">for</span> tag <span class="keyword">in</span> sorted(confusion):
+                row        = confusion[tag]
+                tag_total  = sum(row.values())
+                tag_ok     = row.get(tag, <span class="number">0</span>)
+                tag_acc    = tag_ok / tag_total <span class="keyword">if</span> tag_total > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0.0</span>
+                worst      = [(p, c) <span class="keyword">for</span> p, c <span class="keyword">in</span> row.items() <span class="keyword">if</span> p != tag]
+                worst_str  = (
+                    <span class="string">f"→{worst[0][0]}({worst[0][1]})"</span>
+                    <span class="keyword">if</span> worst <span class="keyword">else</span> <span class="string">"—"</span>
+                )
+                print(<span class="string">f"  {tag:6s}  {tag_ok:8d}  {tag_total:6d}  {tag_acc:5.1%}  {worst_str}"</span>)
+
+        <span class="keyword">return</span> accuracy
+
+    <span class="comment"># ── Utilities ───────────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">_print_trellis</span>(self, sentence: List[str], tags: List[str],
+                       table: List[Dict[str, float]],
+                       label: str = <span class="string">"Trellis"</span>) <span class="operator">-></span> <span class="keyword">None</span>:
+        <span class="string">"""Print a readable trellis table to stdout.
+
+        Columns = time steps (words), rows = states (tags).
+        Values are shown in scientific notation to handle small probabilities.
+        """</span>
+        col_w = <span class="number">12</span>
+        header = <span class="string">f"  {label}\n"</span>
+        header += <span class="string">f"  {'Tag':6s}"</span>
+        <span class="keyword">for</span> word <span class="keyword">in</span> sentence:
+            header += <span class="string">f"  {word[:col_w]:>{col_w}}"</span>
+        print(header)
+        print(<span class="string">f"  {'─' * (8 + (col_w + 2) * len(sentence))}"</span>)
+        <span class="keyword">for</span> tag <span class="keyword">in</span> sorted(tags):
+            row = <span class="string">f"  {tag:6s}"</span>
+            <span class="keyword">for</span> t <span class="keyword">in</span> range(len(sentence)):
+                val = table[t].get(tag, <span class="number">0</span>)
+                row += <span class="string">f"  {val:>{col_w}.3e}"</span>
+            print(row)
+        print()
 
 
-<span class="comment"># ---- Usage Example ----</span>
-train_data = [
-    [(<span class="string">"The"</span>, <span class="string">"DT"</span>), (<span class="string">"dog"</span>, <span class="string">"NN"</span>), (<span class="string">"chased"</span>, <span class="string">"VBD"</span>),
-     (<span class="string">"the"</span>, <span class="string">"DT"</span>), (<span class="string">"cat"</span>, <span class="string">"NN"</span>), (<span class="string">"."</span>, <span class="string">"."</span>)],
-    [(<span class="string">"The"</span>, <span class="string">"DT"</span>), (<span class="string">"cat"</span>, <span class="string">"NN"</span>), (<span class="string">"sat"</span>, <span class="string">"VBD"</span>),
-     (<span class="string">"on"</span>, <span class="string">"IN"</span>), (<span class="string">"the"</span>, <span class="string">"DT"</span>), (<span class="string">"mat"</span>, <span class="string">"NN"</span>), (<span class="string">"."</span>, <span class="string">"."</span>)],
-    [(<span class="string">"A"</span>, <span class="string">"DT"</span>), (<span class="string">"big"</span>, <span class="string">"JJ"</span>), (<span class="string">"dog"</span>, <span class="string">"NN"</span>),
-     (<span class="string">"ran"</span>, <span class="string">"VBD"</span>), (<span class="string">"quickly"</span>, <span class="string">"RB"</span>), (<span class="string">"."</span>, <span class="string">"."</span>)],
-]
+<span class="comment"># ════════════════════════════════════════════════════════════════
+#  Demo — run this file directly to see all three tasks
+# ════════════════════════════════════════════════════════════════</span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
 
-tagger = HMMPosTagger()
-tagger.train(train_data)
+    <span class="comment"># ── 1. Training corpus (tagged sentences) ───────────────────</span>
+    train_data = [
+        [(<span class="string">"The"</span>,  <span class="string">"DT"</span>), (<span class="string">"dog"</span>,     <span class="string">"NN"</span>),  (<span class="string">"chased"</span>, <span class="string">"VBD"</span>),
+         (<span class="string">"the"</span>,  <span class="string">"DT"</span>), (<span class="string">"cat"</span>,     <span class="string">"NN"</span>),  (<span class="string">"."</span>,      <span class="string">"."</span>)],
+        [(<span class="string">"The"</span>,  <span class="string">"DT"</span>), (<span class="string">"cat"</span>,     <span class="string">"NN"</span>),  (<span class="string">"sat"</span>,    <span class="string">"VBD"</span>),
+         (<span class="string">"on"</span>,   <span class="string">"IN"</span>), (<span class="string">"the"</span>,     <span class="string">"DT"</span>),  (<span class="string">"mat"</span>,    <span class="string">"NN"</span>),
+         (<span class="string">"."</span>,    <span class="string">"."</span>)],
+        [(<span class="string">"A"</span>,    <span class="string">"DT"</span>), (<span class="string">"big"</span>,     <span class="string">"JJ"</span>),  (<span class="string">"dog"</span>,    <span class="string">"NN"</span>),
+         (<span class="string">"ran"</span>,  <span class="string">"VBD"</span>),(<span class="string">"quickly"</span>, <span class="string">"RB"</span>),  (<span class="string">"."</span>,      <span class="string">"."</span>)],
+        [(<span class="string">"She"</span>,  <span class="string">"PRP"</span>),(<span class="string">"quickly"</span>, <span class="string">"RB"</span>),  (<span class="string">"opened"</span>, <span class="string">"VBD"</span>),
+         (<span class="string">"the"</span>,  <span class="string">"DT"</span>), (<span class="string">"door"</span>,    <span class="string">"NN"</span>),  (<span class="string">"."</span>,      <span class="string">"."</span>)],
+    ]
 
-test_sentence = [<span class="string">"The"</span>, <span class="string">"dog"</span>, <span class="string">"sat"</span>]
-tags = tagger.viterbi(test_sentence)
-print(list(zip(test_sentence, tags)))
-<span class="comment"># Output: [('The', 'DT'), ('dog', 'NN'), ('sat', 'VBD')]</span>
+    tagger = HMMPosTagger()
+    tagger.train(train_data, verbose=<span class="keyword">True</span>)
 
-<span class="comment"># Evaluate on test data</span>
-test_data = [
-    [(<span class="string">"A"</span>, <span class="string">"DT"</span>), (<span class="string">"cat"</span>, <span class="string">"NN"</span>), (<span class="string">"chased"</span>, <span class="string">"VBD"</span>),
-     (<span class="string">"the"</span>, <span class="string">"DT"</span>), (<span class="string">"dog"</span>, <span class="string">"NN"</span>), (<span class="string">"."</span>, <span class="string">"."</span>)],
-]
-accuracy = tagger.evaluate(test_data)
-print(f<span class="string">"Accuracy: {accuracy:.2%}"</span>)
-<span class="comment"># Output: Accuracy: 100.00%</span></code></pre>
+    <span class="comment"># ── 2. Viterbi decoding with trellis printout ────────────────</span>
+    print(<span class="string">"\n── Viterbi: 'The dog sat' ─────────────────────────────────"</span>)
+    predicted = tagger.viterbi([<span class="string">"The"</span>, <span class="string">"dog"</span>, <span class="string">"sat"</span>], verbose=<span class="keyword">True</span>)
+    print(<span class="string">f"  Result: {list(zip(['The','dog','sat'], predicted))}"</span>)
+    <span class="comment"># Expected: [('The','DT'), ('dog','NN'), ('sat','VBD')]</span>
+
+    <span class="comment"># ── 3. Forward algorithm: P(O | λ) ──────────────────────────</span>
+    print(<span class="string">"\n── Forward: 'The big cat' ─────────────────────────────────"</span>)
+    prob, _ = tagger.forward([<span class="string">"The"</span>, <span class="string">"big"</span>, <span class="string">"cat"</span>], verbose=<span class="keyword">True</span>)
+    <span class="comment"># Interpretation: how likely is this sentence under our model?</span>
+
+    <span class="comment"># ── 4. Evaluation with per-tag breakdown ─────────────────────</span>
+    print(<span class="string">"\n── Evaluation ─────────────────────────────────────────────"</span>)
+    test_data = [
+        [(<span class="string">"A"</span>,   <span class="string">"DT"</span>), (<span class="string">"cat"</span>,  <span class="string">"NN"</span>),  (<span class="string">"chased"</span>, <span class="string">"VBD"</span>),
+         (<span class="string">"the"</span>, <span class="string">"DT"</span>), (<span class="string">"dog"</span>,  <span class="string">"NN"</span>),  (<span class="string">"."</span>,      <span class="string">"."</span>)],
+        [(<span class="string">"The"</span>, <span class="string">"DT"</span>), (<span class="string">"big"</span>,  <span class="string">"JJ"</span>),  (<span class="string">"cat"</span>,    <span class="string">"NN"</span>),
+         (<span class="string">"ran"</span>, <span class="string">"VBD"</span>),(<span class="string">"."</span>,    <span class="string">"."</span>)],
+    ]
+    tagger.evaluate(test_data, verbose=<span class="keyword">True</span>)
+
+    <span class="comment"># ── 5. Baum-Welch on raw (untagged) text ────────────────────</span>
+    print(<span class="string">"\n── Baum-Welch (5 iterations on raw text) ─────────────────"</span>)
+    raw = [
+        [<span class="string">"The"</span>, <span class="string">"dog"</span>, <span class="string">"ran"</span>],
+        [<span class="string">"A"</span>, <span class="string">"cat"</span>, <span class="string">"sat"</span>],
+        [<span class="string">"The"</span>, <span class="string">"big"</span>, <span class="string">"dog"</span>],
+    ]
+    ll_history = tagger.baum_welch(raw, n_iter=<span class="number">5</span>, verbose=<span class="keyword">True</span>)
+    print(<span class="string">f"  Log-likelihood improved: {ll_history[0]:.4f} → {ll_history[-1]:.4f}"</span>)</code></pre>
         </div>
 
         <!-- ============================================================ -->
         <!-- Section 10: References -->
         <!-- ============================================================ -->
+        <!-- Part 2 continue banner -->
+        <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1px solid #6ee7b7;border-radius:0.75rem;padding:1.5rem 2rem;margin:2rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <div>
+                <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#059669;margin-bottom:0.25rem;">You've completed Part 1</div>
+                <strong style="font-size:1.1rem;color:#065f46;">Ready for advanced models?</strong>
+                <p style="margin:0.25rem 0 0;color:#374151;font-size:0.9rem;">Part 2 covers MEMMs, Conditional Random Fields, BiLSTM-CRF, and Transformer-based taggers — with full worked examples.</p>
+            </div>
+            <a href="pos_tagging_models_educational.html" style="background:#10b981;color:#fff;padding:0.6rem 1.4rem;border-radius:0.5rem;text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0;">Part 2: Advanced Models →</a>
+        </div>
+
         <div class="section-header" id="references">
             <h2><span class="icon">📚</span> References</h2>
             <p>Key texts and papers on POS tagging and HMMs</p>
@@ -1993,6 +3018,208 @@ print(f<span class="string">"Accuracy: {accuracy:.2%}"</span>)
     </div>
 
     <script>
+    // Viterbi trellis animation
+    let viterbiAnimTimer = null;
+
+    function animateViterbiTrellis() {
+        resetViterbiTrellis();
+        const steps = [
+            // Step 1: show t=2 column (edge + nodes)
+            function() {
+                ['vtn-2-vbd','vtn-2-prp','vtn-2-dt','vtn-2-nn'].forEach(id => setOpacity(id, 1));
+                ['vtl-2-vbd-v','vtl-2-vbd-s','vtl-2-prp-v','vtl-2-prp-s','vtl-2-dt-v','vtl-2-dt-s','vtl-2-nn-v','vtl-2-nn-s'].forEach(id => setOpacity(id, 1));
+                setOpacity('vte-1-2-prp-vbd', 1);
+            },
+            // Step 2: show t=3 column + backpointer t=2
+            function() {
+                ['vtn-3-dt','vtn-3-prp','vtn-3-vbd','vtn-3-nn'].forEach(id => setOpacity(id, 1));
+                document.querySelectorAll('.vt-node-label[x="410"]').forEach(el => el.setAttribute('opacity','1'));
+                ['vtl-3-dt-v','vtl-3-dt-s'].forEach(id => setOpacity(id, 1));
+                setOpacity('vte-2-3-vbd-dt', 1);
+                setOpacity('vtbp-2', 1); setOpacity('vtbp-2-arr', 1);
+                setOpacity('vtbp-label', 1);
+            },
+            // Step 3: show t=4 column + backpointers t=3, t=4
+            function() {
+                ['vtn-4-nn','vtn-4-prp','vtn-4-vbd','vtn-4-dt'].forEach(id => setOpacity(id, 1));
+                document.querySelectorAll('.vt-node-label[x="560"]').forEach(el => el.setAttribute('opacity','1'));
+                ['vtl-4-nn-v','vtl-4-nn-s'].forEach(id => setOpacity(id, 1));
+                setOpacity('vte-3-4-dt-nn', 1);
+                setOpacity('vtbp-3', 1); setOpacity('vtbp-3-arr', 1);
+                setOpacity('vtbp-4', 1); setOpacity('vtbp-4-arr', 1);
+            }
+        ];
+        let i = 0;
+        function runStep() {
+            if (i < steps.length) {
+                steps[i]();
+                i++;
+                viterbiAnimTimer = setTimeout(runStep, 700);
+            }
+        }
+        runStep();
+    }
+
+    function resetViterbiTrellis() {
+        if (viterbiAnimTimer) { clearTimeout(viterbiAnimTimer); viterbiAnimTimer = null; }
+        document.querySelectorAll('.vt-edge-best').forEach(el => el.setAttribute('opacity', '0'));
+        document.querySelectorAll('.vt-bp').forEach(el => el.setAttribute('opacity', '0'));
+        // Hide t=2,3,4 nodes and labels
+        ['vtn-2-vbd','vtn-2-prp','vtn-2-dt','vtn-2-nn',
+         'vtn-3-dt','vtn-3-prp','vtn-3-vbd','vtn-3-nn',
+         'vtn-4-nn','vtn-4-prp','vtn-4-vbd','vtn-4-dt'].forEach(id => setOpacity(id, 0));
+        document.querySelectorAll('.vt-node-label').forEach(el => el.setAttribute('opacity', '0'));
+    }
+
+    function setOpacity(id, val) {
+        const el = document.getElementById(id);
+        if (el) el.setAttribute('opacity', val);
+    }
+
+    // ================================================================
+    // Interactive Weather/Umbrella Trellis Lab
+    // ================================================================
+    (function(){
+        const ST=['R','S'], OBS=['U','N','U'];
+        let pi={R:0.5,S:0.5}, A={R:{R:0.7,S:0.3},S:{R:0.4,S:0.6}}, B={R:{U:0.9,N:0.1},S:{U:0.2,N:0.8}};
+        let algo='forward', step=0, steps=[], timer=null;
+        function fwd(p,a,b,o){const T=o.length,al=[];const a0={};for(const s of ST)a0[s]=p[s]*b[s][o[0]];al.push(a0);for(let t=1;t<T;t++){const at={};for(const j of ST){let sm=0;for(const i of ST)sm+=al[t-1][i]*a[i][j];at[j]=sm*b[j][o[t]];}al.push(at);}return{alpha:al,pO:ST.reduce((s,j)=>s+al[T-1][j],0)};}
+        function bwd(a,b,o){const T=o.length,be=Array(T);be[T-1]={};for(const s of ST)be[T-1][s]=1;for(let t=T-2;t>=0;t--){be[t]={};for(const i of ST){let sm=0;for(const j of ST)sm+=a[i][j]*b[j][o[t+1]]*be[t+1][j];be[t][i]=sm;}}return be;}
+        function vit(p,a,b,o){const T=o.length,v=[],bp=[];const v0={},bp0={};for(const s of ST){v0[s]=p[s]*b[s][o[0]];bp0[s]=null;}v.push(v0);bp.push(bp0);for(let t=1;t<T;t++){const vt={},bpt={};for(const j of ST){let best=-1,bestI=null;for(const i of ST){const sc=v[t-1][i]*a[i][j];if(sc>best){best=sc;bestI=i;}}vt[j]=best*b[j][o[t]];bpt[j]=bestI;}v.push(vt);bp.push(bpt);}let be=null,bs=-1;for(const s of ST)if(v[T-1][s]>bs){bs=v[T-1][s];be=s;}const path=[be];for(let t=T-1;t>0;t--)path.unshift(bp[t][path[0]]);return{v,bp,path,bs};}
+        function f(n,d){return n.toFixed(d===undefined?4:d);}
+        function gamma(al,be,p){const g=[];for(let t=0;t<al.length;t++){g[t]={};for(const s of ST)g[t][s]=al[t][s]*be[t][s]/p;}return g;}
+        function xi(al,be,a,b,o,p){const T=o.length,x=[];for(let t=0;t<T-1;t++){x[t]={};for(const i of ST){x[t][i]={};for(const j of ST)x[t][i][j]=al[t][i]*a[i][j]*b[j][o[t+1]]*be[t+1][j]/p;}}return x;}
+
+        function buildFwd(){
+            const{alpha:al,pO}=fwd(pi,A,B,OBS);const be=bwd(A,B,OBS);const g=gamma(al,be,pO);const s=[];
+            s.push({hl:[],edges:[],title:'Forward Algorithm',html:'<p>Computes <strong>α<sub>t</sub>(j)</strong> = P(o<sub>1</sub>…o<sub>t</sub>, q<sub>t</sub>=j). Press <em>Next</em>.</p>'});
+            s.push({hl:['R1','S1'],edges:[],vals:{R1:f(al[0].R),S1:f(al[0].S)},title:'Init (t=1, U)',
+                html:`<p>α₁(R) = π(R)×b<sub>R</sub>(U) = 0.5×0.9 = <b>${f(al[0].R)}</b></p><p>α₁(S) = 0.5×0.2 = <b>${f(al[0].S)}</b></p>`});
+            s.push({hl:['R2','S2'],edges:['R1R2','S1R2','R1S2','S1S2'],vals:{R1:f(al[0].R),S1:f(al[0].S),R2:f(al[1].R),S2:f(al[1].S)},title:'Recursion (t=2, N)',
+                html:`<p>α₂(R) = [${f(al[0].R)}×0.7 + ${f(al[0].S)}×0.4]×0.1 = <b>${f(al[1].R)}</b></p><p>α₂(S) = [${f(al[0].R)}×0.3 + ${f(al[0].S)}×0.6]×0.8 = <b>${f(al[1].S)}</b></p>`});
+            s.push({hl:['R3','S3'],edges:['R2R3','S2R3','R2S3','S2S3'],vals:{R1:f(al[0].R),S1:f(al[0].S),R2:f(al[1].R),S2:f(al[1].S),R3:f(al[2].R,6),S3:f(al[2].S,6)},title:'Recursion (t=3, U)',
+                html:`<p>α₃(R) = <b>${f(al[2].R,6)}</b>, α₃(S) = <b>${f(al[2].S,6)}</b></p>`});
+            s.push({hl:['R3','S3'],edges:[],vals:{R1:f(al[0].R),S1:f(al[0].S),R2:f(al[1].R),S2:f(al[1].S),R3:f(al[2].R,6),S3:f(al[2].S,6)},result:`P(O|λ)=${f(pO,6)}`,title:'Termination',
+                html:`<p><b>P(O|λ)</b> = α₃(R)+α₃(S) = <b style="color:#059669;">${f(pO,6)}</b></p>`});
+            s.push({hl:['R1','S1','R2','S2','R3','S3'],edges:[],vals:{R1:(g[0].R*100).toFixed(1)+'%',S1:(g[0].S*100).toFixed(1)+'%',R2:(g[1].R*100).toFixed(1)+'%',S2:(g[1].S*100).toFixed(1)+'%',R3:(g[2].R*100).toFixed(1)+'%',S3:(g[2].S*100).toFixed(1)+'%'},
+                result:'γ: R→S→R',title:'Posteriors (γ)',
+                html:`<p>Using backward β and combining: γ<sub>t</sub>(i) = α×β / P(O|λ)</p>
+                <table style="font-size:0.82rem;border-collapse:collapse;margin:0.3rem 0;"><tr><th style="padding:2px 6px;border:1px solid #e5e7eb;">t</th><th style="padding:2px 6px;border:1px solid #e5e7eb;">P(R)</th><th style="padding:2px 6px;border:1px solid #e5e7eb;">P(S)</th><th style="padding:2px 6px;border:1px solid #e5e7eb;">Best</th></tr>
+                <tr><td style="padding:2px 6px;border:1px solid #e5e7eb;">1(U)</td><td style="padding:2px 6px;border:1px solid #e5e7eb;font-weight:700;">${(g[0].R*100).toFixed(1)}%</td><td style="padding:2px 6px;border:1px solid #e5e7eb;">${(g[0].S*100).toFixed(1)}%</td><td style="padding:2px 6px;border:1px solid #e5e7eb;color:#dc2626;">Rainy☂</td></tr>
+                <tr><td style="padding:2px 6px;border:1px solid #e5e7eb;">2(N)</td><td style="padding:2px 6px;border:1px solid #e5e7eb;">${(g[1].R*100).toFixed(1)}%</td><td style="padding:2px 6px;border:1px solid #e5e7eb;font-weight:700;">${(g[1].S*100).toFixed(1)}%</td><td style="padding:2px 6px;border:1px solid #e5e7eb;color:#2563eb;">Sunny☀</td></tr>
+                <tr><td style="padding:2px 6px;border:1px solid #e5e7eb;">3(U)</td><td style="padding:2px 6px;border:1px solid #e5e7eb;font-weight:700;">${(g[2].R*100).toFixed(1)}%</td><td style="padding:2px 6px;border:1px solid #e5e7eb;">${(g[2].S*100).toFixed(1)}%</td><td style="padding:2px 6px;border:1px solid #e5e7eb;color:#dc2626;">Rainy☂</td></tr></table>`});
+            return s;
+        }
+        function buildBwd(){
+            const be=bwd(A,B,OBS);const{alpha:al,pO}=fwd(pi,A,B,OBS);const s=[];
+            s.push({hl:[],edges:[],title:'Backward Algorithm',html:'<p>Computes <strong>β<sub>t</sub>(i)</strong> = P(o<sub>t+1</sub>…o<sub>T</sub> | q<sub>t</sub>=i). Runs right-to-left.</p>'});
+            s.push({hl:['R3','S3'],edges:[],vals:{R3:'1.0',S3:'1.0'},title:'Init (t=3)',html:'<p>β₃(R) = β₃(S) = <b>1</b> (no future observations)</p>'});
+            s.push({hl:['R2','S2'],edges:['R2R3','R2S3','S2R3','S2S3'],vals:{R3:'1.0',S3:'1.0',R2:f(be[1].R),S2:f(be[1].S)},title:'Recursion (t=2, o₃=U)',
+                html:`<p>β₂(R) = 0.7×0.9×1 + 0.3×0.2×1 = <b>${f(be[1].R)}</b></p><p>β₂(S) = 0.4×0.9×1 + 0.6×0.2×1 = <b>${f(be[1].S)}</b></p>`});
+            s.push({hl:['R1','S1'],edges:['R1R2','R1S2','S1R2','S1S2'],vals:{R3:'1.0',S3:'1.0',R2:f(be[1].R),S2:f(be[1].S),R1:f(be[0].R,4),S1:f(be[0].S,4)},title:'Recursion (t=1, o₂=N)',
+                html:`<p>β₁(R) = 0.7×0.1×${f(be[1].R)} + 0.3×0.8×${f(be[1].S)} = <b>${f(be[0].R,4)}</b></p><p>β₁(S) = 0.4×0.1×${f(be[1].R)} + 0.6×0.8×${f(be[1].S)} = <b>${f(be[0].S,4)}</b></p>`});
+            s.push({hl:['R1','S1','R2','S2','R3','S3'],edges:[],vals:{R1:f(be[0].R,4),S1:f(be[0].S,4),R2:f(be[1].R),S2:f(be[1].S),R3:'1.0',S3:'1.0'},
+                result:`Check: P(O|λ)=${f(pO,6)} ✓`,title:'Consistency Check',
+                html:`<p>P(O|λ) = Σ π(i)×b<sub>i</sub>(o₁)×β₁(i) = 0.5×0.9×${f(be[0].R,4)} + 0.5×0.2×${f(be[0].S,4)} = <b>${f(pO,6)}</b> ✓</p>`});
+            return s;
+        }
+        function buildVit(){
+            const{v,bp,path,bs}=vit(pi,A,B,OBS);const s=[];
+            s.push({hl:[],edges:[],title:'Viterbi Algorithm',html:'<p>Finds the <strong>single best path</strong> using MAX instead of SUM. Identical DP structure to Forward.</p>'});
+            s.push({hl:['R1','S1'],edges:[],vals:{R1:f(v[0].R),S1:f(v[0].S)},title:'Init (t=1, U)',html:`<p>v₁(R)=0.5×0.9=<b>${f(v[0].R)}</b>, v₁(S)=0.5×0.2=<b>${f(v[0].S)}</b></p>`});
+            s.push({hl:['R2','S2'],edges:[bp[1].R+'1R2',bp[1].S+'1S2'],vals:{R1:f(v[0].R),S1:f(v[0].S),R2:f(v[1].R),S2:f(v[1].S)},title:'Recursion (t=2, N)',
+                html:`<p>v₂(R) = MAX(${f(v[0].R)}×0.7, ${f(v[0].S)}×0.4)×0.1 = <b>${f(v[1].R)}</b> ←${bp[1].R}</p><p>v₂(S) = MAX(${f(v[0].R)}×0.3, ${f(v[0].S)}×0.6)×0.8 = <b>${f(v[1].S)}</b> ←${bp[1].S}</p>`});
+            s.push({hl:['R3','S3'],edges:[bp[2].R+'2R3',bp[2].S+'2S3'],vals:{R1:f(v[0].R),S1:f(v[0].S),R2:f(v[1].R),S2:f(v[1].S),R3:f(v[2].R,6),S3:f(v[2].S,6)},title:'Recursion (t=3, U)',
+                html:`<p>v₃(R) = <b>${f(v[2].R,6)}</b> ←${bp[2].R}, v₃(S) = <b>${f(v[2].S,6)}</b> ←${bp[2].S}</p>`});
+            const nY={R:90,S:195};
+            s.push({hl:path.map((p,i)=>p+(i+1)),edges:[],bestPath:path,vals:{R1:f(v[0].R),S1:f(v[0].S),R2:f(v[1].R),S2:f(v[1].S),R3:f(v[2].R,6),S3:f(v[2].S,6)},
+                result:`Best: ${path.join('→')} (${f(bs,6)})`,title:'Backtrace',
+                html:`<p style="font-size:1.05rem;color:#059669;font-weight:700;">Best path: ${path.map(s=>s==='R'?'Rainy☂':'Sunny☀').join(' → ')}</p><p style="color:#6b7280;font-size:0.82rem;">Note: Viterbi best <em>sequence</em> may differ from Forward-Backward marginal <em>per-step</em> argmax.</p>`});
+            return s;
+        }
+        function buildBW(){
+            const s=[];const NITER=5;
+            let cP={R:pi.R,S:pi.S},cA={R:{R:A.R.R,S:A.R.S},S:{R:A.S.R,S:A.S.S}},cB={R:{U:B.R.U,N:B.R.N},S:{U:B.S.U,N:B.S.N}};
+            s.push({hl:[],edges:[],title:'Baum-Welch (EM)',html:'<p>Uses Forward-Backward as E-step, re-estimates parameters in M-step. Watch convergence!</p>'});
+            const iterData=[];
+            for(let it=1;it<=NITER;it++){
+                const{alpha:al,pO}=fwd(cP,cA,cB,OBS);const be=bwd(cA,cB,OBS);const g=gamma(al,be,pO);const x=xi(al,be,cA,cB,OBS,pO);
+                iterData.push({it,logLik:Math.log(pO),pO,piR:cP.R,piS:cP.S,aRR:cA.R.R,aRS:cA.R.S,aSR:cA.S.R,aSS:cA.S.S,bRU:cB.R.U,bRN:cB.R.N,bSU:cB.S.U,bSN:cB.S.N});
+                s.push({hl:['R1','S1','R2','S2','R3','S3'],edges:['R1R2','S1R2','R1S2','S1S2','R2R3','S2R3','R2S3','S2S3'],
+                    vals:{R1:(g[0].R*100).toFixed(0)+'%',S1:(g[0].S*100).toFixed(0)+'%',R2:(g[1].R*100).toFixed(0)+'%',S2:(g[1].S*100).toFixed(0)+'%',R3:(g[2].R*100).toFixed(0)+'%',S3:(g[2].S*100).toFixed(0)+'%'},
+                    title:`Iter ${it}: E-Step`,html:`<p>ln P(O|λ)=<b>${Math.log(pO).toFixed(4)}</b> | γ₁(R)=${f(g[0].R)} γ₂(S)=${f(g[1].S)} γ₃(R)=${f(g[2].R)}</p>`});
+                // M-step
+                const nP={};for(const s2 of ST)nP[s2]=g[0][s2];
+                const nA={R:{},S:{}};for(const i of ST){const d=g[0][i]+g[1][i];for(const j of ST)nA[i][j]=(x[0][i][j]+x[1][i][j])/d;}
+                const nB={R:{},S:{}};for(const i of ST){const d=g[0][i]+g[1][i]+g[2][i];for(const o of['U','N']){let n=0;for(let t=0;t<3;t++)if(OBS[t]===o)n+=g[t][i];nB[i][o]=n/d;}}
+                s.push({hl:[],edges:[],title:`Iter ${it}: M-Step`,
+                    html:`<div style="font-size:0.82rem;display:grid;grid-template-columns:repeat(3,1fr);gap:0.4rem;">
+                    <div style="background:#f0fdf4;padding:0.4rem;border-radius:0.4rem;">π: R=${f(nP.R)}, S=${f(nP.S)}</div>
+                    <div style="background:#eff6ff;padding:0.4rem;border-radius:0.4rem;">A: R→R=${f(nA.R.R)}, S→S=${f(nA.S.S)}</div>
+                    <div style="background:#fefce8;padding:0.4rem;border-radius:0.4rem;">B: R(U)=${f(nB.R.U)}, S(N)=${f(nB.S.N)}</div></div>`});
+                cP=nP;cA=nA;cB=nB;
+            }
+            // Final convergence
+            const{pO:fp}=fwd(cP,cA,cB,OBS);
+            iterData.push({it:NITER+1,logLik:Math.log(fp),pO:fp,piR:cP.R,piS:cP.S,aRR:cA.R.R,aRS:cA.R.S,aSR:cA.S.R,aSS:cA.S.S,bRU:cB.R.U,bRN:cB.R.N,bSU:cB.S.U,bSN:cB.S.N});
+            s.push({hl:['R1','S1','R2','S2','R3','S3'],edges:[],result:`Converged: P(O|λ)=${f(fp,6)}`,title:'Convergence',
+                html:`<p>After ${NITER} iterations, P(O|λ)=<b>${f(fp,6)}</b>. Parameters have adjusted to better explain U,N,U.</p>`});
+            s._iterData=iterData;
+            return s;
+        }
+
+        function resetSvg(){
+            for(const s of ST)for(let t=1;t<=3;t++){
+                const n=document.getElementById('bwN-'+s+t);const v=document.getElementById('bwV-'+s+t);
+                if(n)n.classList.remove('bw-active');if(v)v.textContent='';
+            }
+            document.getElementById('bwEdges').setAttribute('opacity','0.12');
+            const edges=document.getElementById('bwEdges').children;for(const e of edges){e.setAttribute('opacity','1');e.setAttribute('stroke-width','2');}
+            document.getElementById('bwBestPath').setAttribute('opacity','0');
+            document.getElementById('bwResult').textContent='';
+        }
+        function render(st){
+            resetSvg();
+            if(st.hl)for(const id of st.hl){const n=document.getElementById('bwN-'+id);if(n)n.classList.add('bw-active');}
+            if(st.vals)for(const[id,v]of Object.entries(st.vals)){const el=document.getElementById('bwV-'+id);if(el)el.textContent=v;}
+            if(st.edges&&st.edges.length){document.getElementById('bwEdges').setAttribute('opacity','1');const all=document.getElementById('bwEdges').children;for(const e of all)e.setAttribute('opacity','0.08');for(const eid of st.edges){const e=document.getElementById('bwE-'+eid);if(e){e.setAttribute('opacity','1');e.setAttribute('stroke-width','3');}}}
+            if(st.bestPath){const g=document.getElementById('bwBestPath');g.setAttribute('opacity','1');const nY={R:90,S:195},nX={1:120,2:330,3:540};
+                document.getElementById('bwBP1').setAttribute('y1',nY[st.bestPath[0]]);document.getElementById('bwBP1').setAttribute('y2',nY[st.bestPath[1]]);
+                document.getElementById('bwBP2').setAttribute('x1',330);document.getElementById('bwBP2').setAttribute('y1',nY[st.bestPath[1]]);document.getElementById('bwBP2').setAttribute('y2',nY[st.bestPath[2]]);}
+            if(st.result)document.getElementById('bwResult').textContent=st.result;
+            document.getElementById('bwExpl').innerHTML=`<strong>${st.title}</strong><br>${st.html}`;
+            document.getElementById('bwStepLabel').textContent=`Step ${step} / ${steps.length-1}`;
+        }
+        function showConvergence(data){
+            const wrap=document.getElementById('bwConvergenceWrap');
+            wrap.style.display='block';
+            // Fill table
+            const tb=document.getElementById('bwIterBody');
+            tb.innerHTML=data.map(d=>`<tr><td>${d.it}</td><td>${d.logLik.toFixed(4)}</td><td>${f(d.piR)}</td><td>${f(d.piS)}</td><td>${f(d.aRR)}</td><td>${f(d.aRS)}</td><td>${f(d.aSR)}</td><td>${f(d.aSS)}</td><td>${f(d.bRU)}</td><td>${f(d.bRN)}</td><td>${f(d.bSU)}</td><td>${f(d.bSN)}</td></tr>`).join('');
+            // Chart
+            const ctx=document.getElementById('bwConvergenceChart');
+            if(ctx._chart)ctx._chart.destroy();
+            ctx._chart=new Chart(ctx,{type:'line',data:{labels:data.map(d=>'Iter '+d.it),datasets:[{label:'ln P(O|λ)',data:data.map(d=>d.logLik),borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.1)',fill:true,tension:0.3,pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Log-Likelihood Convergence'}},scales:{y:{title:{display:true,text:'ln P(O|λ)'}}}}});
+        }
+
+        window.bwSetAlgo=function(a){
+            algo=a;document.querySelectorAll('.bw-tab').forEach(t=>t.classList.toggle('active',t.dataset.algo===a));
+            if(a==='forward')steps=buildFwd();else if(a==='backward')steps=buildBwd();else if(a==='viterbi')steps=buildVit();else steps=buildBW();
+            step=0;if(timer){clearInterval(timer);timer=null;document.getElementById('bwAutoBtn').textContent='▶ Play';}
+            document.getElementById('bwConvergenceWrap').style.display='none';
+            render(steps[0]);
+            if(a==='baumwelch'&&steps._iterData)showConvergence(steps._iterData);
+        };
+        window.bwStep=function(d){const n=step+d;if(n<0||n>=steps.length)return;step=n;render(steps[step]);};
+        window.bwReset=function(){if(timer){clearInterval(timer);timer=null;document.getElementById('bwAutoBtn').textContent='▶ Play';}step=0;render(steps[0]);};
+        window.bwAutoPlay=function(){const btn=document.getElementById('bwAutoBtn');if(timer){clearInterval(timer);timer=null;btn.textContent='▶ Play';return;}
+            btn.textContent='⏸';if(step>=steps.length-1)step=0;
+            timer=setInterval(()=>{if(step>=steps.length-1){clearInterval(timer);timer=null;btn.textContent='▶ Play';return;}step++;render(steps[step]);},2000);};
+        steps=buildFwd();
+        if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>render(steps[0]));
+        else setTimeout(()=>render(steps[0]),100);
+    })();
+
     function submitFeedback() {
         const PAGE_NAME = 'POS Tagging';
         const type = document.getElementById('feedbackType');

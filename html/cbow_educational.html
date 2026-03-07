@@ -1577,7 +1577,7 @@ Educational implementation - clear, commented, runnable.
         Args:
             embedding_dim: Dimension of word embeddings
             window_size: Number of context words on each side
-            learning_rate: Learning rate for gradient descent
+            learning_rate: Base learning rate for gradient descent
         """</span>
         self.embedding_dim = embedding_dim
         self.window_size = window_size
@@ -1637,7 +1637,7 @@ Educational implementation - clear, commented, runnable.
 
     <span class="keyword">def</span> <span class="function">forward</span>(self, context_indices):
         <span class="string">"""
-        Forward pass: context words -> hidden -> output probabilities.
+        Forward pass: context words -&gt; hidden -&gt; output probabilities.
 
         Returns:
             h: Hidden layer (averaged context embeddings)
@@ -1653,9 +1653,16 @@ Educational implementation - clear, commented, runnable.
 
         <span class="keyword">return</span> h, probs
 
-    <span class="keyword">def</span> <span class="function">backward</span>(self, context_indices, target_idx, h, probs):
+    <span class="keyword">def</span> <span class="function">backward</span>(self, context_indices, target_idx, h, probs, lr):
         <span class="string">"""
         Backward pass: compute gradients and update embeddings.
+
+        Args:
+            context_indices: Indices of context words
+            target_idx: Index of target word
+            h: Hidden layer from forward pass
+            probs: Softmax probabilities from forward pass
+            lr: Current learning rate (after decay)
         """</span>
         <span class="comment"># Gradient of loss w.r.t. scores (softmax output - one-hot target)</span>
         grad_scores = probs.copy()
@@ -1672,12 +1679,12 @@ Educational implementation - clear, commented, runnable.
         <span class="comment"># Each context word gets grad_h / num_context_words</span>
         grad_context = grad_h / len(context_indices)
 
-        <span class="comment"># Update output embeddings</span>
-        self.W_prime -= self.learning_rate * grad_W_prime
+        <span class="comment"># Update output embeddings using decayed lr</span>
+        self.W_prime -= lr * grad_W_prime
 
         <span class="comment"># Update input embeddings for context words</span>
         <span class="keyword">for</span> idx <span class="keyword">in</span> context_indices:
-            self.W[idx] -= self.learning_rate * grad_context
+            self.W[idx] -= lr * grad_context
 
     <span class="keyword">def</span> <span class="function">compute_loss</span>(self, probs, target_idx):
         <span class="string">"""Compute cross-entropy loss."""</span>
@@ -1690,7 +1697,10 @@ Educational implementation - clear, commented, runnable.
         Args:
             corpus: List of sentences
             epochs: Number of training epochs
-            verbose: Print progress
+            verbose: If True, print loss every epoch
+
+        Returns:
+            loss_history: List of average loss per epoch
         """</span>
         <span class="comment"># Build vocabulary and initialize</span>
         vocab_size = self.build_vocabulary(corpus)
@@ -1699,11 +1709,16 @@ Educational implementation - clear, commented, runnable.
         <span class="comment"># Generate training data</span>
         training_data = self.generate_training_data(corpus)
 
-        <span class="keyword">print</span>(f<span class="string">"Vocabulary size: {vocab_size}"</span>)
-        <span class="keyword">print</span>(f<span class="string">"Training examples: {len(training_data)}"</span>)
+        <span class="keyword">if</span> verbose:
+            <span class="keyword">print</span>(f<span class="string">"Vocabulary size: {vocab_size} | Training pairs: {len(training_data)}"</span>)
+
+        loss_history = []
 
         <span class="comment"># Training loop</span>
         <span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):
+            <span class="comment"># Learning rate decay: reduce lr as training progresses</span>
+            lr = self.learning_rate / (<span class="number">1</span> + <span class="number">0.05</span> * epoch)
+
             total_loss = <span class="number">0</span>
             np.random.shuffle(training_data)
 
@@ -1715,12 +1730,16 @@ Educational implementation - clear, commented, runnable.
                 loss = self.compute_loss(probs, target_idx)
                 total_loss += loss
 
-                <span class="comment"># Backward pass</span>
-                self.backward(context_indices, target_idx, h, probs)
+                <span class="comment"># Backward pass with decayed learning rate</span>
+                self.backward(context_indices, target_idx, h, probs, lr)
 
-            <span class="keyword">if</span> verbose <span class="keyword">and</span> (epoch + <span class="number">1</span>) % <span class="number">10</span> == <span class="number">0</span>:
-                avg_loss = total_loss / len(training_data)
-                <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}"</span>)
+            avg_loss = total_loss / len(training_data)
+            loss_history.append(avg_loss)
+
+            <span class="keyword">if</span> verbose:
+                <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1:&gt;3}/{epochs} | lr={lr:.5f} | loss={avg_loss:.4f}"</span>)
+
+        <span class="keyword">return</span> loss_history
 
     <span class="keyword">def</span> <span class="function">get_embedding</span>(self, word):
         <span class="string">"""Get the embedding vector for a word."""</span>
@@ -1748,6 +1767,57 @@ Educational implementation - clear, commented, runnable.
 
         <span class="keyword">return</span> sorted(similarities, key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)[:top_n]
 
+    <span class="keyword">def</span> <span class="function">print_similar</span>(self, word, topn=<span class="number">5</span>):
+        <span class="string">"""Print ASCII bar chart of cosine similarities for top-n neighbors."""</span>
+        results = self.most_similar(word, top_n=topn)
+        <span class="keyword">if</span> <span class="keyword">not</span> results:
+            <span class="keyword">print</span>(f<span class="string">"'{word}' not in vocabulary."</span>)
+            <span class="keyword">return</span>
+        <span class="keyword">print</span>(f<span class="string">"\nNearest neighbors of '{word}':"</span>)
+        <span class="keyword">print</span>(<span class="string">"-"</span> * <span class="number">40</span>)
+        <span class="keyword">for</span> w, sim <span class="keyword">in</span> results:
+            bar_len = <span class="function">int</span>((sim + <span class="number">1</span>) / <span class="number">2</span> * <span class="number">30</span>)  <span class="comment"># map [-1,1] -> [0,30]</span>
+            bar = <span class="string">"#"</span> * max(<span class="number">0</span>, bar_len)
+            <span class="keyword">print</span>(f<span class="string">"  {w:&lt;14} {bar:&lt;30} {sim:+.4f}"</span>)
+        <span class="keyword">print</span>(<span class="string">"-"</span> * <span class="number">40</span>)
+
+    <span class="keyword">def</span> <span class="function">analogy</span>(self, a, b, c, topn=<span class="number">1</span>):
+        <span class="string">"""
+        Solve analogy: a is to b as c is to ?
+
+        Uses vector arithmetic: d = b - a + c, then finds nearest word.
+
+        Args:
+            a, b, c: Query words (strings)
+            topn: Number of candidates to return
+
+        Returns:
+            List of (word, similarity) tuples, excluding a/b/c
+        """</span>
+        <span class="keyword">for</span> w <span class="keyword">in</span> (a, b, c):
+            <span class="keyword">if</span> w <span class="keyword">not in</span> self.word_to_idx:
+                <span class="keyword">print</span>(f<span class="string">"'{w}' not in vocabulary."</span>)
+                <span class="keyword">return</span> []
+
+        vec_a = self.get_embedding(a)
+        vec_b = self.get_embedding(b)
+        vec_c = self.get_embedding(c)
+        target = vec_b - vec_a + vec_c
+        target = target / (np.linalg.norm(target) + <span class="number">1e-10</span>)
+
+        exclude = {a, b, c}
+        scored = []
+        <span class="keyword">for</span> word, idx <span class="keyword">in</span> self.word_to_idx.items():
+            <span class="keyword">if</span> word <span class="keyword">in</span> exclude:
+                <span class="keyword">continue</span>
+            v = self.W[idx]
+            norm = np.linalg.norm(v) + <span class="number">1e-10</span>
+            sim = np.dot(target, v / norm)
+            scored.append((word, sim))
+
+        scored.sort(key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)
+        <span class="keyword">return</span> scored[:topn]
+
     <span class="keyword">def</span> <span class="function">predict</span>(self, context_words):
         <span class="string">"""Predict the most likely center word given context."""</span>
         context_indices = [self.word_to_idx[w] <span class="keyword">for</span> w <span class="keyword">in</span> context_words
@@ -1758,6 +1828,46 @@ Educational implementation - clear, commented, runnable.
         h, probs = self.forward(context_indices)
         top_idx = np.argmax(probs)
         <span class="keyword">return</span> self.idx_to_word[top_idx], probs[top_idx]
+
+    <span class="keyword">def</span> <span class="function">save</span>(self, path):
+        <span class="string">"""
+        Save model weights and vocabulary to a .npz file.
+
+        Args:
+            path: File path (e.g. 'cbow_model.npz')
+        """</span>
+        word_keys = np.array(list(self.word_to_idx.keys()))
+        word_vals = np.array(list(self.word_to_idx.values()))
+        np.savez(
+            path,
+            W=self.W,
+            W_prime=self.W_prime,
+            word_keys=word_keys,
+            word_vals=word_vals,
+            embedding_dim=np.array([self.embedding_dim]),
+            window_size=np.array([self.window_size]),
+            learning_rate=np.array([self.learning_rate]),
+        )
+        <span class="keyword">print</span>(f<span class="string">"Model saved to {path}"</span>)
+
+    <span class="keyword">def</span> <span class="function">load</span>(self, path):
+        <span class="string">"""
+        Load model weights and vocabulary from a .npz file.
+
+        Args:
+            path: File path (e.g. 'cbow_model.npz')
+        """</span>
+        data = np.load(path, allow_pickle=<span class="keyword">True</span>)
+        self.W = data[<span class="string">"W"</span>]
+        self.W_prime = data[<span class="string">"W_prime"</span>]
+        self.embedding_dim = <span class="function">int</span>(data[<span class="string">"embedding_dim"</span>][<span class="number">0</span>])
+        self.window_size = <span class="function">int</span>(data[<span class="string">"window_size"</span>][<span class="number">0</span>])
+        self.learning_rate = <span class="function">float</span>(data[<span class="string">"learning_rate"</span>][<span class="number">0</span>])
+        keys = data[<span class="string">"word_keys"</span>].tolist()
+        vals = data[<span class="string">"word_vals"</span>].tolist()
+        self.word_to_idx = {k: v <span class="keyword">for</span> k, v <span class="keyword">in</span> zip(keys, vals)}
+        self.idx_to_word = {v: k <span class="keyword">for</span> k, v <span class="keyword">in</span> self.word_to_idx.items()}
+        <span class="keyword">print</span>(f<span class="string">"Model loaded from {path} (vocab={len(self.word_to_idx)})"</span>)
 
 
 <span class="comment"># Example usage</span>
@@ -1778,25 +1888,44 @@ Educational implementation - clear, commented, runnable.
         <span class="string">"pets are animals"</span>,
     ]
 
-    <span class="comment"># Create and train model</span>
-    model = CBOW(embedding_dim=<span class="number">20</span>, window_size=<span class="number">2</span>, learning_rate=<span class="number">0.05</span>)
-    model.train(corpus, epochs=<span class="number">200</span>)
+    <span class="comment"># ── Section 1: Train with loss history ───────────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"=== 1. Training ==="</span>)
+    model = <span class="class-name">CBOW</span>(embedding_dim=<span class="number">20</span>, window_size=<span class="number">2</span>, learning_rate=<span class="number">0.05</span>)
+    loss_history = model.train(corpus, epochs=<span class="number">200</span>, verbose=<span class="keyword">True</span>)
+    <span class="keyword">print</span>(f<span class="string">"Final loss: {loss_history[-1]:.4f} (started at {loss_history[0]:.4f})"</span>)
 
-    <span class="comment"># Find similar words</span>
-    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'king':"</span>)
-    <span class="keyword">for</span> word, sim <span class="keyword">in</span> model.most_similar(<span class="string">'king'</span>):
-        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)
+    <span class="comment"># ── Section 2: Most-similar with ASCII bar chart ──────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n=== 2. Nearest Neighbors ==="</span>)
+    model.print_similar(<span class="string">'king'</span>, topn=<span class="number">5</span>)
+    model.print_similar(<span class="string">'cat'</span>, topn=<span class="number">5</span>)
 
-    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'cat':"</span>)
-    <span class="keyword">for</span> word, sim <span class="keyword">in</span> model.most_similar(<span class="string">'cat'</span>):
-        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)
+    <span class="comment"># ── Section 3: Analogy ────────────────────────────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n=== 3. Analogy: king - man + woman = ? ==="</span>)
+    results = model.analogy(<span class="string">'man'</span>, <span class="string">'king'</span>, <span class="string">'woman'</span>, topn=<span class="number">3</span>)
+    <span class="keyword">for</span> word, sim <span class="keyword">in</span> results:
+        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:+.4f}"</span>)
 
-    <span class="comment"># Predict center word from context</span>
-    <span class="keyword">print</span>(<span class="string">"\nPredicting center word:"</span>)
+    <span class="comment"># ── Section 4: Predict next (center) word ────────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n=== 4. Predict Center Word ==="</span>)
     context = [<span class="string">'the'</span>, <span class="string">'loves'</span>, <span class="string">'the'</span>, <span class="string">'queen'</span>]
     prediction, prob = model.predict(context)
-    <span class="keyword">print</span>(f<span class="string">"  Context: {context}"</span>)
-    <span class="keyword">print</span>(f<span class="string">"  Predicted: '{prediction}' (probability: {prob:.4f})"</span>)</code></pre>
+    <span class="keyword">print</span>(f<span class="string">"  Context : {context}"</span>)
+    <span class="keyword">print</span>(f<span class="string">"  Predicted: '{prediction}' (p={prob:.4f})"</span>)
+
+    context2 = [<span class="string">'cat'</span>, <span class="string">'on'</span>, <span class="string">'the'</span>]
+    prediction2, prob2 = model.predict(context2)
+    <span class="keyword">print</span>(f<span class="string">"  Context : {context2}"</span>)
+    <span class="keyword">print</span>(f<span class="string">"  Predicted: '{prediction2}' (p={prob2:.4f})"</span>)
+
+    <span class="comment"># ── Section 5: Save / load round-trip ────────────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n=== 5. Save / Load Round-Trip ==="</span>)
+    model.save(<span class="string">"cbow_model.npz"</span>)
+
+    model2 = <span class="class-name">CBOW</span>()
+    model2.load(<span class="string">"cbow_model.npz"</span>)
+
+    <span class="keyword">print</span>(<span class="string">"Similarity check after reload:"</span>)
+    model2.print_similar(<span class="string">'king'</span>, topn=<span class="number">3</span>)</code></pre>
 
             <div class="callout callout-example">
                 <h4>Expected Output</h4>

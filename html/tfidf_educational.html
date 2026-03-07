@@ -1555,121 +1555,358 @@
 
         <div class="content-block auto">
             <h3>Complete TF-IDF Implementation</h3>
-            <p>Copy this code into a Python file and run it directly. No external dependencies required!</p>
+            <p>Complete, annotated TF-IDF implementation — multiple TF/IDF schemes, cosine similarity, query ranking</p>
+            <p>The class below covers every concept from Sections 1–6 of this guide:</p>
+            <ul>
+                <li><code>compute_tf()</code> — raw normalised TF or sublinear (1+log tf) TF</li>
+                <li><code>compute_idf()</code> — smooth IDF (sklearn default) or classic IDF (Jurafsky)</li>
+                <li><code>fit_transform()</code> — full TF-IDF matrix with optional L2 normalisation</li>
+                <li><code>transform()</code> — apply fitted vectorizer to new documents</li>
+                <li><code>top_keywords()</code> — extract document keywords by TF-IDF score</li>
+                <li><code>rank_documents()</code> — score and rank a corpus against a query</li>
+                <li><code>print_matrix()</code> — ASCII TF-IDF matrix for visual inspection</li>
+            </ul>
 
             <pre><code><span class="comment">"""
-TF-IDF Implementation from Scratch
-===================================
-Educational implementation - clear, commented, runnable.
+TF-IDF Vectorizer — annotated educational implementation
+=========================================================
+Covers:
+  - Normalized TF (raw counts / document length)
+  - Sublinear TF (1 + log tf) — dampens very frequent terms
+  - Smooth IDF  (log((N+1)/(df+1)) + 1) — scikit-learn default
+  - Classic IDF (log(N/df)) — Jurafsky & Martin convention
+  - L2 normalisation of TF-IDF vectors (cosine-ready)
+  - Cosine similarity between document vectors
+  - Top-k keyword extraction per document
+  - Query scoring and document ranking
 """</span>
 
 <span class="keyword">import</span> math
 <span class="keyword">import</span> re
 <span class="keyword">from</span> collections <span class="keyword">import</span> Counter
+<span class="keyword">from</span> typing <span class="keyword">import</span> Dict, List, Optional, Tuple
 
+
+<span class="comment"># ═══════════════════════════════════════════════════════════════════
+#  TFIDFVectorizer
+#  ─────────────────────────────────────────────────────────────────
+#  TF-IDF score for term t in document d over corpus D:
+#
+#    TF(t,d)   = count(t,d) / |d|          (normalised)
+#             or 1 + log(count(t,d))       (sublinear)
+#
+#    IDF(t,D)  = log(N / df(t))            (classic)
+#             or log((N+1)/(df(t)+1)) + 1  (smooth, sklearn default)
+#
+#    TF-IDF(t,d,D) = TF(t,d) × IDF(t,D)
+#
+#  High TF-IDF → word is frequent in this document but rare elsewhere
+#  Low  TF-IDF → word is either rare here or common everywhere ("the")
+# ═══════════════════════════════════════════════════════════════════</span>
 <span class="keyword">class</span> <span class="class-name">TFIDFVectorizer</span>:
-    <span class="string">"""Compute TF-IDF scores for a collection of documents."""</span>
+    <span class="string">"""Compute TF-IDF vectors for a collection of documents.
 
-    <span class="keyword">def</span> <span class="function">__init__</span>(self, use_smoothing=<span class="keyword">True</span>):
-        self.vocabulary = []
-        self.idf_values = {}
-        self.tfidf_matrix = []
-        self.use_smoothing = use_smoothing
+    Args:
+        tf_scheme:  'raw'      — count(t,d) / |d|
+                    'sublinear' — 1 + log(count(t,d))  (dampens outliers)
+        idf_scheme: 'smooth'  — log((N+1)/(df+1))+1  (sklearn default)
+                    'classic' — log(N/df)
+        norm:       'l2' to unit-normalise each vector (cosine-ready),
+                    None to skip normalisation.
+    """</span>
 
-    <span class="keyword">def</span> <span class="function">preprocess</span>(self, text):
-        <span class="string">"""Tokenize and lowercase text."""</span>
+    <span class="keyword">def</span> <span class="function">__init__</span>(self,
+                 tf_scheme: str = <span class="string">'raw'</span>,
+                 idf_scheme: str = <span class="string">'smooth'</span>,
+                 norm: Optional[str] = <span class="string">'l2'</span>) -> <span class="keyword">None</span>:
+        self.tf_scheme  = tf_scheme
+        self.idf_scheme = idf_scheme
+        self.norm       = norm
+        self.vocabulary: List[str] = []
+        self.idf_values: Dict[str, float] = {}
+        self.tfidf_matrix: List[Dict[str, float]] = []
+
+    <span class="comment"># ── Text preprocessing ──────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">preprocess</span>(self, text: str) -> List[str]:
+        <span class="string">"""Lowercase and tokenise to alphabetic tokens only.
+
+        In a production system you would also:
+          - Remove stopwords (but note: stopwords have low IDF naturally)
+          - Apply stemming / lemmatisation ("running" → "run")
+          - Handle punctuation as separate tokens
+        """</span>
         <span class="keyword">return</span> re.findall(r<span class="string">'[a-z]+'</span>, text.lower())
 
-    <span class="keyword">def</span> <span class="function">compute_tf</span>(self, tokens):
-        <span class="string">"""Compute normalized term frequency."""</span>
+    <span class="comment"># ── TF computation ──────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">compute_tf</span>(self, tokens: List[str]) -> Dict[str, float]:
+        <span class="string">"""Compute term frequency for a single document.
+
+        'raw'      TF(t,d) = count(t,d) / len(d)
+                   Normalises by document length so long docs don't
+                   dominate just because they have more tokens.
+
+        'sublinear' TF(t,d) = 1 + log(count(t,d))  (log base 10)
+                   Diminishing returns: a term appearing 100× gets
+                   score 3, not 100× the score of a term appearing once.
+                   Returns 0 for terms not in the document.
+        """</span>
         counts = Counter(tokens)
-        total = len(tokens)
+        total  = len(tokens)
         <span class="keyword">if</span> total == <span class="number">0</span>:
             <span class="keyword">return</span> {}
-        <span class="keyword">return</span> {term: count/total <span class="keyword">for</span> term, count <span class="keyword">in</span> counts.items()}
 
-    <span class="keyword">def</span> <span class="function">compute_idf</span>(self, tokenized_docs):
-        <span class="string">"""Compute inverse document frequency for all terms."""</span>
-        N = len(tokenized_docs)
-        doc_freq = Counter()
+        <span class="keyword">if</span> self.tf_scheme == <span class="string">'raw'</span>:
+            <span class="keyword">return</span> {t: c / total <span class="keyword">for</span> t, c <span class="keyword">in</span> counts.items()}
+        <span class="keyword">elif</span> self.tf_scheme == <span class="string">'sublinear'</span>:
+            <span class="comment"># 1+log(tf) for observed terms, 0 for unobserved</span>
+            <span class="keyword">return</span> {t: <span class="number">1</span> + math.log10(c) <span class="keyword">for</span> t, c <span class="keyword">in</span> counts.items()}
+        <span class="keyword">return</span> {}
 
-        <span class="comment"># Count documents containing each term</span>
+    <span class="comment"># ── IDF computation ─────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">compute_idf</span>(self, tokenized_docs: List[List[str]]) -> Dict[str, float]:
+        <span class="string">"""Compute inverse document frequency for all vocabulary terms.
+
+        'smooth'  IDF(t) = log((N+1)/(df(t)+1)) + 1
+                  +1 in numerator/denominator prevents division by zero
+                  and ensures IDF ≥ 1 even for universal terms.
+                  This is the scikit-learn default.
+
+        'classic' IDF(t) = log(N / df(t))
+                  As in Jurafsky & Martin. Undefined for df=0 (handled
+                  by building vocab from the corpus itself).
+
+        Args:
+            tokenized_docs: List of token lists (one per document).
+
+        Returns:
+            Dict mapping each vocabulary term to its IDF score.
+        """</span>
+        N       = len(tokenized_docs)
+        doc_freq: Dict[str, int] = Counter()
+
+        <span class="comment"># Count how many documents contain each term (once per doc)</span>
         <span class="keyword">for</span> tokens <span class="keyword">in</span> tokenized_docs:
             <span class="keyword">for</span> term <span class="keyword">in</span> set(tokens):
                 doc_freq[term] += <span class="number">1</span>
 
-        <span class="comment"># Calculate IDF with optional smoothing</span>
-        idf = {}
+        idf: Dict[str, float] = {}
         <span class="keyword">for</span> term <span class="keyword">in</span> self.vocabulary:
             df = doc_freq.get(term, <span class="number">0</span>)
-            <span class="keyword">if</span> self.use_smoothing:
-                idf[term] = math.log10(N / (<span class="number">1</span> + df))
-            <span class="keyword">else</span>:
-                idf[term] = math.log10(N / df) <span class="keyword">if</span> df > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0</span>
+            <span class="keyword">if</span> self.idf_scheme == <span class="string">'smooth'</span>:
+                idf[term] = math.log((N + <span class="number">1</span>) / (df + <span class="number">1</span>)) + <span class="number">1</span>
+            <span class="keyword">elif</span> self.idf_scheme == <span class="string">'classic'</span>:
+                idf[term] = math.log(N / df) <span class="keyword">if</span> df > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0.0</span>
         <span class="keyword">return</span> idf
 
-    <span class="keyword">def</span> <span class="function">fit_transform</span>(self, documents):
-        <span class="string">"""Compute TF-IDF for all documents."""</span>
-        <span class="comment"># Tokenize</span>
+    <span class="comment"># ── L2 normalisation ────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">_l2_normalise</span>(self, vec: Dict[str, float]) -> Dict[str, float]:
+        <span class="string">"""Divide each vector component by the Euclidean norm.
+
+        After L2 normalisation, cosine similarity = dot product.
+        Removes document-length bias: a short doc with "cat" 3 times
+        and a long doc with "cat" 3 times get the same normalised score.
+        """</span>
+        norm = math.sqrt(sum(v ** <span class="number">2</span> <span class="keyword">for</span> v <span class="keyword">in</span> vec.values()))
+        <span class="keyword">if</span> norm == <span class="number">0</span>:
+            <span class="keyword">return</span> vec
+        <span class="keyword">return</span> {t: v / norm <span class="keyword">for</span> t, v <span class="keyword">in</span> vec.items()}
+
+    <span class="comment"># ── Main API ────────────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">fit_transform</span>(self,
+                       documents: List[str],
+                       verbose: bool = <span class="keyword">False</span>) -> List[Dict[str, float]]:
+        <span class="string">"""Compute TF-IDF vectors for a corpus.
+
+        Pipeline:
+          1. Tokenise each document.
+          2. Build vocabulary (sorted for determinism).
+          3. Compute TF per document.
+          4. Compute IDF over the whole corpus.
+          5. TF-IDF = TF × IDF.
+          6. (Optional) L2 normalise each vector.
+
+        Args:
+            documents: Raw text strings, one per document.
+            verbose:   Print IDF values after fitting.
+
+        Returns:
+            List of TF-IDF dicts; tfidf_matrix[i][term] = score.
+        """</span>
+        <span class="comment"># Step 1: Tokenise</span>
         tokenized = [self.preprocess(doc) <span class="keyword">for</span> doc <span class="keyword">in</span> documents]
 
-        <span class="comment"># Build vocabulary</span>
-        self.vocabulary = sorted(set(t <span class="keyword">for</span> tokens <span class="keyword">in</span> tokenized <span class="keyword">for</span> t <span class="keyword">in</span> tokens))
+        <span class="comment"># Step 2: Vocabulary (sorted so output is deterministic)</span>
+        all_terms = {t <span class="keyword">for</span> tokens <span class="keyword">in</span> tokenized <span class="keyword">for</span> t <span class="keyword">in</span> tokens}
+        self.vocabulary = sorted(all_terms)
 
-        <span class="comment"># Compute TF for each document</span>
-        tf_matrix = [self.compute_tf(tokens) <span class="keyword">for</span> tokens <span class="keyword">in</span> tokenized]
+        <span class="comment"># Step 3: TF per document</span>
+        tf_list = [self.compute_tf(tokens) <span class="keyword">for</span> tokens <span class="keyword">in</span> tokenized]
 
-        <span class="comment"># Compute IDF</span>
+        <span class="comment"># Step 4: IDF over corpus</span>
         self.idf_values = self.compute_idf(tokenized)
 
-        <span class="comment"># Compute TF-IDF = TF × IDF</span>
+        <span class="keyword">if</span> verbose:
+            <span class="keyword">print</span>(<span class="string">f"Vocabulary: {len(self.vocabulary)} terms"</span>)
+            <span class="keyword">print</span>(<span class="string">f"IDF scheme: {self.idf_scheme}  |  TF scheme: {self.tf_scheme}"</span>)
+            top_idf = sorted(self.idf_values.items(), key=<span class="keyword">lambda</span> x: -x[<span class="number">1</span>])[:<span class="number">5</span>]
+            low_idf = sorted(self.idf_values.items(), key=<span class="keyword">lambda</span> x:  x[<span class="number">1</span>])[:<span class="number">5</span>]
+            <span class="keyword">print</span>(<span class="string">"Highest IDF (rare terms):  "</span> + <span class="string">', '</span>.join(f<span class="string">"{t}={v:.3f}"</span> <span class="keyword">for</span> t,v <span class="keyword">in</span> top_idf))
+            <span class="keyword">print</span>(<span class="string">"Lowest  IDF (common terms):"</span> + <span class="string">', '</span>.join(f<span class="string">"{t}={v:.3f}"</span> <span class="keyword">for</span> t,v <span class="keyword">in</span> low_idf))
+
+        <span class="comment"># Step 5: TF-IDF = TF × IDF</span>
         self.tfidf_matrix = []
-        <span class="keyword">for</span> tf <span class="keyword">in</span> tf_matrix:
-            tfidf = {term: tf.get(term, <span class="number">0</span>) * self.idf_values.get(term, <span class="number">0</span>)
-                     <span class="keyword">for</span> term <span class="keyword">in</span> self.vocabulary}
-            self.tfidf_matrix.append(tfidf)
+        <span class="keyword">for</span> tf <span class="keyword">in</span> tf_list:
+            vec = {
+                term: tf.get(term, <span class="number">0.0</span>) * self.idf_values.get(term, <span class="number">0.0</span>)
+                <span class="keyword">for</span> term <span class="keyword">in</span> self.vocabulary
+            }
+            <span class="comment"># Step 6: optional L2 normalisation</span>
+            <span class="keyword">if</span> self.norm == <span class="string">'l2'</span>:
+                vec = self._l2_normalise(vec)
+            self.tfidf_matrix.append(vec)
 
         <span class="keyword">return</span> self.tfidf_matrix
 
-<span class="comment"># Example usage</span>
+    <span class="keyword">def</span> <span class="function">transform</span>(self, documents: List[str]) -> List[Dict[str, float]]:
+        <span class="string">"""Apply fitted vocabulary and IDF to new (unseen) documents.
+
+        Uses the vocabulary and IDF values from fit_transform().
+        Terms not in the training vocabulary are silently ignored
+        (out-of-vocabulary behaviour matches sklearn).
+        """</span>
+        result = []
+        <span class="keyword">for</span> doc <span class="keyword">in</span> documents:
+            tokens = self.preprocess(doc)
+            tf     = self.compute_tf(tokens)
+            vec    = {t: tf.get(t, <span class="number">0.0</span>) * self.idf_values.get(t, <span class="number">0.0</span>)
+                      <span class="keyword">for</span> t <span class="keyword">in</span> self.vocabulary}
+            <span class="keyword">if</span> self.norm == <span class="string">'l2'</span>:
+                vec = self._l2_normalise(vec)
+            result.append(vec)
+        <span class="keyword">return</span> result
+
+    <span class="comment"># ── Analysis helpers ────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">top_keywords</span>(self, doc_idx: int, n: int = <span class="number">5</span>) -> List[Tuple[str, float]]:
+        <span class="string">"""Return the top-n keywords for a given document index.
+
+        High TF-IDF = this word is important for this document
+        specifically, not just common across the whole corpus.
+        """</span>
+        vec = self.tfidf_matrix[doc_idx]
+        <span class="keyword">return</span> sorted(((t, s) <span class="keyword">for</span> t, s <span class="keyword">in</span> vec.items() <span class="keyword">if</span> s > <span class="number">0</span>),
+                      key=<span class="keyword">lambda</span> x: -x[<span class="number">1</span>])[:n]
+
+    <span class="keyword">def</span> <span class="function">cosine_similarity</span>(self, vec_a: Dict[str, float],
+                            vec_b: Dict[str, float]) -> float:
+        <span class="string">"""Dot product of two L2-normalised TF-IDF vectors.
+
+        If vectors are already L2-normalised, dot product = cosine similarity.
+        Range: 0 (completely different) to 1 (identical term distribution).
+        """</span>
+        <span class="keyword">return</span> sum(vec_a.get(t, <span class="number">0</span>) * vec_b.get(t, <span class="number">0</span>) <span class="keyword">for</span> t <span class="keyword">in</span> self.vocabulary)
+
+    <span class="keyword">def</span> <span class="function">rank_documents</span>(self, query: str) -> List[Tuple[int, str, float]]:
+        <span class="string">"""Rank all documents by cosine similarity to a query string.
+
+        Args:
+            query: Raw query text (tokenised and vectorised internally).
+
+        Returns:
+            List of (rank, document preview, score) sorted by score desc.
+        """</span>
+        q_vec  = self.transform([query])[<span class="number">0</span>]
+        scores = [
+            (i, self.cosine_similarity(q_vec, doc_vec))
+            <span class="keyword">for</span> i, doc_vec <span class="keyword">in</span> enumerate(self.tfidf_matrix)
+        ]
+        <span class="keyword">return</span> sorted(scores, key=<span class="keyword">lambda</span> x: -x[<span class="number">1</span>])
+
+    <span class="keyword">def</span> <span class="function">print_matrix</span>(self, documents: List[str], max_terms: int = <span class="number">10</span>) -> <span class="keyword">None</span>:
+        <span class="string">"""Print a TF-IDF matrix to stdout (terms × documents).
+
+        Shows only the top max_terms by total TF-IDF score across the corpus,
+        so the output stays readable even for large vocabularies.
+        """</span>
+        <span class="comment"># Pick top terms by total score across all docs</span>
+        totals  = {t: sum(v.get(t, <span class="number">0</span>) <span class="keyword">for</span> v <span class="keyword">in</span> self.tfidf_matrix)
+                   <span class="keyword">for</span> t <span class="keyword">in</span> self.vocabulary}
+        terms   = sorted(totals, key=<span class="keyword">lambda</span> t: -totals[t])[:max_terms]
+        col_w   = <span class="number">8</span>
+        n_docs  = len(self.tfidf_matrix)
+
+        <span class="keyword">print</span>(<span class="string">f"\n  TF-IDF Matrix  (TF={self.tf_scheme}, IDF={self.idf_scheme}, norm={self.norm})"</span>)
+        header = f<span class="string">"  {'term':12s}"</span> + <span class="string">''</span>.join(f<span class="string">"  {'Doc'+str(i+1):>{col_w}}"</span> <span class="keyword">for</span> i <span class="keyword">in</span> range(n_docs))
+        <span class="keyword">print</span>(header)
+        <span class="keyword">print</span>(<span class="string">"  "</span> + <span class="string">"─"</span> * (len(header) - <span class="number">2</span>))
+        <span class="keyword">for</span> t <span class="keyword">in</span> terms:
+            row = f<span class="string">"  {t:12s}"</span>
+            <span class="keyword">for</span> vec <span class="keyword">in</span> self.tfidf_matrix:
+                row += f<span class="string">"  {vec.get(t,0):>{col_w}.4f}"</span>
+            <span class="keyword">print</span>(row)
+
+
+<span class="comment"># ════════════════════════════════════════════════════════════════
+#  Demo — run this file directly to see all features
+# ════════════════════════════════════════════════════════════════</span>
 <span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+
     documents = [
-        <span class="string">"The cat sat on the mat."</span>,
-        <span class="string">"The dog sat on the log."</span>,
-        <span class="string">"The cat chased the dog."</span>,
+        <span class="string">"The cat sat on the mat near the window."</span>,
+        <span class="string">"The dog chased the cat around the garden."</span>,
+        <span class="string">"Machine learning models learn from data."</span>,
+        <span class="string">"Deep learning is a subfield of machine learning."</span>,
+        <span class="string">"The cat and the dog are common household pets."</span>,
     ]
 
-    vectorizer = TFIDFVectorizer()
-    tfidf = vectorizer.fit_transform(documents)
+    <span class="comment"># ── 1. Basic TF-IDF with full matrix printout ──────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"══ 1. TF-IDF Matrix (smooth IDF, L2 normalised) ══════════════"</span>)
+    v = TFIDFVectorizer(tf_scheme=<span class="string">'raw'</span>, idf_scheme=<span class="string">'smooth'</span>, norm=<span class="string">'l2'</span>)
+    v.fit_transform(documents, verbose=<span class="keyword">True</span>)
+    v.print_matrix(documents, max_terms=<span class="number">10</span>)
 
-    <span class="keyword">print</span>(<span class="string">"TF-IDF Results:"</span>)
-    <span class="keyword">for</span> i, scores <span class="keyword">in</span> enumerate(tfidf):
-        <span class="keyword">print</span>(f<span class="string">"\nDoc {i+1}:"</span>)
-        top = sorted(scores.items(), key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)[:<span class="number">3</span>]
-        <span class="keyword">for</span> term, score <span class="keyword">in</span> top:
-            <span class="keyword">if</span> score > <span class="number">0</span>:
-                <span class="keyword">print</span>(f<span class="string">"  {term}: {score:.4f}"</span>)</code></pre>
+    <span class="comment"># ── 2. Top keywords per document ───────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n══ 2. Top Keywords Per Document ════════════════════════════════"</span>)
+    <span class="keyword">for</span> i, doc <span class="keyword">in</span> enumerate(documents):
+        kw = v.top_keywords(i, n=<span class="number">3</span>)
+        preview = doc[:<span class="number">40</span>]
+        <span class="keyword">print</span>(f<span class="string">"  Doc {i+1}: '{preview}…'"</span>)
+        <span class="keyword">print</span>(f<span class="string">"           keywords: {', '.join(f'{t}({s:.3f})' for t,s in kw)}"</span>)
 
-            <div class="callout callout-example">
-                <h4>Expected Output</h4>
-                <pre style="background: #f0fdf4; color: #166534; margin: 0;">
-TF-IDF Results:
+    <span class="comment"># ── 3. Query → document ranking ────────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n══ 3. Query Ranking ════════════════════════════════════════════"</span>)
+    <span class="keyword">for</span> query <span class="keyword">in</span> [<span class="string">"cat and dog"</span>, <span class="string">"machine learning"</span>]:
+        ranked = v.rank_documents(query)
+        <span class="keyword">print</span>(f<span class="string">"\n  Query: '{query}'"</span>)
+        <span class="keyword">for</span> rank, (doc_idx, score) <span class="keyword">in</span> enumerate(ranked[:<span class="number">3</span>], <span class="number">1</span>):
+            preview = documents[doc_idx][:<span class="number">45</span>]
+            <span class="keyword">print</span>(f<span class="string">"    #{rank} (score={score:.4f}): {preview}…"</span>)
 
-Doc 1:
-  mat: 0.0795
-  cat: 0.0293
-  sat: 0.0293
+    <span class="comment"># ── 4. Sublinear TF comparison ─────────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n══ 4. Sublinear TF vs Raw TF ════════════════════════════════════"</span>)
+    v_sub = TFIDFVectorizer(tf_scheme=<span class="string">'sublinear'</span>, idf_scheme=<span class="string">'smooth'</span>, norm=<span class="keyword">None</span>)
+    v_sub.fit_transform(documents)
+    v_raw = TFIDFVectorizer(tf_scheme=<span class="string">'raw'</span>,      idf_scheme=<span class="string">'smooth'</span>, norm=<span class="keyword">None</span>)
+    v_raw.fit_transform(documents)
+    <span class="keyword">print</span>(<span class="string">"  (Doc 1 — 'cat' appears once, 'the' appears 3 times)"</span>)
+    <span class="keyword">for</span> t <span class="keyword">in</span> [<span class="string">'cat'</span>, <span class="string">'the'</span>]:
+        raw_score = v_raw.tfidf_matrix[<span class="number">0</span>].get(t, <span class="number">0</span>)
+        sub_score = v_sub.tfidf_matrix[<span class="number">0</span>].get(t, <span class="number">0</span>)
+        <span class="keyword">print</span>(f<span class="string">"  '{t}': raw_TF-IDF={raw_score:.4f}  sublinear_TF-IDF={sub_score:.4f}"</span>)
 
-Doc 2:
-  log: 0.0795
-  dog: 0.0293
-  sat: 0.0293
-
-Doc 3:
-  chased: 0.0954
-  cat: 0.0352
-  dog: 0.0352</pre>
-            </div>
+    <span class="comment"># ── 5. Cosine similarity between documents ────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n══ 5. Cosine Similarities ═══════════════════════════════════════"</span>)
+    pairs = [(0, 1), (0, 2), (2, 3), (0, 4)]
+    <span class="keyword">for</span> i, j <span class="keyword">in</span> pairs:
+        sim = v.cosine_similarity(v.tfidf_matrix[i], v.tfidf_matrix[j])
+        <span class="keyword">print</span>(f<span class="string">"  sim(Doc{i+1}, Doc{j+1}) = {sim:.4f}  "</span>
+              f<span class="string">"  '{documents[i][:30]}…'"</span>
+              f<span class="string">"  vs  '{documents[j][:30]}…'"</span>)</code></pre>
         </div>
 
         <!-- Section 7: Variants -->

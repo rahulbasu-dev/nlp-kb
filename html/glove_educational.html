@@ -1462,6 +1462,7 @@ Learns word embeddings from co-occurrence statistics.
         self.W_ctx = <span class="keyword">None</span>  <span class="comment"># Context vectors</span>
         self.b = <span class="keyword">None</span>  <span class="comment"># Word biases</span>
         self.b_ctx = <span class="keyword">None</span>  <span class="comment"># Context biases</span>
+        self._cooccurrences = <span class="keyword">None</span>  <span class="comment"># Stored for stats after training</span>
 
     <span class="keyword">def</span> <span class="function">tokenize</span>(self, text):
         <span class="string">"""Simple tokenization: lowercase and extract words."""</span>
@@ -1482,7 +1483,6 @@ Learns word embeddings from co-occurrence statistics.
 
     <span class="keyword">def</span> <span class="function">build_cooccurrence_matrix</span>(self, corpus):
         <span class="string">"""Build word co-occurrence matrix from corpus."""</span>
-        V = len(self.vocab)
         cooccurrence = defaultdict(<span class="keyword">lambda</span>: defaultdict(<span class="keyword">float</span>))
 
         <span class="keyword">for</span> sentence <span class="keyword">in</span> corpus:
@@ -1512,12 +1512,21 @@ Learns word embeddings from co-occurrence statistics.
 
     <span class="keyword">def</span> <span class="function">weighting_function</span>(self, x):
         <span class="string">"""Weighting function f(x) to reduce impact of very frequent pairs."""</span>
-        <span class="keyword">if</span> x < self.x_max:
+        <span class="keyword">if</span> x &lt; self.x_max:
             <span class="keyword">return</span> (x / self.x_max) ** self.alpha
         <span class="keyword">return</span> <span class="number">1.0</span>
 
     <span class="keyword">def</span> <span class="function">train</span>(self, corpus, verbose=<span class="keyword">True</span>):
-        <span class="string">"""Train GloVe embeddings on corpus."""</span>
+        <span class="string">"""
+        Train GloVe embeddings on corpus.
+
+        Args:
+            corpus: List of sentences
+            verbose: If True, print epoch loss every epoch
+
+        Returns:
+            loss_history: List of total loss per epoch
+        """</span>
         <span class="comment"># Build vocabulary</span>
         V = self.build_vocab(corpus)
         <span class="keyword">if</span> verbose:
@@ -1525,6 +1534,7 @@ Learns word embeddings from co-occurrence statistics.
 
         <span class="comment"># Build co-occurrence matrix</span>
         cooccurrences = self.build_cooccurrence_matrix(corpus)
+        self._cooccurrences = cooccurrences  <span class="comment"># store for stats</span>
         <span class="keyword">if</span> verbose:
             <span class="keyword">print</span>(f<span class="string">"Non-zero co-occurrences: {len(cooccurrences)}"</span>)
 
@@ -1539,6 +1549,8 @@ Learns word embeddings from co-occurrence statistics.
         grad_sq_W_ctx = np.ones_like(self.W_ctx)
         grad_sq_b = np.ones_like(self.b)
         grad_sq_b_ctx = np.ones_like(self.b_ctx)
+
+        loss_history = []
 
         <span class="comment"># Training loop</span>
         <span class="keyword">for</span> epoch <span class="keyword">in</span> range(self.epochs):
@@ -1580,10 +1592,12 @@ Learns word embeddings from co-occurrence statistics.
                 grad_sq_b_ctx[j] += grad_common ** <span class="number">2</span>
                 self.b_ctx[j] -= self.lr * grad_common / np.sqrt(grad_sq_b_ctx[j])
 
-            <span class="keyword">if</span> verbose <span class="keyword">and</span> (epoch + <span class="number">1</span>) % <span class="number">10</span> == <span class="number">0</span>:
-                <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1}/{self.epochs}, Loss: {total_loss:.4f}"</span>)
+            loss_history.append(total_loss)
 
-        <span class="keyword">return</span> self
+            <span class="keyword">if</span> verbose:
+                <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1:&gt;3}/{self.epochs} | loss={total_loss:.4f}"</span>)
+
+        <span class="keyword">return</span> loss_history
 
     <span class="keyword">def</span> <span class="function">get_embedding</span>(self, word):
         <span class="string">"""Get embedding for a word (W + W_ctx combined)."""</span>
@@ -1611,6 +1625,134 @@ Learns word embeddings from co-occurrence statistics.
         similarities.sort(key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)
         <span class="keyword">return</span> similarities[:top_n]
 
+    <span class="keyword">def</span> <span class="function">print_nearest</span>(self, word, topn=<span class="number">5</span>):
+        <span class="string">"""Print ASCII bar chart of cosine similarities for top-n neighbors."""</span>
+        results = self.most_similar(word, top_n=topn)
+        <span class="keyword">if</span> <span class="keyword">not</span> results:
+            <span class="keyword">print</span>(f<span class="string">"'{word}' not in vocabulary."</span>)
+            <span class="keyword">return</span>
+        <span class="keyword">print</span>(f<span class="string">"\nNearest neighbors of '{word}':"</span>)
+        <span class="keyword">print</span>(<span class="string">"-"</span> * <span class="number">42</span>)
+        <span class="keyword">for</span> w, sim <span class="keyword">in</span> results:
+            bar_len = <span class="function">int</span>((sim + <span class="number">1</span>) / <span class="number">2</span> * <span class="number">30</span>)  <span class="comment"># map [-1,1] -&gt; [0,30]</span>
+            bar = <span class="string">"#"</span> * max(<span class="number">0</span>, bar_len)
+            <span class="keyword">print</span>(f<span class="string">"  {w:&lt;14} {bar:&lt;30} {sim:+.4f}"</span>)
+        <span class="keyword">print</span>(<span class="string">"-"</span> * <span class="number">42</span>)
+
+    <span class="keyword">def</span> <span class="function">print_cooccurrence_stats</span>(self, n=<span class="number">10</span>):
+        <span class="string">"""
+        Print ASCII table of the n most frequent co-occurring word pairs.
+
+        Args:
+            n: Number of top pairs to display
+        """</span>
+        <span class="keyword">if</span> self._cooccurrences <span class="keyword">is</span> <span class="keyword">None</span>:
+            <span class="keyword">print</span>(<span class="string">"No co-occurrence data. Run train() first."</span>)
+            <span class="keyword">return</span>
+
+        sorted_pairs = sorted(self._cooccurrences, key=<span class="keyword">lambda</span> x: x[<span class="number">2</span>], reverse=<span class="keyword">True</span>)[:n]
+        max_count = sorted_pairs[<span class="number">0</span>][<span class="number">2</span>] <span class="keyword">if</span> sorted_pairs <span class="keyword">else</span> <span class="number">1</span>
+
+        <span class="keyword">print</span>(f<span class="string">"\nTop-{n} co-occurrence pairs:"</span>)
+        <span class="keyword">print</span>(f<span class="string">"{'Word A':&lt;14} {'Word B':&lt;14} {'Count':&gt;8}  Bar"</span>)
+        <span class="keyword">print</span>(<span class="string">"-"</span> * <span class="number">55</span>)
+        <span class="keyword">for</span> i, j, count <span class="keyword">in</span> sorted_pairs:
+            word_a = self.inverse_vocab.get(i, <span class="string">"?"</span>)
+            word_b = self.inverse_vocab.get(j, <span class="string">"?"</span>)
+            bar_len = <span class="function">int</span>(count / max_count * <span class="number">20</span>)
+            bar = <span class="string">"#"</span> * bar_len
+            <span class="keyword">print</span>(f<span class="string">"  {word_a:&lt;12} {word_b:&lt;12} {count:&gt;8.2f}  {bar}"</span>)
+        <span class="keyword">print</span>(<span class="string">"-"</span> * <span class="number">55</span>)
+
+    <span class="keyword">def</span> <span class="function">evaluate_analogies</span>(self, pairs):
+        <span class="string">"""
+        Evaluate analogy pairs of the form a:b :: c:d.
+
+        Args:
+            pairs: List of (a, b, c, expected_d) tuples
+
+        Returns:
+            accuracy: Fraction of correct top-1 predictions
+        """</span>
+        correct = <span class="number">0</span>
+        total = <span class="number">0</span>
+        <span class="keyword">for</span> a, b, c, expected_d <span class="keyword">in</span> pairs:
+            <span class="keyword">if</span> any(w <span class="keyword">not in</span> self.vocab <span class="keyword">for</span> w <span class="keyword">in</span> (a, b, c, expected_d)):
+                <span class="keyword">continue</span>
+            vec_a = self.get_embedding(a)
+            vec_b = self.get_embedding(b)
+            vec_c = self.get_embedding(c)
+            target = vec_b - vec_a + vec_c
+            target = target / (np.linalg.norm(target) + <span class="number">1e-10</span>)
+
+            exclude = {a, b, c}
+            best_word, best_sim = <span class="string">""</span>, -<span class="number">999</span>
+            <span class="keyword">for</span> w, idx <span class="keyword">in</span> self.vocab.items():
+                <span class="keyword">if</span> w <span class="keyword">in</span> exclude:
+                    <span class="keyword">continue</span>
+                v = self.get_embedding(w)
+                sim = np.dot(target, v / (np.linalg.norm(v) + <span class="number">1e-10</span>))
+                <span class="keyword">if</span> sim > best_sim:
+                    best_sim, best_word = sim, w
+
+            hit = <span class="string">"OK"</span> <span class="keyword">if</span> best_word == expected_d <span class="keyword">else</span> <span class="string">"X "</span>
+            <span class="keyword">print</span>(f<span class="string">"  [{hit}] {a}:{b} :: {c}:{expected_d}  (got '{best_word}')"</span>)
+            <span class="keyword">if</span> best_word == expected_d:
+                correct += <span class="number">1</span>
+            total += <span class="number">1</span>
+
+        accuracy = correct / total <span class="keyword">if</span> total > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0.0</span>
+        <span class="keyword">print</span>(f<span class="string">"  Accuracy: {correct}/{total} = {accuracy:.0%}"</span>)
+        <span class="keyword">return</span> accuracy
+
+    <span class="keyword">def</span> <span class="function">save</span>(self, path):
+        <span class="string">"""
+        Save model weights and vocabulary to a .npz file.
+
+        Args:
+            path: File path (e.g. 'glove_model.npz')
+        """</span>
+        word_keys = np.array(list(self.vocab.keys()))
+        word_vals = np.array(list(self.vocab.values()))
+        np.savez(
+            path,
+            W=self.W,
+            W_ctx=self.W_ctx,
+            b=self.b,
+            b_ctx=self.b_ctx,
+            word_keys=word_keys,
+            word_vals=word_vals,
+            embedding_dim=np.array([self.embedding_dim]),
+            x_max=np.array([self.x_max]),
+            alpha=np.array([self.alpha]),
+            lr=np.array([self.lr]),
+            window_size=np.array([self.window_size]),
+        )
+        <span class="keyword">print</span>(f<span class="string">"Model saved to {path}"</span>)
+
+    <span class="keyword">def</span> <span class="function">load</span>(self, path):
+        <span class="string">"""
+        Load model weights and vocabulary from a .npz file.
+
+        Args:
+            path: File path (e.g. 'glove_model.npz')
+        """</span>
+        data = np.load(path, allow_pickle=<span class="keyword">True</span>)
+        self.W = data[<span class="string">"W"</span>]
+        self.W_ctx = data[<span class="string">"W_ctx"</span>]
+        self.b = data[<span class="string">"b"</span>]
+        self.b_ctx = data[<span class="string">"b_ctx"</span>]
+        self.embedding_dim = <span class="function">int</span>(data[<span class="string">"embedding_dim"</span>][<span class="number">0</span>])
+        self.x_max = <span class="function">float</span>(data[<span class="string">"x_max"</span>][<span class="number">0</span>])
+        self.alpha = <span class="function">float</span>(data[<span class="string">"alpha"</span>][<span class="number">0</span>])
+        self.lr = <span class="function">float</span>(data[<span class="string">"lr"</span>][<span class="number">0</span>])
+        self.window_size = <span class="function">int</span>(data[<span class="string">"window_size"</span>][<span class="number">0</span>])
+        keys = data[<span class="string">"word_keys"</span>].tolist()
+        vals = data[<span class="string">"word_vals"</span>].tolist()
+        self.vocab = {k: v <span class="keyword">for</span> k, v <span class="keyword">in</span> zip(keys, vals)}
+        self.inverse_vocab = {v: k <span class="keyword">for</span> k, v <span class="keyword">in</span> self.vocab.items()}
+        <span class="keyword">print</span>(f<span class="string">"Model loaded from {path} (vocab={len(self.vocab)})"</span>)
+
 
 <span class="comment"># Example usage</span>
 <span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
@@ -1628,18 +1770,42 @@ Learns word embeddings from co-occurrence statistics.
         <span class="string">"the princess will become queen"</span>,
     ] * <span class="number">100</span>  <span class="comment"># Repeat for more training data</span>
 
-    <span class="comment"># Train GloVe</span>
-    glove = GloVe(embedding_dim=<span class="number">30</span>, epochs=<span class="number">50</span>, window_size=<span class="number">3</span>)
-    glove.train(corpus)
+    <span class="comment"># ── Section 1: Co-occurrence stats (build vocab + matrix first) ───────────</span>
+    <span class="keyword">print</span>(<span class="string">"=== 1. Co-occurrence Statistics ==="</span>)
+    glove = <span class="class-name">GloVe</span>(embedding_dim=<span class="number">30</span>, epochs=<span class="number">50</span>, window_size=<span class="number">3</span>)
+    glove.build_vocab(corpus)
+    glove._cooccurrences = glove.build_cooccurrence_matrix(corpus)
+    glove.print_cooccurrence_stats(n=<span class="number">10</span>)
 
-    <span class="comment"># Test embeddings</span>
-    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'king':"</span>)
-    <span class="keyword">for</span> word, sim <span class="keyword">in</span> glove.most_similar(<span class="string">'king'</span>):
-        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)
+    <span class="comment"># ── Section 2: Training with loss history ─────────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n=== 2. Training ==="</span>)
+    glove2 = <span class="class-name">GloVe</span>(embedding_dim=<span class="number">30</span>, epochs=<span class="number">50</span>, window_size=<span class="number">3</span>)
+    loss_history = glove2.train(corpus, verbose=<span class="keyword">True</span>)
+    <span class="keyword">print</span>(f<span class="string">"Final loss: {loss_history[-1]:.4f} (started at {loss_history[0]:.4f})"</span>)
 
-    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'queen':"</span>)
-    <span class="keyword">for</span> word, sim <span class="keyword">in</span> glove.most_similar(<span class="string">'queen'</span>):
-        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)</code></pre>
+    <span class="comment"># ── Section 3: Nearest neighbors with ASCII bar chart ─────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n=== 3. Nearest Neighbors ==="</span>)
+    glove2.print_nearest(<span class="string">'king'</span>, topn=<span class="number">5</span>)
+    glove2.print_nearest(<span class="string">'queen'</span>, topn=<span class="number">5</span>)
+
+    <span class="comment"># ── Section 4: Analogy evaluation ────────────────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n=== 4. Analogy Test ==="</span>)
+    analogy_pairs = [
+        (<span class="string">"man"</span>, <span class="string">"king"</span>, <span class="string">"woman"</span>, <span class="string">"queen"</span>),
+        (<span class="string">"king"</span>, <span class="string">"prince"</span>, <span class="string">"queen"</span>, <span class="string">"princess"</span>),
+        (<span class="string">"man"</span>, <span class="string">"prince"</span>, <span class="string">"woman"</span>, <span class="string">"princess"</span>),
+    ]
+    glove2.evaluate_analogies(analogy_pairs)
+
+    <span class="comment"># ── Section 5: Save / load round-trip ────────────────────────────────────</span>
+    <span class="keyword">print</span>(<span class="string">"\n=== 5. Save / Load Round-Trip ==="</span>)
+    glove2.save(<span class="string">"glove_model.npz"</span>)
+
+    glove3 = <span class="class-name">GloVe</span>()
+    glove3.load(<span class="string">"glove_model.npz"</span>)
+
+    <span class="keyword">print</span>(<span class="string">"Similarity check after reload:"</span>)
+    glove3.print_nearest(<span class="string">'king'</span>, topn=<span class="number">3</span>)</code></pre>
 
             <div class="callout callout-example">
                 <h4>Expected Output</h4>

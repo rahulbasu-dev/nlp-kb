@@ -1327,219 +1327,458 @@
         <!-- Section 9: Python Code -->
         <div class="section-header" id="python">
             <h2><span class="icon">🐍</span> Python Implementation</h2>
-            <p>Complete, runnable code for N-gram language models</p>
+            <p>Complete, annotated N-gram language model — smoothing, perplexity, generation, and evaluation</p>
         </div>
 
         <div class="content-block auto">
-            <h3>Complete N-gram Language Model</h3>
-            <p>Copy this code into a Python file and run it directly!</p>
+            <h3>What this code implements</h3>
+            <p>The module below covers every concept from Sections 1–8 of this guide, in runnable form:</p>
+            <ul>
+                <li><code>NgramLM</code> — bigram/trigram/n-gram model with four smoothing methods, perplexity, and sampling-based generation</li>
+                <li><code>StupidBackoff</code> — the large-scale production approach (Brants et al. 2007)</li>
+                <li><code>KneserNeyLM</code> — the gold-standard smoothing method, with continuation counts</li>
+                <li><code>compare_models()</code> — side-by-side perplexity comparison across smoothing strategies</li>
+                <li><code>print_prob_table()</code> — ASCII probability table so you can see the full distribution</li>
+            </ul>
 
 <pre><code><span class="comment">"""
-N-gram Language Model Implementation
-=====================================
-Educational implementation with smoothing, perplexity, and generation.
+N-gram Language Model — annotated educational implementation
+============================================================
+Covers:
+  - MLE training from a text corpus (tokenisation, counting)
+  - Four smoothing methods: none, Laplace, add-k, linear interpolation
+  - Kneser-Ney smoothing (state-of-the-art for small/medium corpora)
+  - Stupid Backoff (Google's web-scale approach)
+  - Perplexity evaluation
+  - Sampling-based text generation with temperature
+  - Side-by-side model comparison
+  - ASCII probability bar chart
 """</span>
 
 <span class="keyword">import</span> re
 <span class="keyword">import</span> math
-<span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict, Counter
-<span class="keyword">from</span> typing <span class="keyword">import</span> List, Tuple, Dict
 <span class="keyword">import</span> random
+<span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict, Counter
+<span class="keyword">from</span> typing <span class="keyword">import</span> Dict, List, Optional, Tuple
 
+
+<span class="comment"># ═══════════════════════════════════════════════════════════════════
+#  NgramLM
+#  ─────────────────────────────────────────────────────────────────
+#  Core formula:  P(w_n | w_{n-N+1} … w_{n-1})
+#               = C(w_{n-N+1} … w_n) / C(w_{n-N+1} … w_{n-1})
+#
+#  Four smoothing methods:
+#    'none'          MLE  — zero for any unseen n-gram
+#    'laplace'       Add-1 smoothing
+#    'addk'          Add-k  — generalises Laplace; tune k on dev set
+#    'interpolation' Jelinek-Mercer: mix all orders with weights λ
+# ═══════════════════════════════════════════════════════════════════</span>
 <span class="keyword">class</span> <span class="class-name">NgramLM</span>:
-    <span class="string">"""N-gram Language Model with multiple smoothing options."""</span>
+    <span class="string">"""N-gram Language Model with pluggable smoothing.
 
-    <span class="keyword">def</span> <span class="function">__init__</span>(self, n=<span class="number">2</span>, smoothing=<span class="string">'none'</span>, k=<span class="number">1.0</span>, lambdas=<span class="keyword">None</span>):
-        <span class="string">"""
-        Args:
-            n: N-gram order (2=bigram, 3=trigram)
-            smoothing: 'none', 'laplace', 'addk', 'interpolation'
-            k: smoothing parameter for add-k
-            lambdas: weights for interpolation [λ_n, λ_n-1, ..., λ_1]
+    Attributes:
+        n:             Order of the model (2=bigram, 3=trigram, …).
+        smoothing:     'none' | 'laplace' | 'addk' | 'interpolation'.
+        k:             Add-k constant (k=1 recovers Laplace).
+        lambdas:       Interpolation weights, must sum to 1.
+        ngram_counts:  Raw counts C(w_{i-n+1} … w_i).
+        context_counts: Raw counts C(w_{i-n+1} … w_{i-1}).
+        vocab:         All tokens seen during training.
+    """</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self,
+                 n: int = <span class="number">2</span>,
+                 smoothing: str = <span class="string">'none'</span>,
+                 k: float = <span class="number">1.0</span>,
+                 lambdas: Optional[List[float]] = <span class="keyword">None</span>) -> <span class="keyword">None</span>:
+        self.n          = n
+        self.smoothing  = smoothing
+        self.k          = k
+        <span class="comment"># Default interpolation weights: favour higher-order estimates</span>
+        self.lambdas    = lambdas <span class="keyword">or</span> [<span class="number">0.6</span>, <span class="number">0.3</span>, <span class="number">0.1</span>]
+        self.ngram_counts:   Dict[tuple, int] = defaultdict(int)
+        self.context_counts: Dict[tuple, int] = defaultdict(int)
+        self.vocab: set = set()
+
+    <span class="comment"># ── Data preparation ────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">tokenize</span>(self, text: str) -> List[str]:
+        <span class="string">"""Split text into tokens, wrapped with sentence-boundary symbols.
+
+        For a bigram model (n=2) each sentence gets one &lt;s&gt; prefix and
+        one &lt;/s&gt; suffix.  For a trigram model it gets two &lt;s&gt; prefixes,
+        so the context at position 1 is always fully defined.
+
+        Example (n=2):
+            "I am Sam." → ['&lt;s&gt;', 'i', 'am', 'sam', '&lt;/s&gt;']
         """</span>
-        self.n = n
-        self.smoothing = smoothing
-        self.k = k
-        self.lambdas = lambdas <span class="keyword">or</span> [<span class="number">0.6</span>, <span class="number">0.3</span>, <span class="number">0.1</span>]
-        self.ngram_counts = defaultdict(int)
-        self.context_counts = defaultdict(int)
-        self.vocab = set()
-
-    <span class="keyword">def</span> <span class="function">tokenize</span>(self, text: str) <span class="operator">-></span> List[str]:
-        <span class="string">"""Tokenize text into sentences and words."""</span>
-        <span class="comment"># Split into sentences</span>
         sentences = re.split(r<span class="string">'[.!?]'</span>, text.lower())
-        tokens = []
+        tokens: List[str] = []
         <span class="keyword">for</span> sent <span class="keyword">in</span> sentences:
             words = re.findall(r<span class="string">'\w+'</span>, sent)
             <span class="keyword">if</span> words:
-                <span class="comment"># Add sentence boundaries</span>
                 tokens.extend([<span class="string">'&lt;s&gt;'</span>] * (self.n - <span class="number">1</span>) + words + [<span class="string">'&lt;/s&gt;'</span>])
         <span class="keyword">return</span> tokens
 
-    <span class="keyword">def</span> <span class="function">train</span>(self, corpus: str) <span class="operator">-></span> <span class="keyword">None</span>:
-        <span class="string">"""Train the N-gram model on a corpus."""</span>
+    <span class="comment"># ── Training ────────────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, corpus: str, verbose: bool = <span class="keyword">False</span>) -> <span class="keyword">None</span>:
+        <span class="string">"""Estimate N-gram counts from a raw text corpus.
+
+        One sliding window pass: for each position i extract the n-gram
+        and its (n-1)-gram context, then increment both counts.
+
+        Args:
+            corpus:  Raw text string (multiple sentences OK).
+            verbose: Print corpus statistics after training.
+        """</span>
         tokens = self.tokenize(corpus)
         self.vocab = set(tokens)
 
-        <span class="comment"># Count N-grams and contexts</span>
+        <span class="comment"># Count target-order n-grams and their (n-1)-gram contexts</span>
         <span class="keyword">for</span> i <span class="keyword">in</span> range(len(tokens) - self.n + <span class="number">1</span>):
-            ngram = tuple(tokens[i:i + self.n])
+            ngram   = tuple(tokens[i : i + self.n])
             context = ngram[:-<span class="number">1</span>]
-            word = ngram[-<span class="number">1</span>]
-
-            self.ngram_counts[ngram] += <span class="number">1</span>
+            self.ngram_counts[ngram]     += <span class="number">1</span>
             self.context_counts[context] += <span class="number">1</span>
 
-        <span class="comment"># Also count lower-order N-grams for interpolation</span>
+        <span class="comment"># For interpolation we also need lower-order n-gram counts</span>
         <span class="keyword">if</span> self.smoothing == <span class="string">'interpolation'</span>:
             <span class="keyword">for</span> order <span class="keyword">in</span> range(<span class="number">1</span>, self.n):
                 <span class="keyword">for</span> i <span class="keyword">in</span> range(len(tokens) - order + <span class="number">1</span>):
-                    ngram = tuple(tokens[i:i + order])
-                    <span class="keyword">if</span> len(ngram) > <span class="number">1</span>:
-                        context = ngram[:-<span class="number">1</span>]
-                        self.context_counts[context] = self.context_counts.get(context, <span class="number">0</span>) + <span class="number">1</span>
+                    ng  = tuple(tokens[i : i + order])
+                    ctx = ng[:-<span class="number">1</span>]
+                    self.ngram_counts[ng] += <span class="number">1</span>
+                    <span class="keyword">if</span> ctx:
+                        self.context_counts[ctx] += <span class="number">1</span>
 
-    <span class="keyword">def</span> <span class="function">prob</span>(self, word: str, context: tuple) <span class="operator">-></span> float:
-        <span class="string">"""Calculate P(word | context) with smoothing."""</span>
-        V = len(self.vocab)
+        <span class="keyword">if</span> verbose:
+            total = sum(self.ngram_counts.values())
+            <span class="keyword">print</span>(f<span class="string">"Trained {self.n}-gram LM  |  vocab={len(self.vocab)}  "</span>
+                  f<span class="string">"unique {self.n}-grams={len(self.ngram_counts)}  total={total}"</span>)
+
+    <span class="comment"># ── Probability estimation ──────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">prob</span>(self, word: str, context: tuple) -> float:
+        <span class="string">"""P(word | context) under the configured smoothing.
+
+        Smoothing formulae:
+          none:          C(context,word) / C(context)
+          laplace:       (C+1) / (C(ctx)+|V|)
+          addk:          (C+k) / (C(ctx)+k·|V|)
+          interpolation: Σ_i λ_i · P_i(word | context[-i:])
+        """</span>
+        V     = len(self.vocab)
         ngram = context + (word,)
 
         <span class="keyword">if</span> self.smoothing == <span class="string">'none'</span>:
-            <span class="keyword">if</span> self.context_counts[context] == <span class="number">0</span>:
-                <span class="keyword">return</span> <span class="number">0.0</span>
-            <span class="keyword">return</span> self.ngram_counts[ngram] / self.context_counts[context]
+            denom = self.context_counts.get(context, <span class="number">0</span>)
+            <span class="keyword">if</span> denom == <span class="number">0</span>: <span class="keyword">return</span> <span class="number">0.0</span>
+            <span class="keyword">return</span> self.ngram_counts.get(ngram, <span class="number">0</span>) / denom
 
         <span class="keyword">elif</span> self.smoothing == <span class="string">'laplace'</span>:
-            <span class="keyword">return</span> (self.ngram_counts[ngram] + <span class="number">1</span>) / (self.context_counts[context] + V)
+            <span class="comment"># Add 1 to every count → no zero probabilities</span>
+            <span class="keyword">return</span> (self.ngram_counts.get(ngram, <span class="number">0</span>) + <span class="number">1</span>) / \
+                   (self.context_counts.get(context, <span class="number">0</span>) + V)
 
         <span class="keyword">elif</span> self.smoothing == <span class="string">'addk'</span>:
-            <span class="keyword">return</span> (self.ngram_counts[ngram] + self.k) / (self.context_counts[context] + self.k * V)
+            <span class="comment"># k=1 → Laplace; k&lt;1 → less mass stolen from seen n-grams</span>
+            <span class="keyword">return</span> (self.ngram_counts.get(ngram, <span class="number">0</span>) + self.k) / \
+                   (self.context_counts.get(context, <span class="number">0</span>) + self.k * V)
 
         <span class="keyword">elif</span> self.smoothing == <span class="string">'interpolation'</span>:
-            <span class="comment"># Linear interpolation</span>
-            prob = <span class="number">0.0</span>
-            <span class="keyword">for</span> i, lambda_i <span class="keyword">in</span> enumerate(self.lambdas):
+            <span class="comment"># Jelinek-Mercer: weighted mix of all orders</span>
+            p = <span class="number">0.0</span>
+            <span class="keyword">for</span> i, lam <span class="keyword">in</span> enumerate(self.lambdas):
                 order = self.n - i
                 <span class="keyword">if</span> order == <span class="number">1</span>:
-                    <span class="comment"># Unigram</span>
-                    total = sum(self.context_counts.values())
-                    prob += lambda_i * (self.ngram_counts[(word,)] / total <span class="keyword">if</span> total > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0</span>)
+                    total = sum(self.ngram_counts.get((w,), <span class="number">0</span>) <span class="keyword">for</span> w <span class="keyword">in</span> self.vocab)
+                    p += lam * (self.ngram_counts.get((word,), <span class="number">0</span>) / total <span class="keyword">if</span> total > <span class="number">0</span> <span class="keyword">else</span> <span class="number">0.0</span>)
                 <span class="keyword">else</span>:
-                    sub_context = context[-(order-<span class="number">1</span>):] <span class="keyword">if</span> len(context) >= order-<span class="number">1</span> <span class="keyword">else</span> context
-                    sub_ngram = sub_context + (word,)
-                    <span class="keyword">if</span> self.context_counts[sub_context] > <span class="number">0</span>:
-                        prob += lambda_i * (self.ngram_counts[sub_ngram] / self.context_counts[sub_context])
-            <span class="keyword">return</span> prob
+                    ctx_i   = context[-(order - <span class="number">1</span>):]
+                    ngram_i = ctx_i + (word,)
+                    denom_i = self.context_counts.get(ctx_i, <span class="number">0</span>)
+                    <span class="keyword">if</span> denom_i > <span class="number">0</span>:
+                        p += lam * (self.ngram_counts.get(ngram_i, <span class="number">0</span>) / denom_i)
+            <span class="keyword">return</span> p
 
         <span class="keyword">return</span> <span class="number">0.0</span>
 
-    <span class="keyword">def</span> <span class="function">perplexity</span>(self, sentence: str) <span class="operator">-></span> float:
-        <span class="string">"""Calculate perplexity of a sentence."""</span>
-        tokens = self.tokenize(sentence)
-        log_prob = <span class="number">0.0</span>
-        count = <span class="number">0</span>
+    <span class="comment"># ── Evaluation ──────────────────────────────────────────────────</span>
 
+    <span class="keyword">def</span> <span class="function">perplexity</span>(self, text: str) -> float:
+        <span class="string">"""Compute perplexity of a text string.
+
+        PP(W) = 2^{ −1/N · Σ log₂ P(w_i | context_i) }
+
+        Lower perplexity = better model fit (less "surprised").
+        PP=k means the model is as uncertain as a uniform choice among k words.
+        Returns float('inf') if any token has zero probability.
+        """</span>
+        tokens   = self.tokenize(text)
+        log_prob = <span class="number">0.0</span>
+        count    = <span class="number">0</span>
         <span class="keyword">for</span> i <span class="keyword">in</span> range(self.n - <span class="number">1</span>, len(tokens)):
-            context = tuple(tokens[i - self.n + <span class="number">1</span>:i])
-            word = tokens[i]
+            context = tuple(tokens[i - self.n + <span class="number">1</span> : i])
+            word    = tokens[i]
             p = self.prob(word, context)
             <span class="keyword">if</span> p > <span class="number">0</span>:
                 log_prob += math.log2(p)
             <span class="keyword">else</span>:
-                log_prob += -<span class="number">20</span>  <span class="comment"># Penalty for zero prob</span>
+                <span class="keyword">return</span> float(<span class="string">'inf'</span>)
             count += <span class="number">1</span>
-
         <span class="keyword">return</span> <span class="number">2</span> ** (-log_prob / count) <span class="keyword">if</span> count > <span class="number">0</span> <span class="keyword">else</span> float(<span class="string">'inf'</span>)
 
-    <span class="keyword">def</span> <span class="function">generate</span>(self, context: tuple, max_words: int = <span class="number">10</span>) <span class="operator">-></span> str:
-        <span class="string">"""Generate text given a starting context."""</span>
+    <span class="comment"># ── Generation ──────────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">generate</span>(self,
+                context: tuple,
+                max_words: int = <span class="number">15</span>,
+                temperature: float = <span class="number">1.0</span>) -> str:
+        <span class="string">"""Sample a word sequence given a starting context.
+
+        temperature &gt; 1 → flatter distribution (more creative)
+        temperature &lt; 1 → sharper distribution (more predictable)
+        temperature = 1 → raw model probabilities
+        """</span>
         result = list(context)
-
         <span class="keyword">for</span> _ <span class="keyword">in</span> range(max_words):
-            candidates = [(w, self.prob(w, tuple(result[-(self.n-<span class="number">1</span>):])))
-                         <span class="keyword">for</span> w <span class="keyword">in</span> self.vocab <span class="keyword">if</span> w != <span class="string">'&lt;s&gt;'</span>]
-            candidates = [(w, p) <span class="keyword">for</span> w, p <span class="keyword">in</span> candidates <span class="keyword">if</span> p > <span class="number">0</span>]
-
-            <span class="keyword">if</span> <span class="keyword">not</span> candidates:
-                <span class="keyword">break</span>
-
-            <span class="comment"># Sample proportional to probability</span>
+            ctx = tuple(result[-(self.n - <span class="number">1</span>):])
+            candidates = [
+                (w, self.prob(w, ctx))
+                <span class="keyword">for</span> w <span class="keyword">in</span> self.vocab
+                <span class="keyword">if</span> w != <span class="string">'&lt;s&gt;'</span> <span class="keyword">and</span> self.prob(w, ctx) > <span class="number">0</span>
+            ]
+            <span class="keyword">if</span> <span class="keyword">not</span> candidates: <span class="keyword">break</span>
             words, probs = zip(*candidates)
-            total = sum(probs)
-            probs = [p/total <span class="keyword">for</span> p <span class="keyword">in</span> probs]
-            word = random.choices(words, probs)[<span class="number">0</span>]
-
-            <span class="keyword">if</span> word == <span class="string">'&lt;/s&gt;'</span>:
-                <span class="keyword">break</span>
+            scaled = [p ** (<span class="number">1.0</span> / temperature) <span class="keyword">for</span> p <span class="keyword">in</span> probs]
+            total  = sum(scaled)
+            probs  = [s / total <span class="keyword">for</span> s <span class="keyword">in</span> scaled]
+            word   = random.choices(words, probs)[<span class="number">0</span>]
+            <span class="keyword">if</span> word == <span class="string">'&lt;/s&gt;'</span>: <span class="keyword">break</span>
             result.append(word)
+        <span class="keyword">return</span> <span class="string">' '</span>.join(result[self.n - <span class="number">1</span>:])
 
-        <span class="keyword">return</span> <span class="string">' '</span>.join(result)
+    <span class="comment"># ── Inspection ──────────────────────────────────────────────────</span>
+
+    <span class="keyword">def</span> <span class="function">top_next_words</span>(self, context: tuple, n: int = <span class="number">10</span>) -> List[Tuple[str, float]]:
+        <span class="string">"""Top-n most probable next words for a given context."""</span>
+        candidates = [(w, self.prob(w, context)) <span class="keyword">for</span> w <span class="keyword">in</span> self.vocab <span class="keyword">if</span> w != <span class="string">'&lt;s&gt;'</span>]
+        <span class="keyword">return</span> sorted(candidates, key=<span class="keyword">lambda</span> x: -x[<span class="number">1</span>])[:n]
+
+    <span class="keyword">def</span> <span class="function">print_prob_table</span>(self, context: tuple, top_n: int = <span class="number">8</span>) -> <span class="keyword">None</span>:
+        <span class="string">"""Print an ASCII bar chart of P(word | context).
+
+        Makes the probability distribution visually inspectable —
+        you can see at a glance whether mass is concentrated or spread.
+        """</span>
+        rows   = self.top_next_words(context, top_n)
+        max_p  = rows[<span class="number">0</span>][<span class="number">1</span>] <span class="keyword">if</span> rows <span class="keyword">else</span> <span class="number">1.0</span>
+        ctx_str = <span class="string">' '</span>.join(context)
+        <span class="keyword">print</span>(f<span class="string">"\n  P(word | '{ctx_str}')  [{self.smoothing}]"</span>)
+        <span class="keyword">print</span>(f<span class="string">"  {'word':12s}  {'prob':8s}  distribution"</span>)
+        <span class="keyword">print</span>(f<span class="string">"  {'─'*50}"</span>)
+        <span class="keyword">for</span> word, p <span class="keyword">in</span> rows:
+            bar = <span class="string">'█'</span> * int(<span class="number">30</span> * p / max_p) <span class="keyword">if</span> max_p > <span class="number">0</span> <span class="keyword">else</span> <span class="string">''</span>
+            <span class="keyword">print</span>(f<span class="string">"  {word:12s}  {p:8.5f}  {bar}"</span>)
 
 
-<span class="keyword">class</span> <span class="class-name">StupidBackoff</span>:
-    <span class="string">"""Stupid Backoff for large-scale N-gram models."""</span>
+<span class="comment"># ═══════════════════════════════════════════════════════════════════
+#  KneserNeyLM — state-of-the-art N-gram smoothing
+#  ─────────────────────────────────────────────────────────────────
+#  Key idea: replace raw unigram counts with "continuation counts"
+#  (how many distinct left-contexts does w appear in?).
+#
+#  "Francisco" appears often but almost always after "San" →
+#  low continuation probability → poor fallback choice.
+#  "the" appears after many different words → high continuation prob.
+#
+#  P_KN(w|h) = max(C(h,w)−d, 0)/C(h) + λ(h)·P_continuation(w)
+# ═══════════════════════════════════════════════════════════════════</span>
+<span class="keyword">class</span> <span class="class-name">KneserNeyLM</span>:
+    <span class="string">"""Bigram Kneser-Ney language model (simplified to 2-gram for clarity)."""</span>
 
-    <span class="keyword">def</span> <span class="function">__init__</span>(self, max_n=<span class="number">3</span>, alpha=<span class="number">0.4</span>):
-        self.max_n = max_n
-        self.alpha = alpha
-        self.ngram_counts = defaultdict(int)
-        self.context_counts = defaultdict(int)
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, d: float = <span class="number">0.75</span>) -> <span class="keyword">None</span>:
+        <span class="string">"""Args:
+            d: Absolute discount (typically 0.75; tune on dev set).
+        """</span>
+        self.d = d
+        self.bigram_counts:  Dict[tuple, int] = defaultdict(int)
+        self.unigram_counts: Dict[str,   int] = defaultdict(int)
+        self.continuation:   Dict[str,   int] = defaultdict(int)
+        self.context_count:  Dict[str,   int] = defaultdict(int)
+        self.vocab: set = set()
+        self._N: int = <span class="number">0</span>
 
-    <span class="keyword">def</span> <span class="function">train</span>(self, corpus: str) <span class="operator">-></span> <span class="keyword">None</span>:
+    <span class="keyword">def</span> <span class="function">train</span>(self, corpus: str) -> <span class="keyword">None</span>:
         tokens = re.findall(r<span class="string">'\w+'</span>, corpus.lower())
+        self.vocab = set(tokens)
+        self._N = max(len(tokens) - <span class="number">1</span>, <span class="number">1</span>)
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(tokens) - <span class="number">1</span>):
+            w_prev, w_curr = tokens[i], tokens[i + <span class="number">1</span>]
+            self.bigram_counts[(w_prev, w_curr)] += <span class="number">1</span>
+            self.unigram_counts[w_prev]          += <span class="number">1</span>
+            self.continuation[w_curr]            += <span class="number">1</span>
+            self.context_count[w_prev]           += <span class="number">1</span>
 
-        <span class="comment"># Count all N-grams from 1 to max_n</span>
+    <span class="keyword">def</span> <span class="function">p_continuation</span>(self, word: str) -> float:
+        <span class="string">"""Number of distinct left-contexts / total bigrams."""</span>
+        <span class="keyword">return</span> self.continuation.get(word, <span class="number">0</span>) / self._N
+
+    <span class="keyword">def</span> <span class="function">prob</span>(self, word: str, prev: str) -> float:
+        <span class="string">"""P_KN(word | prev) with absolute discounting."""</span>
+        c_bi  = self.bigram_counts.get((prev, word), <span class="number">0</span>)
+        c_uni = self.unigram_counts.get(prev, <span class="number">0</span>)
+        n_ctx = self.context_count.get(prev, <span class="number">0</span>)
+        <span class="keyword">if</span> c_uni == <span class="number">0</span>:
+            <span class="keyword">return</span> self.p_continuation(word)
+        p_high = max(c_bi - self.d, <span class="number">0</span>) / c_uni
+        lam    = (self.d * n_ctx) / c_uni
+        <span class="keyword">return</span> p_high + lam * self.p_continuation(word)
+
+
+<span class="comment"># ═══════════════════════════════════════════════════════════════════
+#  StupidBackoff — Brants et al. (2007), Google web-scale LMs
+#  ─────────────────────────────────────────────────────────────────
+#  NOT a probability distribution (scores don't sum to 1).
+#  S(w|h) = C(h,w)/C(h)       if C(h,w) &gt; 0
+#          = α · S(w|h[1:])    otherwise (drop leftmost word)
+#          = C(w)/N            at unigram level
+# ═══════════════════════════════════════════════════════════════════</span>
+<span class="keyword">class</span> <span class="class-name">StupidBackoff</span>:
+    <span class="string">"""Recursive backoff scoring (not normalised probabilities).
+
+    Args:
+        max_n: Maximum N-gram order to store.
+        alpha: Backoff penalty applied each time we drop an order.
+    """</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, max_n: int = <span class="number">3</span>, alpha: float = <span class="number">0.4</span>) -> <span class="keyword">None</span>:
+        self.max_n   = max_n
+        self.alpha   = alpha
+        self.ngram_counts:   Dict[tuple, int] = defaultdict(int)
+        self.context_counts: Dict[tuple, int] = defaultdict(int)
+        self._total: int = <span class="number">0</span>
+
+    <span class="keyword">def</span> <span class="function">train</span>(self, corpus: str) -> <span class="keyword">None</span>:
+        tokens = re.findall(r<span class="string">'\w+'</span>, corpus.lower())
+        self._total = len(tokens)
         <span class="keyword">for</span> n <span class="keyword">in</span> range(<span class="number">1</span>, self.max_n + <span class="number">1</span>):
             <span class="keyword">for</span> i <span class="keyword">in</span> range(len(tokens) - n + <span class="number">1</span>):
-                ngram = tuple(tokens[i:i + n])
-                self.ngram_counts[ngram] += <span class="number">1</span>
-                <span class="keyword">if</span> n > <span class="number">1</span>:
-                    context = ngram[:-<span class="number">1</span>]
-                    self.context_counts[context] += <span class="number">1</span>
+                ng  = tuple(tokens[i : i + n])
+                ctx = ng[:-<span class="number">1</span>]
+                self.ngram_counts[ng] += <span class="number">1</span>
+                <span class="keyword">if</span> ctx:
+                    self.context_counts[ctx] += <span class="number">1</span>
 
-    <span class="keyword">def</span> <span class="function">score</span>(self, word: str, context: tuple) <span class="operator">-></span> float:
-        <span class="string">"""Calculate Stupid Backoff score (not a probability)."""</span>
+    <span class="keyword">def</span> <span class="function">score</span>(self, word: str, context: tuple) -> float:
+        <span class="string">"""S(word | context) — backs off recursively if unseen."""</span>
         <span class="keyword">if</span> <span class="keyword">not</span> context:
-            <span class="comment"># Unigram</span>
-            <span class="keyword">return</span> self.ngram_counts[(word,)] / sum(self.ngram_counts.values())
-
-        ngram = context + (word,)
-        <span class="keyword">if</span> self.ngram_counts[ngram] > <span class="number">0</span>:
-            <span class="keyword">return</span> self.ngram_counts[ngram] / self.context_counts[context]
-        <span class="keyword">else</span>:
-            <span class="comment"># Back off</span>
-            <span class="keyword">return</span> self.alpha * self.score(word, context[<span class="number">1</span>:])
+            <span class="keyword">return</span> self.ngram_counts.get((word,), <span class="number">0</span>) / max(self._total, <span class="number">1</span>)
+        ng = context + (word,)
+        <span class="keyword">if</span> self.ngram_counts.get(ng, <span class="number">0</span>) > <span class="number">0</span>:
+            <span class="keyword">return</span> self.ngram_counts[ng] / self.context_counts[context]
+        <span class="keyword">return</span> self.alpha * self.score(word, context[<span class="number">1</span>:])
 
 
-<span class="comment"># Example usage</span>
+<span class="comment"># ─── Utility: side-by-side perplexity comparison ─────────────────</span>
+
+<span class="keyword">def</span> <span class="function">compare_models</span>(corpus: str, test_texts: List[str]) -> <span class="keyword">None</span>:
+    <span class="string">"""Train all smoothing variants and print a perplexity comparison table."""</span>
+    variants = [
+        (<span class="string">'laplace'</span>,       NgramLM(n=<span class="number">2</span>, smoothing=<span class="string">'laplace'</span>)),
+        (<span class="string">'add-k (0.1)'</span>,   NgramLM(n=<span class="number">2</span>, smoothing=<span class="string">'addk'</span>, k=<span class="number">0.1</span>)),
+        (<span class="string">'interpolation'</span>, NgramLM(n=<span class="number">3</span>, smoothing=<span class="string">'interpolation'</span>)),
+    ]
+    kn = KneserNeyLM(d=<span class="number">0.75</span>)
+    kn.train(corpus)
+    <span class="keyword">for</span> _, m <span class="keyword">in</span> variants:
+        m.train(corpus)
+
+    col = <span class="number">16</span>
+    header = f<span class="string">"  {'Smoothing':20s}"</span> + <span class="string">''</span>.join(f<span class="string">"  {t[:col]:&gt;{col}}"</span> <span class="keyword">for</span> t <span class="keyword">in</span> test_texts)
+    <span class="keyword">print</span>(header)
+    <span class="keyword">print</span>(<span class="string">"  "</span> + <span class="string">"─"</span> * (len(header) - <span class="number">2</span>))
+
+    <span class="keyword">for</span> name, model <span class="keyword">in</span> variants:
+        row = f<span class="string">"  {name:20s}"</span>
+        <span class="keyword">for</span> t <span class="keyword">in</span> test_texts:
+            pp = model.perplexity(t)
+            row += f<span class="string">"  {pp:&gt;{col}.2f}"</span> <span class="keyword">if</span> pp != float(<span class="string">'inf'</span>) <span class="keyword">else</span> f<span class="string">"  {'∞':&gt;{col}}"</span>
+        <span class="keyword">print</span>(row)
+
+    row = f<span class="string">"  {'Kneser-Ney':20s}"</span>
+    <span class="keyword">for</span> t <span class="keyword">in</span> test_texts:
+        words = re.findall(r<span class="string">'\w+'</span>, t.lower())
+        lp = sum(math.log2(max(kn.prob(words[i], words[i-<span class="number">1</span>]), <span class="number">1e-10</span>))
+                 <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, len(words)))
+        n  = max(len(words) - <span class="number">1</span>, <span class="number">1</span>)
+        pp = <span class="number">2</span> ** (-lp / n)
+        row += f<span class="string">"  {pp:&gt;{col}.2f}"</span>
+    <span class="keyword">print</span>(row)
+
+
+<span class="comment"># ════════════════════════════════════════════════════════════════
+#  Demo — run this file directly to see all features
+# ════════════════════════════════════════════════════════════════</span>
 <span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
-    corpus = <span class="string">"I am Sam. Sam I am. I do not like green eggs and ham."</span>
 
-    <span class="keyword">print</span>(<span class="string">"=== Bigram Model with Add-k Smoothing ==="</span>)
-    model = NgramLM(n=<span class="number">2</span>, smoothing=<span class="string">'addk'</span>, k=<span class="number">0.1</span>)
-    model.train(corpus)
+    corpus = (
+        <span class="string">"I am Sam. Sam I am. "</span>
+        <span class="string">"I do not like green eggs and ham. "</span>
+        <span class="string">"I do not like them Sam I am. "</span>
+        <span class="string">"Do you like green eggs and ham? "</span>
+        <span class="string">"I would not like them here or there. "</span>
+        <span class="string">"I would not like them anywhere."</span>
+    )
 
-    test_sentence = <span class="string">"I am Sam"</span>
-    pp = model.perplexity(test_sentence)
-    <span class="keyword">print</span>(f<span class="string">"Perplexity of '{test_sentence}': {pp:.2f}"</span>)
+    <span class="comment"># 1. Probability distribution table</span>
+    <span class="keyword">print</span>(<span class="string">"══ 1. Bigram probability table after 'i' ════════════════════"</span>)
+    lm = NgramLM(n=<span class="number">2</span>, smoothing=<span class="string">'addk'</span>, k=<span class="number">0.1</span>)
+    lm.train(corpus, verbose=<span class="keyword">True</span>)
+    lm.print_prob_table((<span class="string">'i'</span>,), top_n=<span class="number">8</span>)
 
-    <span class="keyword">print</span>(<span class="string">"\n=== Next Word Predictions after 'I am' ==="</span>)
-    context = (<span class="string">'i'</span>, <span class="string">'am'</span>)
-    predictions = [(w, model.prob(w, context)) <span class="keyword">for</span> w <span class="keyword">in</span> model.vocab <span class="keyword">if</span> w != <span class="string">'&lt;s&gt;'</span>]
-    predictions.sort(key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)
-    <span class="keyword">for</span> w, p <span class="keyword">in</span> predictions[:<span class="number">5</span>]:
-        <span class="keyword">print</span>(f<span class="string">"  {w}: {p:.4f}"</span>)
+    <span class="comment"># 2. Perplexity: in-domain vs out-of-domain</span>
+    <span class="keyword">print</span>(<span class="string">"\n══ 2. Perplexity ════════════════════════════════════════════"</span>)
+    <span class="keyword">for</span> sent <span class="keyword">in</span> [<span class="string">"I am Sam"</span>, <span class="string">"do you like ham"</span>, <span class="string">"the quick brown fox"</span>]:
+        pp = lm.perplexity(sent)
+        pp_str = f<span class="string">"{pp:.2f}"</span> <span class="keyword">if</span> pp != float(<span class="string">'inf'</span>) <span class="keyword">else</span> <span class="string">"∞"</span>
+        <span class="keyword">print</span>(f<span class="string">"  '{sent}'  PP={pp_str}"</span>)
 
-    <span class="keyword">print</span>(<span class="string">"\n=== Text Generation ==="</span>)
-    generated = model.generate((<span class="string">'&lt;s&gt;'</span>, <span class="string">'i'</span>), max_words=<span class="number">10</span>)
-    <span class="keyword">print</span>(f<span class="string">"Generated: {generated}"</span>)
+    <span class="comment"># 3. Text generation at different temperatures</span>
+    <span class="keyword">print</span>(<span class="string">"\n══ 3. Generation with temperature control ═══════════════════"</span>)
+    lm3 = NgramLM(n=<span class="number">2</span>, smoothing=<span class="string">'interpolation'</span>)
+    lm3.train(corpus)
+    <span class="keyword">for</span> temp <span class="keyword">in</span> [<span class="number">0.5</span>, <span class="number">1.0</span>, <span class="number">2.0</span>]:
+        random.seed(<span class="number">42</span>)
+        out = lm3.generate((<span class="string">'i'</span>,), max_words=<span class="number">10</span>, temperature=temp)
+        <span class="keyword">print</span>(f<span class="string">"  temp={temp}: {out}"</span>)
 
-    <span class="keyword">print</span>(<span class="string">"\n=== Stupid Backoff ==="</span>)
-    backoff = StupidBackoff(max_n=<span class="number">3</span>, alpha=<span class="number">0.4</span>)
-    backoff.train(corpus)
-    score = backoff.score(<span class="string">'sam'</span>, (<span class="string">'i'</span>, <span class="string">'am'</span>))
-    <span class="keyword">print</span>(f<span class="string">"Score('sam' | 'i am'): {score:.4f}"</span>)</code></pre>
+    <span class="comment"># 4. Model comparison table</span>
+    <span class="keyword">print</span>(<span class="string">"\n══ 4. Smoothing comparison (perplexity) ══════════════════════"</span>)
+    compare_models(corpus, [<span class="string">"I am Sam"</span>, <span class="string">"I like ham"</span>, <span class="string">"the cat sat"</span>])
+
+    <span class="comment"># 5. Kneser-Ney continuation counts</span>
+    <span class="keyword">print</span>(<span class="string">"\n══ 5. Kneser-Ney continuation probabilities ═════════════════"</span>)
+    kn = KneserNeyLM(d=<span class="number">0.75</span>)
+    kn.train(corpus)
+    <span class="keyword">for</span> w <span class="keyword">in</span> [<span class="string">'sam'</span>, <span class="string">'am'</span>, <span class="string">'i'</span>, <span class="string">'green'</span>]:
+        p_c = kn.p_continuation(w)
+        <span class="keyword">print</span>(f<span class="string">"  P_continuation('{w}') = {p_c:.4f}  "</span>
+              f<span class="string">"(seen after {kn.continuation.get(w,0)} distinct words)"</span>)
+
+    <span class="comment"># 6. Stupid Backoff scores</span>
+    <span class="keyword">print</span>(<span class="string">"\n══ 6. Stupid Backoff scores ══════════════════════════════════"</span>)
+    sb = StupidBackoff(max_n=<span class="number">3</span>, alpha=<span class="number">0.4</span>)
+    sb.train(corpus)
+    <span class="keyword">for</span> ctx, w <span class="keyword">in</span> [
+        ((<span class="string">'i'</span>, <span class="string">'am'</span>), <span class="string">'sam'</span>),    <span class="comment"># seen trigram</span>
+        ((<span class="string">'i'</span>, <span class="string">'am'</span>), <span class="string">'green'</span>),  <span class="comment"># unseen trigram → backoff to bigram</span>
+        ((<span class="string">'i'</span>, <span class="string">'am'</span>), <span class="string">'the'</span>),    <span class="comment"># unseen even at bigram → unigram</span>
+    ]:
+        s = sb.score(w, ctx)
+        <span class="keyword">print</span>(f<span class="string">"  S('{w}' | '{' '.join(ctx)}') = {s:.6f}"</span>)</code></pre>
         </div>
 
         <!-- Section 10: References -->

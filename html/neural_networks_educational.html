@@ -1690,41 +1690,77 @@
                 <!-- Annotated Code -->
                 <pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
 
-<span class="keyword">class</span> <span class="function">NeuralNetwork</span>:
+<span class="keyword">class</span> <span class="class-name">NeuralNetwork</span>:
     <span class="comment"># ============================================</span>
     <span class="comment"># INITIALIZATION: This runs when we create a new network</span>
     <span class="comment"># Why random weights? If all weights start the same,</span>
     <span class="comment"># neurons learn the same things and the network fails!</span>
     <span class="comment"># ============================================</span>
-    <span class="keyword">def</span> <span class="function">__init__</span>(self, input_size, hidden_size, output_size):
-        <span class="comment"># Initialize weights randomly (small numbers between -0.5 and 0.5)</span>
-        <span class="comment"># Small random weights help break symmetry between neurons</span>
-        self.W1 = np.random.randn(input_size, hidden_size) * <span class="number">0.5</span>
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, input_size: int, hidden_size: int, output_size: int,
+                 activation: str = <span class="string">'sigmoid'</span>):
+        <span class="string">"""
+        Args:
+            input_size: Number of input features
+            hidden_size: Number of hidden neurons
+            output_size: Number of output neurons
+            activation: Activation function - 'sigmoid', 'relu', or 'tanh'
+        """</span>
+        self.activation = activation
+        self.loss_history = []
+
+        <span class="comment"># He initialization for ReLU; Xavier for sigmoid/tanh</span>
+        <span class="keyword">if</span> activation == <span class="string">'relu'</span>:
+            scale1 = np.sqrt(<span class="number">2.0</span> / input_size)
+            scale2 = np.sqrt(<span class="number">2.0</span> / hidden_size)
+        <span class="keyword">else</span>:
+            scale1 = np.sqrt(<span class="number">1.0</span> / input_size)
+            scale2 = np.sqrt(<span class="number">1.0</span> / hidden_size)
+
+        self.W1 = np.random.randn(input_size, hidden_size) * scale1
         self.b1 = np.zeros((<span class="number">1</span>, hidden_size))
-        self.W2 = np.random.randn(hidden_size, output_size) * <span class="number">0.5</span>
+        self.W2 = np.random.randn(hidden_size, output_size) * scale2
         self.b2 = np.zeros((<span class="number">1</span>, output_size))
 
-    <span class="keyword">def</span> <span class="function">sigmoid</span>(self, z):
-        <span class="comment"># Activation function: clamps output between 0 and 1</span>
-        <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + np.exp(-z))
+    <span class="keyword">def</span> <span class="function">_activate</span>(self, z: np.ndarray) -&gt; np.ndarray:
+        <span class="string">"""Apply the chosen activation function element-wise."""</span>
+        <span class="keyword">if</span> self.activation == <span class="string">'relu'</span>:
+            <span class="keyword">return</span> np.maximum(<span class="number">0</span>, z)
+        <span class="keyword">elif</span> self.activation == <span class="string">'tanh'</span>:
+            <span class="keyword">return</span> np.tanh(z)
+        <span class="keyword">else</span>:  <span class="comment"># sigmoid (default)</span>
+            <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + np.exp(-np.clip(z, -<span class="number">500</span>, <span class="number">500</span>)))
 
-    <span class="keyword">def</span> <span class="function">sigmoid_derivative</span>(self, z):
-        <span class="comment"># Used for backpropagation - tells us how much to adjust weights</span>
+    <span class="keyword">def</span> <span class="function">_activate_deriv</span>(self, z: np.ndarray) -&gt; np.ndarray:
+        <span class="string">"""Derivative of the chosen activation function."""</span>
+        <span class="keyword">if</span> self.activation == <span class="string">'relu'</span>:
+            <span class="keyword">return</span> (z &gt; <span class="number">0</span>).astype(float)
+        <span class="keyword">elif</span> self.activation == <span class="string">'tanh'</span>:
+            <span class="keyword">return</span> <span class="number">1</span> - np.tanh(z) ** <span class="number">2</span>
+        <span class="keyword">else</span>:  <span class="comment"># sigmoid</span>
+            s = self._activate(z)
+            <span class="keyword">return</span> s * (<span class="number">1</span> - s)
+
+    <span class="keyword">def</span> <span class="function">sigmoid</span>(self, z: np.ndarray) -&gt; np.ndarray:
+        <span class="comment"># Kept for backward compatibility</span>
+        <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + np.exp(-np.clip(z, -<span class="number">500</span>, <span class="number">500</span>)))
+
+    <span class="keyword">def</span> <span class="function">sigmoid_derivative</span>(self, z: np.ndarray) -&gt; np.ndarray:
+        <span class="comment"># Kept for backward compatibility</span>
         <span class="keyword">return</span> self.sigmoid(z) * (<span class="number">1</span> - self.sigmoid(z))
 
-    <span class="keyword">def</span> <span class="function">forward</span>(self, X):
+    <span class="keyword">def</span> <span class="function">forward</span>(self, X: np.ndarray) -&gt; np.ndarray:
         <span class="comment"># Forward propagation: compute predictions</span>
         <span class="comment"># z1 = input * weights + bias (weighted sum)</span>
         self.z1 = np.dot(X, self.W1) + self.b1
-        <span class="comment"># a1 = sigmoid(z1) - apply activation function</span>
-        self.a1 = self.sigmoid(self.z1)
+        <span class="comment"># a1 = activation(z1) - apply chosen activation function</span>
+        self.a1 = self._activate(self.z1)
         <span class="comment"># z2 = hidden * weights + bias (output layer)</span>
         self.z2 = np.dot(self.a1, self.W2) + self.b2
-        <span class="comment"># a2 = sigmoid(z2) - final output (prediction)</span>
+        <span class="comment"># a2 = sigmoid(z2) - final output always uses sigmoid for binary output</span>
         self.a2 = self.sigmoid(self.z2)
         <span class="keyword">return</span> self.a2
 
-    <span class="keyword">def</span> <span class="function">backward</span>(self, X, y, learning_rate):
+    <span class="keyword">def</span> <span class="function">backward</span>(self, X: np.ndarray, y: np.ndarray, learning_rate: float):
         <span class="comment"># Backpropagation: calculate gradients for weight updates</span>
         <span class="comment"># m = number of training examples</span>
         m = X.shape[<span class="number">0</span>]
@@ -1743,7 +1779,7 @@
         <span class="comment"># Error from output layer backpropagated through weights</span>
         <span class="comment"># Multiplied by derivative to get how activation changed</span>
         <span class="comment"># ============================================</span>
-        dz1 = np.dot(dz2, self.W2.T) * self.sigmoid_derivative(self.z1)
+        dz1 = np.dot(dz2, self.W2.T) * self._activate_deriv(self.z1)
         dW1 = np.dot(X.T, dz1) / m
         db1 = np.sum(dz1, axis=<span class="number">0</span>, keepdims=<span class="keyword">True</span>) / m
 
@@ -1756,7 +1792,9 @@
         self.W1 -= learning_rate * dW1
         self.b1 -= learning_rate * db1
 
-    <span class="keyword">def</span> <span class="function">train</span>(self, X, y, epochs, learning_rate):
+    <span class="keyword">def</span> <span class="function">train</span>(self, X: np.ndarray, y: np.ndarray, epochs: int, learning_rate: float):
+        <span class="string">"""Train the network and record loss history."""</span>
+        self.loss_history = []
         <span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):
             <span class="comment"># Forward pass: make predictions</span>
             predictions = self.forward(X)
@@ -1764,12 +1802,124 @@
             <span class="comment"># Compute loss (how wrong were we?)</span>
             loss = -np.mean(y * np.log(predictions + <span class="number">1e-8</span>) +
                            (<span class="number">1</span> - y) * np.log(<span class="number">1</span> - predictions + <span class="number">1e-8</span>))
+            self.loss_history.append(loss)
 
             <span class="comment"># Backward pass: calculate gradients</span>
             self.backward(X, y, learning_rate)
 
             <span class="keyword">if</span> epoch % <span class="number">100</span> == <span class="number">0</span>:
-                print(<span class="string">f"Epoch {epoch}, Loss: {loss:.4f}"</span>)</code></pre>
+                print(<span class="string">f"Epoch {epoch}, Loss: {loss:.4f}"</span>)
+
+    <span class="keyword">def</span> <span class="function">predict</span>(self, X: np.ndarray) -&gt; np.ndarray:
+        <span class="string">"""Run forward pass and threshold at 0.5 for binary predictions."""</span>
+        <span class="keyword">return</span> (self.forward(X) &gt; <span class="number">0.5</span>).astype(int)
+
+    <span class="keyword">def</span> <span class="function">accuracy</span>(self, X: np.ndarray, y: np.ndarray) -&gt; float:
+        <span class="string">"""Return fraction of correctly classified samples."""</span>
+        preds = self.predict(X)
+        <span class="keyword">return</span> float(np.mean(preds == y))
+
+    <span class="keyword">def</span> <span class="function">confusion_matrix</span>(self, X: np.ndarray, y: np.ndarray) -&gt; dict:
+        <span class="string">"""
+        Compute a 2x2 confusion matrix.
+
+        Returns:
+            Dict with keys TP, FP, TN, FN (integer counts)
+        """</span>
+        preds = self.predict(X).flatten()
+        truth = y.flatten().astype(int)
+        tp = int(np.sum((preds == <span class="number">1</span>) &amp; (truth == <span class="number">1</span>)))
+        fp = int(np.sum((preds == <span class="number">1</span>) &amp; (truth == <span class="number">0</span>)))
+        tn = int(np.sum((preds == <span class="number">0</span>) &amp; (truth == <span class="number">0</span>)))
+        fn = int(np.sum((preds == <span class="number">0</span>) &amp; (truth == <span class="number">1</span>)))
+        <span class="keyword">return</span> {<span class="string">"TP"</span>: tp, <span class="string">"FP"</span>: fp, <span class="string">"TN"</span>: tn, <span class="string">"FN"</span>: fn}
+
+    <span class="keyword">def</span> <span class="function">print_learning_curve</span>(self, width: int = <span class="number">40</span>):
+        <span class="string">"""Print an ASCII bar chart of the recorded loss history (every 10 epochs)."""</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> self.loss_history:
+            print(<span class="string">"No loss history — run train() first."</span>)
+            <span class="keyword">return</span>
+        sampled = self.loss_history[::<span class="number">10</span>]
+        max_loss = max(sampled) <span class="keyword">if</span> sampled <span class="keyword">else</span> <span class="number">1.0</span>
+        print(<span class="string">f"\nLearning Curve (every 10 epochs, max={max_loss:.3f})"</span>)
+        print(<span class="string">"-"</span> * (width + <span class="number">20</span>))
+        <span class="keyword">for</span> i, loss <span class="keyword">in</span> enumerate(sampled):
+            bar_len = int((loss / max_loss) * width)
+            bar = <span class="string">"#"</span> * bar_len
+            epoch = i * <span class="number">10</span>
+            print(<span class="string">f"Epoch {epoch:&gt;5}: |{bar:&lt;{width}}| {loss:.4f}"</span>)
+
+    <span class="keyword">def</span> <span class="function">print_weights</span>(self):
+        <span class="string">"""Print W1 and W2 as ASCII grids with min/max annotations."""</span>
+        <span class="keyword">for</span> name, W <span class="keyword">in</span> [(<span class="string">"W1"</span>, self.W1), (<span class="string">"W2"</span>, self.W2)]:
+            print(<span class="string">f"\n{name}  shape={W.shape}  min={W.min():.3f}  max={W.max():.3f}"</span>)
+            print(<span class="string">"+"</span> + <span class="string">"-"</span> * (<span class="number">8</span> * W.shape[<span class="number">1</span>] + <span class="number">1</span>) + <span class="string">"+"</span>)
+            <span class="keyword">for</span> row <span class="keyword">in</span> W:
+                cells = <span class="string">" "</span>.join(<span class="string">f"{v:&gt;7.3f}"</span> <span class="keyword">for</span> v <span class="keyword">in</span> row)
+                print(<span class="string">f"| {cells} |"</span>)
+            print(<span class="string">"+"</span> + <span class="string">"-"</span> * (<span class="number">8</span> * W.shape[<span class="number">1</span>] + <span class="number">1</span>) + <span class="string">"+"</span>)
+
+
+<span class="comment"># ============================================================</span>
+<span class="comment"># Main demonstration — runs standalone with numpy only</span>
+<span class="comment"># ============================================================</span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    np.random.seed(<span class="number">42</span>)
+
+    <span class="comment"># XOR dataset</span>
+    X = np.array([[<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">1</span>], [<span class="number">1</span>, <span class="number">0</span>], [<span class="number">1</span>, <span class="number">1</span>]])
+    y = np.array([[<span class="number">0</span>], [<span class="number">1</span>], [<span class="number">1</span>], [<span class="number">0</span>]])
+
+    <span class="comment"># ----------------------------------------------------------</span>
+    <span class="comment"># Section 1: XOR with sigmoid + accuracy</span>
+    <span class="comment"># ----------------------------------------------------------</span>
+    print(<span class="string">"=== Section 1: XOR with Sigmoid ==="</span>)
+    nn = <span class="class-name">NeuralNetwork</span>(input_size=<span class="number">2</span>, hidden_size=<span class="number">4</span>, output_size=<span class="number">1</span>,
+                       activation=<span class="string">'sigmoid'</span>)
+    nn.train(X, y, epochs=<span class="number">1000</span>, learning_rate=<span class="number">0.5</span>)
+    acc = nn.accuracy(X, y)
+    print(<span class="string">f"Accuracy: {acc * 100:.1f}%"</span>)
+    print(<span class="string">f"Predictions: {nn.predict(X).flatten().tolist()}"</span>)
+
+    <span class="comment"># ----------------------------------------------------------</span>
+    <span class="comment"># Section 2: Loss curve</span>
+    <span class="comment"># ----------------------------------------------------------</span>
+    print(<span class="string">"\n=== Section 2: Loss Curve ==="</span>)
+    nn.print_learning_curve(width=<span class="number">40</span>)
+
+    <span class="comment"># ----------------------------------------------------------</span>
+    <span class="comment"># Section 3: Weight visualization</span>
+    <span class="comment"># ----------------------------------------------------------</span>
+    print(<span class="string">"\n=== Section 3: Learned Weights ==="</span>)
+    nn.print_weights()
+
+    <span class="comment"># ----------------------------------------------------------</span>
+    <span class="comment"># Section 4: Confusion matrix</span>
+    <span class="comment"># ----------------------------------------------------------</span>
+    print(<span class="string">"\n=== Section 4: Confusion Matrix ==="</span>)
+    cm = nn.confusion_matrix(X, y)
+    print(<span class="string">f"TP={cm['TP']}  FP={cm['FP']}  TN={cm['TN']}  FN={cm['FN']}"</span>)
+    total = sum(cm.values())
+    print(<span class="string">f"Precision: {cm['TP'] / max(cm['TP'] + cm['FP'], 1):.2f}"</span>)
+    print(<span class="string">f"Recall:    {cm['TP'] / max(cm['TP'] + cm['FN'], 1):.2f}"</span>)
+
+    <span class="comment"># ----------------------------------------------------------</span>
+    <span class="comment"># Section 5: Compare activations on XOR</span>
+    <span class="comment"># ----------------------------------------------------------</span>
+    print(<span class="string">"\n=== Section 5: Compare Activations ==="</span>)
+    <span class="keyword">for</span> act <span class="keyword">in</span> [<span class="string">'sigmoid'</span>, <span class="string">'relu'</span>, <span class="string">'tanh'</span>]:
+        np.random.seed(<span class="number">42</span>)
+        net = <span class="class-name">NeuralNetwork</span>(<span class="number">2</span>, <span class="number">4</span>, <span class="number">1</span>, activation=act)
+        <span class="comment"># Suppress per-epoch prints during comparison</span>
+        <span class="keyword">for</span> epoch <span class="keyword">in</span> range(<span class="number">1000</span>):
+            preds = net.forward(X)
+            loss = -np.mean(y * np.log(preds + <span class="number">1e-8</span>) +
+                            (<span class="number">1</span> - y) * np.log(<span class="number">1</span> - preds + <span class="number">1e-8</span>))
+            net.loss_history.append(loss)
+            net.backward(X, y, <span class="number">0.5</span>)
+        final_loss = net.loss_history[-<span class="number">1</span>]
+        acc = net.accuracy(X, y)
+        print(<span class="string">f"  {act:&lt;8}  final_loss={final_loss:.4f}  accuracy={acc * 100:.1f}%"</span>)</code></pre>
 
                 <div style="background: #f8fafc; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
                     <h4 style="margin-bottom: 0.5rem;">💡 Try This: Modify the Code</h4>

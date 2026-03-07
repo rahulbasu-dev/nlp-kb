@@ -1875,6 +1875,8 @@ the woman petted the cat</textarea>
 Skip-gram with Negative Sampling (SGNS) - From Scratch
 ======================================================
 Educational implementation of Word2Vec's SGNS algorithm.
+Includes: LR decay, word-count logging, save/load, analogies,
+          ASCII bar chart, pairwise similarity matrix.
 """</span>
 
 <span class="keyword">import</span> numpy <span class="keyword">as</span> np
@@ -1965,8 +1967,18 @@ Educational implementation of Word2Vec's SGNS algorithm.
                         <span class="number">1</span> / (<span class="number">1</span> + np.exp(-x)),
                         np.exp(x) / (<span class="number">1</span> + np.exp(x)))
 
-    <span class="keyword">def</span> <span class="function">train_pair</span>(self, center_idx, context_idx, label):
-        <span class="string">"""Train on a single (center, context) pair."""</span>
+    <span class="keyword">def</span> <span class="function">train_pair</span>(self, center_idx, context_idx, label, lr):
+        <span class="string">"""Train on a single (center, context) pair.
+
+        Args:
+            center_idx: Index of the center word.
+            context_idx: Index of the context word.
+            label: 1 for positive pair, 0 for negative pair.
+            lr: Current (possibly decayed) learning rate.
+
+        Returns:
+            float: BCE loss for this pair.
+        """</span>
         <span class="comment"># Get embeddings</span>
         v_c = self.W[center_idx]   <span class="comment"># Center word vector</span>
         u_o = self.C[context_idx]  <span class="comment"># Context word vector</span>
@@ -1982,8 +1994,8 @@ Educational implementation of Word2Vec's SGNS algorithm.
         grad_c = error * u_o
         grad_o = error * v_c
 
-        self.W[center_idx] -= self.learning_rate * grad_c
-        self.C[context_idx] -= self.learning_rate * grad_o
+        self.W[center_idx] -= lr * grad_c
+        self.C[context_idx] -= lr * grad_o
 
         <span class="comment"># Return loss for monitoring</span>
         <span class="keyword">if</span> label == <span class="number">1</span>:
@@ -1991,8 +2003,17 @@ Educational implementation of Word2Vec's SGNS algorithm.
         <span class="keyword">else</span>:
             <span class="keyword">return</span> -np.log(<span class="number">1</span> - pred + <span class="number">1e-10</span>)
 
-    <span class="keyword">def</span> <span class="function">train</span>(self, corpus, epochs=<span class="number">5</span>):
-        <span class="string">"""Train SGNS on corpus."""</span>
+    <span class="keyword">def</span> <span class="function">train</span>(self, corpus, epochs=<span class="number">5</span>, verbose=<span class="keyword">True</span>):
+        <span class="string">"""Train SGNS on corpus with linear learning rate decay.
+
+        Args:
+            corpus: List of raw text strings (sentences).
+            epochs: Number of training epochs.
+            verbose: If True, print loss and word count each epoch.
+
+        Returns:
+            Tuple[np.ndarray, List[float]]: (W embeddings, per-epoch avg loss list).
+        """</span>
         <span class="comment"># Build vocabulary</span>
         self.build_vocab(corpus)
 
@@ -2003,10 +2024,15 @@ Educational implementation of Word2Vec's SGNS algorithm.
         self.C = np.random.uniform(-scale, scale,
                                     (self.vocab_size, self.embedding_dim))
 
+        loss_history = []
+
         <span class="comment"># Training loop</span>
         <span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):
-            total_loss = <span class="number">0</span>
+            <span class="comment"># Linear learning rate decay</span>
+            lr = self.learning_rate * (<span class="number">1</span> - epoch / (epochs + <span class="number">1</span>))
+            total_loss = <span class="number">0.0</span>
             num_pairs = <span class="number">0</span>
+            word_count = <span class="number">0</span>
 
             <span class="keyword">for</span> sentence <span class="keyword">in</span> corpus:
                 tokens = self.tokenize(sentence)
@@ -2016,6 +2042,8 @@ Educational implementation of Word2Vec's SGNS algorithm.
                 <span class="comment"># Subsample frequent words</span>
                 indices = [idx <span class="keyword">for</span> idx <span class="keyword">in</span> indices
                           <span class="keyword">if</span> np.random.random() < self.subsample_prob(idx)]
+
+                word_count += len(indices)
 
                 <span class="comment"># Generate training pairs</span>
                 <span class="keyword">for</span> i, center_idx <span class="keyword">in</span> enumerate(indices):
@@ -2032,20 +2060,23 @@ Educational implementation of Word2Vec's SGNS algorithm.
                         context_idx = indices[j]
 
                         <span class="comment"># Positive sample</span>
-                        loss = self.train_pair(center_idx, context_idx, <span class="number">1</span>)
+                        loss = self.train_pair(center_idx, context_idx, <span class="number">1</span>, lr)
                         total_loss += loss
 
                         <span class="comment"># Negative samples</span>
                         <span class="keyword">for</span> neg_idx <span class="keyword">in</span> self.sample_negatives(context_idx):
-                            loss = self.train_pair(center_idx, neg_idx, <span class="number">0</span>)
+                            loss = self.train_pair(center_idx, neg_idx, <span class="number">0</span>, lr)
                             total_loss += loss
 
                         num_pairs += <span class="number">1</span>
 
             avg_loss = total_loss / max(num_pairs, <span class="number">1</span>)
-            <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}"</span>)
+            loss_history.append(avg_loss)
+            <span class="keyword">if</span> verbose:
+                <span class="keyword">print</span>(f<span class="string">"Epoch {epoch+1}/{epochs}  lr={lr:.5f}"</span>
+                      f<span class="string">"  loss={avg_loss:.4f}  words={word_count}"</span>)
 
-        <span class="keyword">return</span> self.W
+        <span class="keyword">return</span> self.W, loss_history
 
     <span class="keyword">def</span> <span class="function">get_embedding</span>(self, word):
         <span class="string">"""Get embedding for a word."""</span>
@@ -2073,6 +2104,144 @@ Educational implementation of Word2Vec's SGNS algorithm.
 
         <span class="keyword">return</span> [(self.idx2word[i], similarities[i]) <span class="keyword">for</span> i <span class="keyword">in</span> top_indices]
 
+    <span class="keyword">def</span> <span class="function">save</span>(self, path):
+        <span class="string">"""Save model weights and vocabulary to a .npz file.
+
+        Args:
+            path: Destination file path (without extension).
+        """</span>
+        vocab_array = np.array([self.idx2word[i] <span class="keyword">for</span> i <span class="keyword">in</span> range(self.vocab_size)])
+        np.savez(
+            path,
+            vocab=vocab_array,
+            W=self.W,
+            C=self.C,
+            embedding_dim=np.array(self.embedding_dim),
+            window_size=np.array(self.window_size),
+            neg_samples=np.array(self.neg_samples),
+            learning_rate=np.array(self.learning_rate),
+        )
+        <span class="keyword">print</span>(f<span class="string">"Model saved to {path}.npz"</span>)
+
+    <span class="keyword">@classmethod</span>
+    <span class="keyword">def</span> <span class="function">load</span>(cls, path):
+        <span class="string">"""Load a previously saved model from a .npz file.
+
+        Args:
+            path: File path (with or without .npz extension).
+
+        Returns:
+            SGNS: Reconstructed model instance.
+        """</span>
+        data = np.load(path, allow_pickle=<span class="keyword">True</span>)
+        model = cls(
+            embedding_dim=<span class="keyword">int</span>(data[<span class="string">"embedding_dim"</span>]),
+            window_size=<span class="keyword">int</span>(data[<span class="string">"window_size"</span>]),
+            neg_samples=<span class="keyword">int</span>(data[<span class="string">"neg_samples"</span>]),
+            learning_rate=<span class="keyword">float</span>(data[<span class="string">"learning_rate"</span>]),
+        )
+        vocab_list = list(data[<span class="string">"vocab"</span>])
+        model.word2idx = {w: i <span class="keyword">for</span> i, w <span class="keyword">in</span> enumerate(vocab_list)}
+        model.idx2word = {i: w <span class="keyword">for</span> i, w <span class="keyword">in</span> enumerate(vocab_list)}
+        model.vocab_size = len(vocab_list)
+        model.W = data[<span class="string">"W"</span>]
+        model.C = data[<span class="string">"C"</span>]
+        model.word_freqs = np.ones(model.vocab_size) / model.vocab_size
+        model.noise_dist = model.word_freqs.copy()
+        <span class="keyword">print</span>(f<span class="string">"Model loaded from {path}  (vocab_size={model.vocab_size})"</span>)
+        <span class="keyword">return</span> model
+
+    <span class="keyword">def</span> <span class="function">evaluate_analogies</span>(self, pairs):
+        <span class="string">"""Evaluate word analogies: a - b + c ≈ d.
+
+        Args:
+            pairs: List of 4-tuples (a, b, c, expected_d).
+
+        Returns:
+            List[dict]: Each dict has keys 'query', 'expected', 'predicted', 'correct'.
+        """</span>
+        results = []
+        <span class="keyword">for</span> a, b, c, expected <span class="keyword">in</span> pairs:
+            va = self.get_embedding(a)
+            vb = self.get_embedding(b)
+            vc = self.get_embedding(c)
+            <span class="keyword">if</span> <span class="keyword">any</span>(v <span class="keyword">is</span> <span class="keyword">None</span> <span class="keyword">for</span> v <span class="keyword">in</span> [va, vb, vc]):
+                results.append({<span class="string">"query"</span>: f<span class="string">"{a}-{b}+{c}"</span>, <span class="string">"expected"</span>: expected,
+                                 <span class="string">"predicted"</span>: <span class="string">"&lt;OOV&gt;"</span>, <span class="string">"correct"</span>: <span class="keyword">False</span>})
+                <span class="keyword">continue</span>
+            target = va - vb + vc
+            target /= (np.linalg.norm(target) + <span class="number">1e-10</span>)
+            exclude = {a, b, c}
+            best_word, best_sim = <span class="string">""</span>, -<span class="number">2.0</span>
+            <span class="keyword">for</span> w, idx <span class="keyword">in</span> self.word2idx.items():
+                <span class="keyword">if</span> w <span class="keyword">in</span> exclude:
+                    <span class="keyword">continue</span>
+                v = self.W[idx]
+                norm = np.linalg.norm(v)
+                <span class="keyword">if</span> norm == <span class="number">0</span>:
+                    <span class="keyword">continue</span>
+                sim = np.dot(target, v / norm)
+                <span class="keyword">if</span> sim &gt; best_sim:
+                    best_sim, best_word = sim, w
+            results.append({
+                <span class="string">"query"</span>: f<span class="string">"{a} - {b} + {c}"</span>,
+                <span class="string">"expected"</span>: expected,
+                <span class="string">"predicted"</span>: best_word,
+                <span class="string">"correct"</span>: best_word == expected,
+            })
+        <span class="keyword">return</span> results
+
+    <span class="keyword">def</span> <span class="function">print_nearest</span>(self, word, topn=<span class="number">8</span>):
+        <span class="string">"""Print ASCII bar chart of top-N nearest words.
+
+        Args:
+            word: Query word.
+            topn: Number of neighbours to display.
+        """</span>
+        neighbours = self.most_similar(word, top_k=topn)
+        <span class="keyword">if not</span> neighbours:
+            <span class="keyword">print</span>(f<span class="string">"'{word}' not in vocabulary."</span>)
+            <span class="keyword">return</span>
+        <span class="keyword">print</span>(f<span class="string">"\nNearest to '{word}':"</span>)
+        max_sim = neighbours[<span class="number">0</span>][<span class="number">1</span>]
+        bar_width = <span class="number">30</span>
+        <span class="keyword">for</span> w, sim <span class="keyword">in</span> neighbours:
+            filled = <span class="keyword">int</span>(bar_width * (sim / max_sim)) <span class="keyword">if</span> max_sim &gt; <span class="number">0</span> <span class="keyword">else</span> <span class="number">0</span>
+            bar = <span class="string">"█"</span> * filled + <span class="string">"░"</span> * (bar_width - filled)
+            <span class="keyword">print</span>(f<span class="string">"  {w:&lt;12} {bar} {sim:.4f}"</span>)
+
+    <span class="keyword">def</span> <span class="function">compare_words</span>(self, word_list):
+        <span class="string">"""Print pairwise cosine similarity matrix as an ASCII table.
+
+        Args:
+            word_list: List of words to compare pairwise.
+        """</span>
+        n = len(word_list)
+        vecs = []
+        <span class="keyword">for</span> w <span class="keyword">in</span> word_list:
+            v = self.get_embedding(w)
+            <span class="keyword">if</span> v <span class="keyword">is</span> <span class="keyword">None</span>:
+                <span class="keyword">print</span>(f<span class="string">"Warning: '{w}' not in vocabulary, skipping."</span>)
+                vecs.append(<span class="keyword">None</span>)
+            <span class="keyword">else</span>:
+                norm = np.linalg.norm(v)
+                vecs.append(v / (norm + <span class="number">1e-10</span>))
+
+        col_w = <span class="number">10</span>
+        header = <span class="string">" "</span> * col_w + <span class="string">" "</span>.join(f<span class="string">"{w[:col_w-1]:&gt;{col_w-1}}"</span> <span class="keyword">for</span> w <span class="keyword">in</span> word_list)
+        <span class="keyword">print</span>(<span class="string">"\nPairwise cosine similarities:"</span>)
+        <span class="keyword">print</span>(header)
+        <span class="keyword">print</span>(<span class="string">"-"</span> * len(header))
+        <span class="keyword">for</span> i, w_i <span class="keyword">in</span> enumerate(word_list):
+            row = f<span class="string">"{w_i[:col_w-1]:&lt;{col_w-1}} "</span>
+            <span class="keyword">for</span> j <span class="keyword">in</span> range(n):
+                <span class="keyword">if</span> vecs[i] <span class="keyword">is</span> <span class="keyword">None</span> <span class="keyword">or</span> vecs[j] <span class="keyword">is</span> <span class="keyword">None</span>:
+                    row += f<span class="string">"{' N/A':&gt;{col_w}}"</span>
+                <span class="keyword">else</span>:
+                    sim = np.dot(vecs[i], vecs[j])
+                    row += f<span class="string">"{sim:&gt;{col_w}.3f}"</span>
+            <span class="keyword">print</span>(row)
+
 
 <span class="comment"># Example usage</span>
 <span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
@@ -2091,19 +2260,36 @@ Educational implementation of Word2Vec's SGNS algorithm.
         <span class="string">"the woman petted the cat at home"</span>,
     ] * <span class="number">100</span>  <span class="comment"># Repeat for more training data</span>
 
-    <span class="comment"># Train model</span>
-    model = SGNS(embedding_dim=<span class="number">50</span>, window_size=<span class="number">2</span>,
+    <span class="comment"># --- Section 1: Train model + show per-epoch loss ---</span>
+    model = <span class="class-name">SGNS</span>(embedding_dim=<span class="number">50</span>, window_size=<span class="number">2</span>,
                   neg_samples=<span class="number">5</span>, min_count=<span class="number">1</span>)
-    model.train(corpus, epochs=<span class="number">10</span>)
+    W, loss_history = model.train(corpus, epochs=<span class="number">10</span>, verbose=<span class="keyword">True</span>)
+    <span class="keyword">print</span>(f<span class="string">"\nFinal avg loss: {loss_history[-1]:.4f}"</span>)
 
-    <span class="comment"># Find similar words</span>
-    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'king':"</span>)
-    <span class="keyword">for</span> word, sim <span class="keyword">in</span> model.most_similar(<span class="string">"king"</span>, top_k=<span class="number">5</span>):
-        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)
+    <span class="comment"># --- Section 2: Nearest neighbours with ASCII bar chart ---</span>
+    model.print_nearest(<span class="string">"king"</span>, topn=<span class="number">5</span>)
+    model.print_nearest(<span class="string">"dog"</span>, topn=<span class="number">5</span>)
 
-    <span class="keyword">print</span>(<span class="string">"\nMost similar to 'dog':"</span>)
-    <span class="keyword">for</span> word, sim <span class="keyword">in</span> model.most_similar(<span class="string">"dog"</span>, top_k=<span class="number">5</span>):
-        <span class="keyword">print</span>(f<span class="string">"  {word}: {sim:.4f}"</span>)</code></pre>
+    <span class="comment"># --- Section 3: Pairwise similarity matrix ---</span>
+    model.compare_words([<span class="string">"king"</span>, <span class="string">"queen"</span>, <span class="string">"prince"</span>, <span class="string">"princess"</span>, <span class="string">"dog"</span>, <span class="string">"cat"</span>])
+
+    <span class="comment"># --- Section 4: Analogy test ---</span>
+    <span class="keyword">print</span>(<span class="string">"\nAnalogy tests (a - b + c = ?):"</span>)
+    analogy_pairs = [
+        (<span class="string">"king"</span>, <span class="string">"man"</span>, <span class="string">"woman"</span>, <span class="string">"queen"</span>),
+        (<span class="string">"prince"</span>, <span class="string">"man"</span>, <span class="string">"woman"</span>, <span class="string">"princess"</span>),
+        (<span class="string">"dog"</span>, <span class="string">"park"</span>, <span class="string">"home"</span>, <span class="string">"cat"</span>),
+    ]
+    <span class="keyword">for</span> result <span class="keyword">in</span> model.evaluate_analogies(analogy_pairs):
+        status = <span class="string">"✓"</span> <span class="keyword">if</span> result[<span class="string">"correct"</span>] <span class="keyword">else</span> <span class="string">"✗"</span>
+        <span class="keyword">print</span>(f<span class="string">"  {result['query']} = {result['predicted']}"</span>
+              f<span class="string">"  (expected: {result['expected']}) {status}"</span>)
+
+    <span class="comment"># --- Section 5: Save / load round-trip ---</span>
+    model.save(<span class="string">"sgns_demo"</span>)
+    model2 = <span class="class-name">SGNS</span>.load(<span class="string">"sgns_demo.npz"</span>)
+    <span class="keyword">print</span>(<span class="string">"\nAfter reload — nearest to 'queen':"</span>)
+    model2.print_nearest(<span class="string">"queen"</span>, topn=<span class="number">4</span>)</code></pre>
 
             <div class="callout callout-example">
                 <h4>Expected Output</h4>
